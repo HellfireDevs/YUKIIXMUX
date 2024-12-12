@@ -14,11 +14,11 @@ API_HASH = getenv("API_HASH")
 # ------------------------------------------------------
 BOT_TOKEN = getenv("BOT_TOKEN")
 # -------------------------------------------------------
-OWNER_USERNAME = getenv("OWNER_USERNAME","SHIVANSHDEVS")
+OWNER_USERNAME = getenv("OWNER_USERNAME","@Rishunit_hu_bochlik")
 # --------------------------------------------------------
-BOT_USERNAME = getenv("BOT_USERNAME" , "Itz_SapnaMusicbot")
+BOT_USERNAME = getenv("BOT_USERNAME" , "@NitiMusicbot")
 # --------------------------------------------------------
-BOT_NAME = getenv("BOT_NAME" , "SAPNA")
+BOT_NAME = getenv("BOT_NAME" , "NITI")
 # ---------------------------------------------------------
 ASSUSERNAME = getenv("ASSUSERNAME" , "KHWAAISH_HOON")
 # ---------------------------------------------------------
@@ -53,7 +53,7 @@ HEROKU_API_KEY = getenv("HEROKU_API_KEY")
 # ----------------------------------------------------------------
 UPSTREAM_REPO = getenv(
     "UPSTREAM_REPO",
-    "https://github.com/itzshukla/STRANGER-MUSIC",
+    "https://github.com/Thakur740/STRANGER-MUSIC",
 )
 UPSTREAM_BRANCH = getenv("UPSTREAM_BRANCH", "main")
 GIT_TOKEN = getenv(
@@ -67,8 +67,8 @@ GIT_TOKEN = getenv(
 
 # ------------------------------------------------------------------------
 # -------------------------------------------------------------------------
-SUPPORT_CHANNEL = getenv("SUPPORT_CHANNEL", "https://t.me/SHIVANSH474")
-SUPPORT_CHAT = getenv("SUPPORT_CHAT", "https://t.me/MASTIWITHFRIENDSXD")
+SUPPORT_CHANNEL = getenv("SUPPORT_CHANNEL", "https://t.me/TR3NDING_MOVI3S")
+SUPPORT_CHAT = getenv("SUPPORT_CHAT", "https://t.me/boyandgirlgcc")
 # ------------------------------------------------------------------------------
 # -------------------------------------------------------------------------------
 
