@@ -159,10 +159,10 @@ async def check_payment_gateways(_, message):
             result_message += f"|𝗣𝗮𝘆𝗺𝗲𝗻𝘁 𝗚𝗮𝘁𝗲𝘄𝗮𝘆𝘀: {', '.join(detected_gateways)}\n"
             result_message += f"|𝗖𝗮𝗽𝘁𝗰𝗵𝗮: {detected_captcha}\n"
             result_message += f"|𝘾𝙡𝙤𝙪𝙙𝙛𝙡𝙖𝙧𝙚 𝙋𝙧𝙤𝙩𝙚𝙘𝙩𝙞𝙤𝙣: {'✅' if is_cloudflare_protected else '🚫'}\n"
-            result_message += f"----------------------------\n"
-        result_message += f"𝐁𝐨𝐭 𝐛𝐲 - @Itz_SapnaMusicbot 👑\n"
+            result_message += f"--------------------------\n"
+        result_message += f"𝐁𝐨𝐭 𝐛𝐲 - @riyaXmusicbot 👑\n"
         result_message += f"---------------------------\n"
-        result_message += f"𝗖𝗛𝗘𝗖𝗞𝗘𝗗 𝗕𝗬 𝗧𝗘𝗔𝗠 @StrangerAssociation\n"
+        result_message += f"𝗖𝗛𝗘𝗖𝗞𝗘𝗗 𝗕𝗬 𝗧𝗘𝗔𝗠 @KSD_BOT_NETWORK\n"
         result_message += f"--------------------------------------------------------------\n"
 
         await message.reply(result_message, disable_web_page_preview=True)
