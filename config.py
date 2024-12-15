@@ -26,7 +26,7 @@ ASSUSERNAME = getenv("ASSUSERNAME" , "itz_m3_riya")
 
 #---------------------------------------------------------------
 #---------------------------------------------------------------
-MONGO_DB_URI = getenv("MONGO_DB_URI", None)
+MONGO_DB_URI = getenv("MONGO_DB_URI", "mongodb+srv://theriyamusic94:f67KlgTyzr3TTutn@cluster0.lym5x.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 #---------------------------------------------------------------
 #---------------------------------------------------------------
 
@@ -114,7 +114,7 @@ TG_VIDEO_FILESIZE_LIMIT = int(getenv("TG_VIDEO_FILESIZE_LIMIT", "5242880000"))
 # ------------------------------------
 # ------------------------------------
 # ------------------------------------
-STRING1 = getenv("STRING_SESSION", None)
+STRING1 = getenv("STRING_SESSION", "BQGV228AnXNo28JZUA8Gj_U2NXX7Gf-D7v0wBMBtAVmfm4tchpWtUbg5XaAJqLKMPSVOEseufFuzFrbH3IIit5_IJL997Z_1UUgnAu50mSjHcuDhBLEc1r3Q8T8J506_io6JyLF1ElpuU0jer8QswWQAn2Lp4IGHM0VCaDsSserjVoh1HKwfWQnr3oWnr919gnmRwyDU8TlazWYrcT7MhtMBOLVIn7YOSZsLfMdFu-v0lrujxGWkp48zdTAonetevCBVWbkSetWnRKROhZWUh6ItGtFk5d75uWmtO1LAP_kKlz9wxc-9nsBYrUiDmv4OtSheB8ma_Ag2PKFa9uYZagsdiOhyjAAAAAGwUnlsAA")
 STRING2 = getenv("STRING_SESSION2", None)
 STRING3 = getenv("STRING_SESSION3", None)
 STRING4 = getenv("STRING_SESSION4", None)
