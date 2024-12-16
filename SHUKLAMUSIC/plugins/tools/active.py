@@ -10,28 +10,48 @@ from SHUKLAMUSIC.utils.database import (
     remove_active_chat,
     remove_active_video_chat,
 )
+async def generate_join_link(chat_id: int):
+    invite_link = await app.export_chat_invite_link(chat_id)
+    return invite_link
 
 
-@app.on_message(filters.command(["activevc", "activevoice","vc"]) & SUDOERS)
+def ordinal(n):
+    suffix = ["th", "st", "nd", "rd", "th"][min(n % 10, 4)]
+    if 11 <= (n % 100) <= 13:
+        suffix = "th"
+    return str(n) + suffix
+
+
+@app.on_message(
+    filters.command(
+        ["activevc", "activevoice"], prefixes=["/", "!", "%", ",", "", ".", "@", "#"]
+    )
+    & SUDOERS
+)
 async def activevc(_, message: Message):
     mystic = await message.reply_text("» ɢᴇᴛᴛɪɴɢ ᴀᴄᴛɪᴠᴇ ᴠᴏɪᴄᴇ ᴄʜᴀᴛs ʟɪsᴛ...")
     served_chats = await get_active_chats()
     text = ""
     j = 0
+    buttons = []
     for x in served_chats:
         try:
-            title = (await app.get_chat(x)).title
+            chat_info = await app.get_chat(x)
+            title = chat_info.title
+            invite_link = await generate_join_link(x)
         except:
             await remove_active_chat(x)
             continue
         try:
-            if (await app.get_chat(x)).username:
-                user = (await app.get_chat(x)).username
-                text += f"<b>{j + 1}.</b> <a href=https://t.me/{user}>{unidecode(title).upper()}</a>\n"
+            if chat_info.username:
+                user = chat_info.username
+                text += f"<b>{j + 1}.</b> <a href=https://t.me/{user}>{unidecode(title).upper()}</a> [<code>{x}</code>]\n"
             else:
                 text += (
-                    f"<b>{j + 1}.</b> {unidecode(title).upper()}\n"
+                    f"<b>{j + 1}.</b> {unidecode(title).upper()} [<code>{x}</code>]\n"
                 )
+            button_text = f"๏ ᴊᴏɪɴ {ordinal(j + 1)} ɢʀᴏᴜᴘ ๏"
+            buttons.append([InlineKeyboardButton(button_text, url=invite_link)])
             j += 1
         except:
             continue
@@ -40,30 +60,41 @@ async def activevc(_, message: Message):
     else:
         await mystic.edit_text(
             f"<b>» ʟɪsᴛ ᴏғ ᴄᴜʀʀᴇɴᴛʟʏ ᴀᴄᴛɪᴠᴇ ᴠᴏɪᴄᴇ ᴄʜᴀᴛs :</b>\n\n{text}",
+            reply_markup=InlineKeyboardMarkup(buttons),
             disable_web_page_preview=True,
         )
 
 
-@app.on_message(filters.command(["activev", "activevideo","vvc"]) & SUDOERS)
+@app.on_message(
+    filters.command(
+        ["activev", "activevideo"], prefixes=["/", "!", "%", ",", "", ".", "@", "#"]
+    )
+    & SUDOERS
+)
 async def activevi_(_, message: Message):
     mystic = await message.reply_text("» ɢᴇᴛᴛɪɴɢ ᴀᴄᴛɪᴠᴇ ᴠɪᴅᴇᴏ ᴄʜᴀᴛs ʟɪsᴛ...")
     served_chats = await get_active_video_chats()
     text = ""
     j = 0
+    buttons = []
     for x in served_chats:
         try:
-            title = (await app.get_chat(x)).title
+            chat_info = await app.get_chat(x)
+            title = chat_info.title
+            invite_link = await generate_join_link(x)
         except:
             await remove_active_video_chat(x)
             continue
         try:
-            if (await app.get_chat(x)).username:
-                user = (await app.get_chat(x)).username
+            if chat_info.username:
+                user = chat_info.username
                 text += f"<b>{j + 1}.</b> <a href=https://t.me/{user}>{unidecode(title).upper()}</a> [<code>{x}</code>]\n"
             else:
                 text += (
                     f"<b>{j + 1}.</b> {unidecode(title).upper()} [<code>{x}</code>]\n"
                 )
+            button_text = f"๏ ᴊᴏɪɴ {ordinal(j + 1)} ɢʀᴏᴜᴘ ๏"
+            buttons.append([InlineKeyboardButton(button_text, url=invite_link)])
             j += 1
         except:
             continue
@@ -72,11 +103,18 @@ async def activevi_(_, message: Message):
     else:
         await mystic.edit_text(
             f"<b>» ʟɪsᴛ ᴏғ ᴄᴜʀʀᴇɴᴛʟʏ ᴀᴄᴛɪᴠᴇ ᴠɪᴅᴇᴏ ᴄʜᴀᴛs :</b>\n\n{text}",
+            reply_markup=InlineKeyboardMarkup(buttons),
             disable_web_page_preview=True,
         )
 
-@app.on_message(filters.command(["ac","av"]) & SUDOERS)
+
+@app.on_message(filters.command(["ac"]) & SUDOERS)
 async def start(client: Client, message: Message):
     ac_audio = str(len(await get_active_chats()))
     ac_video = str(len(await get_active_video_chats()))
-    await message.reply_text(f"✫ <b><u>ᴀᴄᴛɪᴠᴇ ᴄʜᴀᴛs ɪɴғᴏ</u></b> :\n\nᴠᴏɪᴄᴇ : {ac_audio}\nᴠɪᴅᴇᴏ  : {ac_video}", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('✯ ᴄʟᴏsᴇ ✯', callback_data=f"close")]]))
+    await message.reply_text(
+        f"✫ <b><u>ᴀᴄᴛɪᴠᴇ ᴄʜᴀᴛs ɪɴғᴏ</u></b> :\nᴀᴜᴅɪᴏ : {ac_audio}\nᴠɪᴅᴇᴏ : {ac_video}",
+        reply_markup=InlineKeyboardMarkup(
+            [[InlineKeyboardButton("🥀ᴄʟᴏsᴇ🥀", callback_data=f"close")]]
+        ),
+    )
