@@ -34,5 +34,9 @@ def get_random_emoji():
         "😴",
         "😪",
         "💤",
+        "🥱",
+        "🛌",
+        "✨",
+        "🌙",
     ]
     return random.choice(emojis)
