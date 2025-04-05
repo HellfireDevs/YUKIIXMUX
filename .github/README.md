@@ -3,12 +3,12 @@
 
 </h2>
 
-[![Typing SVG](https://readme-typing-svg.herokuapp.com/?lines=ㅤ+𝚆𝙴𝙻𝙲𝙾𝙼𝙴+𝚃𝙾+𝚁𝙸𝚈𝙰+𝙼𝚄𝚂𝙸𝙲+𝚁𝙴𝙿𝙾+;ㅤ+𝚃𝙷𝙸𝚂+𝙸𝚂+𝙰+𝙰𝙳𝚅𝙰𝙽𝙲𝙴+𝙼𝚄𝚂𝙸𝙲+𝙱𝙾𝚃;𝙿𝙾𝚆𝙴𝚁𝙴𝙳+𝙱𝚈+☞+𝗧𝗘𝗔𝗠+𝗥𝗜𝗬𝗔)](https://github.com/shoaib910385/NEWTIDAL)
+[![Typing SVG](https://readme-typing-svg.herokuapp.com/?lines=ㅤ+𝚆𝙴𝙻𝙲𝙾𝙼𝙴+𝚃𝙾+𝚁𝙸𝚈𝙰+𝙼𝚄𝚂𝙸𝙲+𝚁𝙴𝙿𝙾+;ㅤ+𝚃𝙷𝙸𝚂+𝙸𝚂+𝙰+𝙰𝙳𝚅𝙰𝙽𝙲𝙴+𝙼𝚄𝚂𝙸𝙲+𝙱𝙾𝚃;𝙿𝙾𝚆𝙴𝚁𝙴𝙳+𝙱𝚈+☞+TIDAL+MUSIC)](https://github.com/shoaib910385/NEWTIDAL)
 
 
 
 <p align="center">
-  <img src="https://files.catbox.moe/n4vivz.jpg">
+  <img src="[https://files.catbox.moe/n4vivz.jpg](https://graph.org/file/90ef1bc444de679d65209-335d94a31975f4eda6.jpg)">
 </p>
 
 
