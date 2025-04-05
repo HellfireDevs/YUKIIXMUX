@@ -35,7 +35,7 @@ YUMI_PICS = [
 "https://graph.org/file/5346f8d3e34f85855176b-8f3a38df6c805fb7d7.jpg",
 "https://graph.org/file/5346f8d3e34f85855176b-8f3a38df6c805fb7d7.jpg",
 "https://graph.org/file/5346f8d3e34f85855176b-8f3a38df6c805fb7d7.jpg",
-"https://graph.org/file/5346f8d3e34f85855176b-8f3a38df6c805fb7d7.jpg,
+"https://graph.org/file/5346f8d3e34f85855176b-8f3a38df6c805fb7d7.jpg",
 "https://graph.org/file/5346f8d3e34f85855176b-8f3a38df6c805fb7d7.jpg",
 "https://graph.org/file/5346f8d3e34f85855176b-8f3a38df6c805fb7d7.jpg",
 "https://graph.org/file/5346f8d3e34f85855176b-8f3a38df6c805fb7d7.jpg",
