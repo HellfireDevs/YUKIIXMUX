@@ -58,7 +58,7 @@ async def get_link_group(client, message):
                         [
                             [
                                 InlineKeyboardButton(
-                                    "❍ ᴄʀᴇᴀᴛᴇ ʙʏ ˹ ᴛᴇᴀᴍ ʀɪʏᴀ ",
+                                    "❍ ᴄʀᴇᴀᴛᴇ ʙʏ ˹ 𝐓ɪᴅᴀʟ ꭙ 𝐌ᴜꜱɪᴄ 🥀 ",
                                     url=upload_path,
                                 )
                             ]
