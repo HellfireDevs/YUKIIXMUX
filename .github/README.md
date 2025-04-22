@@ -24,8 +24,8 @@
 ## 🖇 Generating Pyrogram String Session
 
 <p>
-<a href="https://t.me/KsdStringSessionbot"><img src="https://img.shields.io/badge/KSD%20String%20Gen%20Bot-blueviolet?style=for-the-badge&logo=appveyor" width="200""/></a>
-<a href="https://t.me/riyaXmusicbot-Gen"><img src="https://img.shields.io/badge/TIDAL%20MUSIC%20Bot-blueviolet?style=for-the-badge&logo=appveyor" width="200""/></a>
+<a href="https://t.me/SessionStringZbot"><img src="https://img.shields.io/badge/STALKER%20String%20Gen%20Bot-blueviolet?style=for-the-badge&logo=appveyor" width="200""/></a>
+<a href="https://t.me/TidalXmusicbot-Gen"><img src="https://img.shields.io/badge/TIDAL%20MUSIC%20Bot-blueviolet?style=for-the-badge&logo=appveyor" width="200""/></a>
 
 
 <h3 align="center">
@@ -40,10 +40,10 @@
 
 
 <p align="center">
-<a href="https://telegram.me/ksdofficial84"><img src="https://img.shields.io/badge/-☆𝐃𝐌 𝐓𝐎 𝗞𝗦𝗗%20☆-blue.svg?style=for-the-badge&logo=Telegram"></a>
+<a href="https://telegram.me/ABOUT_STALKER"><img src="https://img.shields.io/badge/-☆𝐃𝐌 𝐓𝐎 STALKER%20☆-blue.svg?style=for-the-badge&logo=Telegram"></a>
 </p>
 <p align="center">
-<a href="https://telegram.me/ll_hunter_lll"><img src="https://img.shields.io/badge/-☆𝐃𝐌 𝐓𝐎 𝗛𝗨𝗡𝗧𝗘𝗥 𝗫𝗗%20☆-blue.svg?style=for-the-badge&logo=Telegram"></a>
+<a href="https://telegram.me/HEHE_STALKER"><img src="https://img.shields.io/badge/-☆𝐃𝐌 𝐓𝐎 OWNER%20☆-blue.svg?style=for-the-badge&logo=Telegram"></a>
 </p>
 <h3 align="center">
     ─「 ᴅᴇᴩʟᴏʏ ᴏɴ ʟᴏᴄᴀʟ ʜᴏsᴛ/ ᴠᴘs 」─
