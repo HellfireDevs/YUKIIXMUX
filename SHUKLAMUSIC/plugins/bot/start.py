@@ -142,6 +142,27 @@ async def start_pm(client, message: Message, _):
 async def start_gp(client, message: Message, _):
     out = start_panel(_)
     uptime = int(time.time() - _boot_)
+    
+    loading_1 = await message.reply_text(random.choice(GREET))
+    await add_served_user(message.from_user.id)
+    
+    await asyncio.sleep(0.1)
+    await loading_1.edit_text("<b>ʟᴏᴀᴅɪɴɢ..</b>")
+    await asyncio.sleep(0.1)
+    await loading_1.edit_text("<b>ʟᴏᴀᴅɪɴɢ...</b>")
+    await asyncio.sleep(0.1)
+    await loading_1.edit_text("<b>ʜєʏ ʙᴧʙʏ! 💞</b>")
+    await asyncio.sleep(0.1)
+    await loading_1.edit_text("<b>ᴛιᴅᴀʟ</b>")
+    await asyncio.sleep(0.1)
+    await loading_1.edit_text("<b>ᴛιᴅᴀʟ ꭙ</b>")
+    await asyncio.sleep(0.1)
+    await loading_1.edit_text("<b>ᴛιᴅᴀʟ ꭙ ϻᴜsɪᴄ ♪</b>")
+    await asyncio.sleep(0.1)
+    await loading_1.edit_text("<b>ᴛιᴅᴀʟ ꭙ ϻᴜsɪᴄ♪\nsᴛᴧʀᴛєᴅ!🥀</b>")
+    await asyncio.sleep(0.1)
+    await loading_1.delete()
+    
     await message.reply_photo(
         random.choice(YUMI_PICS),
         caption=_["start_1"].format(app.mention, get_readable_time(uptime)),
