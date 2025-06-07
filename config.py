@@ -67,8 +67,8 @@ GIT_TOKEN = getenv(
 
 # ------------------------------------------------------------------------
 # -------------------------------------------------------------------------
-SUPPORT_CHANNEL = getenv("SUPPORT_CHANNEL", "https://t.me/TIDALXUPDATES")
-SUPPORT_CHAT = getenv("SUPPORT_CHAT", "https://t.me/TIDAL_SUPPORT")
+SUPPORT_CHANNEL = getenv("SUPPORT_CHANNEL", "https://t.me/drxgiveway")
+SUPPORT_CHAT = getenv("SUPPORT_CHAT", "https://t.me/drx_supportchat")
 # ------------------------------------------------------------------------------
 # -------------------------------------------------------------------------------
 
@@ -147,7 +147,7 @@ PING_IMG_URL = getenv(
     "PING_IMG_URL", "https://files.catbox.moe/z1vt2e.jpg"
 )
 PLAYLIST_IMG_URL = "https://graph.org/file/5346f8d3e34f85855176b-8f3a38df6c805fb7d7.jpg"
-STATS_IMG_URL = "https://graph.org/file/90ef1bc444de679d65209-335d94a31975f4eda6.jpg"
+STATS_IMG_URL = "https://files.catbox.moe/8rmrd9.jpg"
 TELEGRAM_AUDIO_URL = "https://files.catbox.moe/2vq8oz.jpg"
 TELEGRAM_VIDEO_URL = "https://files.catbox.moe/2vq8oz.jpg"
 STREAM_IMG_URL = "https://files.catbox.moe/2vq8oz.jpg"
