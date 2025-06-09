@@ -9,8 +9,8 @@ from ..logging import LOGGER
 def load_fonts():
     try:
         return {
-            "cfont": ImageFont.truetype("PURVIMUSIC/assets/cfont.ttf", 24),
-            "tfont": ImageFont.truetype("PURVIMUSIC/assets/font.ttf", 30),
+            "cfont": ImageFont.truetype("SHUKLAMUSIC/assets/cfont.ttf", 24),
+            "tfont": ImageFont.truetype("SHUKLAMUSIC/assets/font.ttf", 30),
         }
     except Exception as e:
         LOGGER.error("Font loading error: %s, using default fonts", e)
@@ -22,7 +22,7 @@ def load_fonts():
 FONTS = load_fonts()
 
 
-FALLBACK_IMAGE_PATH = "PURVIMUSIC/assets/controller.png"
+FALLBACK_IMAGE_PATH = "SHUKLAMUSIC/assets/controller.png"
 
 YOUTUBE_IMG_URL = "https://i.ytimg.com/vi/default.jpg"
 
@@ -93,7 +93,7 @@ async def add_controls(img: Image.Image) -> Image.Image:
     box = (305, 125, 975, 595)
     region = img.crop(box)
     try:
-        controls = Image.open("PURVIMUSIC/assets/controls.png").convert("RGBA")
+        controls = Image.open("SHUKLAMUSIC/assets/controls.png").convert("RGBA")
         controls = controls.resize((1200, 320), Image.Resampling.LANCZOS)
         controls = ImageEnhance.Sharpness(controls).enhance(5.0)
         controls = ImageEnhance.Contrast(controls).enhance(1.0)
