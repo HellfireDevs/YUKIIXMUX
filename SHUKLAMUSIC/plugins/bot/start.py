@@ -162,11 +162,11 @@ async def start_gp(client, message: Message, _):
 async def about_command(client: Client, message: Message):
     await message.reply_text(
         Data.PROMO,
-        reply_markup=InlineKeyboardMarkup(Data.home_buttons)
+        reply_markup=InlineKeyboardMarkup(Data.PROMO)
     )
    
 home_buttons = [
-        generate_single_button,
+    
         [InlineKeyboardButton("ʀᴇᴛᴜʀɴ ʜᴏᴍᴇ", callback_data="home")]
     ]
 
