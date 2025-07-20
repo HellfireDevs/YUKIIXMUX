@@ -35,6 +35,8 @@ YUMI_PICS = [
 "https://files.catbox.moe/csyzob.jpg",
 
 ]
+
+PROMO = ["S_B_10"]
 GREET = [
     "💞", "🥂", "🔍", "🧪", "🥂", "⚡️", "🔥",
 ]
