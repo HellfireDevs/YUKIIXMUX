@@ -3,9 +3,6 @@ from pyrogram.types import InlineKeyboardButton
 import config
 from SHUKLAMUSIC import app
 
-PROMO = """
-soon!
-"""
 def start_panel(_):
     buttons = [
         [
@@ -39,3 +36,7 @@ def private_panel(_):
         ],
     ]
     return buttons
+
+PROMO = """
+soon!
+"""
