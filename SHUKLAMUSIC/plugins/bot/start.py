@@ -208,6 +208,7 @@ async def welcome(client, message: Message):
                         app.mention,
                     ),
                     reply_markup=InlineKeyboardMarkup(out),
+                    spoiler=True
                 )
                 await add_served_chat(message.chat.id)
                 await message.stop_propagation()
