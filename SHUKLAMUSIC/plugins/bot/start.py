@@ -75,7 +75,7 @@ async def start_pm(client, message: Message, _):
     await loading_1.edit_text("<b>ᴍɪᴍɪ ꭙ ϻᴜsɪᴄ♪\nsᴛᴧʀᴛed❤️‍🔥!🥀</b>")
     await asyncio.sleep(0.1)
     await loading_1.delete()
-
+    
     await add_served_user(message.from_user.id)
     if len(message.text.split()) > 1:
         name = message.text.split(None, 1)[1]
@@ -123,7 +123,6 @@ async def start_pm(client, message: Message, _):
             await app.send_photo(
                 chat_id=message.chat.id,
                 photo=thumbnail,
-                spoiler=True,
                 caption=searched_text,
                 reply_markup=key,
             )
@@ -137,16 +136,10 @@ async def start_pm(client, message: Message, _):
         served_chats = len(await get_served_chats())
         served_users = len(await get_served_users())
         UP, CPU, RAM, DISK = await bot_sys_stats()
-        await app.send_photo(
-    chat_id=message.chat.id,          # ✅ zaroori
-    photo=random.choice(YUMI_PICS),
-    caption=_["start_2"].format(
-        message.from_user.mention,
-        app.mention, UP, DISK, CPU, RAM,
-        served_users, served_chats
-    ),
-    reply_markup=InlineKeyboardMarkup(out),
-    spoiler=True                      # ✅ spoiler works
+        await message.reply_photo(
+            random.choice(YUMI_PICS),
+            caption=_["start_2"].format(message.from_user.mention, app.mention, UP, DISK, CPU, RAM,served_users,served_chats),
+            reply_markup=InlineKeyboardMarkup(out),
         )
         if await is_on_off(2):
             return await app.send_message(
