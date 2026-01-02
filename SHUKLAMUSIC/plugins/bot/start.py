@@ -137,11 +137,16 @@ async def start_pm(client, message: Message, _):
         served_chats = len(await get_served_chats())
         served_users = len(await get_served_users())
         UP, CPU, RAM, DISK = await bot_sys_stats()
-        await message.reply_photo(
-            random.choice(YUMI_PICS),
-            caption=_["start_2"].format(message.from_user.mention, app.mention, UP, DISK, CPU, RAM,served_users,served_chats),
-            reply_markup=InlineKeyboardMarkup(out),
-            spoiler=True
+        await app.send_photo(
+    chat_id=message.chat.id,          # ✅ zaroori
+    photo=random.choice(YUMI_PICS),
+    caption=_["start_2"].format(
+        message.from_user.mention,
+        app.mention, UP, DISK, CPU, RAM,
+        served_users, served_chats
+    ),
+    reply_markup=InlineKeyboardMarkup(out),
+    spoiler=True                      # ✅ spoiler works
         )
         if await is_on_off(2):
             return await app.send_message(
