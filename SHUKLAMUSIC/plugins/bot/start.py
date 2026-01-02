@@ -66,13 +66,13 @@ async def start_pm(client, message: Message, _):
     await asyncio.sleep(0.1)
     await loading_1.edit_text("<b>ʜєʏ ʙᴧʙʏ! 💞</b>")
     await asyncio.sleep(0.1)
-    await loading_1.edit_text("<b>ᴛιᴅᴀʟ</b>")
+    await loading_1.edit_text("<b>ᴍɪᴍɪ</b>")
     await asyncio.sleep(0.1)
-    await loading_1.edit_text("<b>ᴛιᴅᴀʟ ꭙ</b>")
+    await loading_1.edit_text("<b>ᴍɪᴍɪ ꭙ</b>")
     await asyncio.sleep(0.1)
-    await loading_1.edit_text("<b>ᴛιᴅᴀʟ ꭙ ϻᴜsɪᴄ ♪</b>")
+    await loading_1.edit_text("<b>ᴍɪᴍɪ ꭙ ϻᴜsɪᴄ ♪</b>")
     await asyncio.sleep(0.1)
-    await loading_1.edit_text("<b>ᴛιᴅᴀʟ ꭙ ϻᴜsɪᴄ♪\nsᴛᴧʀᴛed❤️‍🔥!🥀</b>")
+    await loading_1.edit_text("<b>ᴍɪᴍɪ ꭙ ϻᴜsɪᴄ♪\nsᴛᴧʀᴛed❤️‍🔥!🥀</b>")
     await asyncio.sleep(0.1)
     await loading_1.delete()
 
@@ -141,6 +141,7 @@ async def start_pm(client, message: Message, _):
             random.choice(YUMI_PICS),
             caption=_["start_2"].format(message.from_user.mention, app.mention, UP, DISK, CPU, RAM,served_users,served_chats),
             reply_markup=InlineKeyboardMarkup(out),
+            spoiler=True
         )
         if await is_on_off(2):
             return await app.send_message(
@@ -158,6 +159,7 @@ async def start_gp(client, message: Message, _):
         random.choice(YUMI_PICS),
         caption=_["start_1"].format(app.mention, get_readable_time(uptime)),
         reply_markup=InlineKeyboardMarkup(out),
+        spoiler=True
     )
 
 @app.on_message(filters.command("promo") & filters.private)
