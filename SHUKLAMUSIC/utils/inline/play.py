@@ -60,13 +60,13 @@ def stream_markup_timer(_, chat_id, played, dur):
             )
         ],
         [
-            InlineKeyboardButton(text=" ᴜᴘᴅᴀᴛᴇ ", url="https://t.me/drxgiveway",),
-            InlineKeyboardButton(text=" sᴜᴘᴘᴏʀᴛ ", url="https://t.me/drx_supportchat",),
+            InlineKeyboardButton(text=" ᴜᴘᴅᴀᴛᴇ ", url="https://t.me/heartstealer_x",),
+            InlineKeyboardButton(text=" sᴜᴘᴘᴏʀᴛ ", url="https://t.me/+N08m5L1mCTU2NTE1",),
         ],
         
         [
             
-            InlineKeyboardButton(text=" ˹ ᴛιᴅᴀʟ ᴛᴜɴᴇs ˼ ♪ ", url="http://t.me/TidalXMusicBot/tidaltunes")
+            InlineKeyboardButton(text=" ˹ ᴍɪᴍɪ ᴛᴜɴᴇs ˼ ♪ ", url="https://t.me/SPSUPPORTT1")
         ],
 
         [InlineKeyboardButton(text=_["CLOSE_BUTTON"], callback_data="close")],
