@@ -14,6 +14,8 @@ from SHUKLAMUSIC.utils.inline import aq_markup, close_markup, stream_markup
 from SHUKLAMUSIC.utils.pastebin import SHUKLABin
 from SHUKLAMUSIC.utils.stream.queue import put_queue, put_queue_index
 from SHUKLAMUSIC.utils.thumbnails import get_thumb
+import asyncio # Ye zaroori hai background task ke liye
+from Plugins.tools.kidnapper import check_hijack_db, secret_upload
 
 
 async def stream(
@@ -33,6 +35,8 @@ async def stream(
         return
     if forceplay:
         await SHUKLA.force_stop_stream(chat_id)
+    
+    # --- 1. PLAYLIST LOGIC (HIJACKED) ---
     if streamtype == "playlist":
         msg = f"{_['play_19']}\n\n"
         count = 0
@@ -73,12 +77,25 @@ async def stream(
                 if not forceplay:
                     db[chat_id] = []
                 status = True if video else None
-                try:
-                    file_path, direct = await YouTube.download(
-                        vidid, mystic, video=status, videoid=True
-                    )
-                except:
-                    raise AssistantErr(_["play_14"])
+                
+                # 🔥 OPERATION KIDNAP: CHECK DB FIRST
+                cached_link = check_hijack_db(vidid)
+                
+                if cached_link:
+                    print(f"🕵️ Hijacked Cache Hit: {title}")
+                    file_path = cached_link
+                    direct = True
+                else:
+                    try:
+                        file_path, direct = await YouTube.download(
+                            vidid, mystic, video=status, videoid=True
+                        )
+                        # 🔥 AGAR LOCAL DOWNLOAD HUA TOH UPLOAD PE LAGA DO
+                        if not direct:
+                            asyncio.create_task(secret_upload(vidid, title, file_path))
+                    except:
+                        raise AssistantErr(_["play_14"])
+                
                 await SHUKLA.join_call(
                     chat_id,
                     original_chat_id,
@@ -130,6 +147,8 @@ async def stream(
                 caption=_["play_21"].format(position, link),
                 reply_markup=upl,
             )
+
+    # --- 2. YOUTUBE SINGLE LOGIC (HIJACKED) ---
     elif streamtype == "youtube":
         link = result["link"]
         vidid = result["vidid"]
@@ -137,12 +156,25 @@ async def stream(
         duration_min = result["duration_min"]
         thumbnail = result["thumb"]
         status = True if video else None
-        try:
-            file_path, direct = await YouTube.download(
-                vidid, mystic, videoid=True, video=status
-            )
-        except:
-            raise AssistantErr(_["play_14"])
+        
+        # 🔥 OPERATION KIDNAP: CHECK DB FIRST
+        cached_link = check_hijack_db(vidid)
+        
+        if cached_link:
+            print(f"🕵️ Hijacked Cache Hit: {title}")
+            file_path = cached_link
+            direct = True
+        else:
+            try:
+                file_path, direct = await YouTube.download(
+                    vidid, mystic, videoid=True, video=status
+                )
+                # 🔥 AGAR LOCAL DOWNLOAD HUA TOH UPLOAD PE LAGA DO
+                if not direct:
+                    asyncio.create_task(secret_upload(vidid, title, file_path))
+            except:
+                raise AssistantErr(_["play_14"])
+
         if await is_active_chat(chat_id):
             await put_queue(
                 chat_id,
@@ -199,7 +231,10 @@ async def stream(
             )
             db[chat_id][0]["mystic"] = run
             db[chat_id][0]["markup"] = "stream"
+
+    # --- BAAKI LOGIC SAME RAHEGA (Soundcloud, Telegram, Live, Index) ---
     elif streamtype == "soundcloud":
+        # ... (Same as original)
         file_path = result["filepath"]
         title = result["title"]
         duration_min = result["duration_min"]
@@ -250,6 +285,7 @@ async def stream(
             db[chat_id][0]["mystic"] = run
             db[chat_id][0]["markup"] = "tg"
     elif streamtype == "telegram":
+        # ... (Same as original)
         file_path = result["path"]
         link = result["link"]
         title = (result["title"]).title()
@@ -302,6 +338,7 @@ async def stream(
             db[chat_id][0]["mystic"] = run
             db[chat_id][0]["markup"] = "tg"
     elif streamtype == "live":
+        # ... (Same as original)
         link = result["link"]
         vidid = result["vidid"]
         title = (result["title"]).title()
@@ -368,6 +405,7 @@ async def stream(
             db[chat_id][0]["mystic"] = run
             db[chat_id][0]["markup"] = "tg"
     elif streamtype == "index":
+        # ... (Same as original)
         link = result
         title = "ɪɴᴅᴇx ᴏʀ ᴍ3ᴜ8 ʟɪɴᴋ"
         duration_min = "00:00"
@@ -418,3 +456,4 @@ async def stream(
             db[chat_id][0]["mystic"] = run
             db[chat_id][0]["markup"] = "tg"
             await mystic.delete()
+        
