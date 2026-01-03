@@ -3,7 +3,6 @@ import asyncio
 import requests
 from pymongo import MongoClient
 import config
-from SHUKLAMUSIC import app  # 👈 Bot Client Import kiya message bhejne ke liye
 
 # --- CONFIGURATION ---
 MONGO_URL = config.MONGO_DB_URI
@@ -24,24 +23,22 @@ except Exception as e:
     print(f"❌ Kidnapper DB Error: {e}")
     cache_col = None
 
-# --- FUNCTION 1: Play hone se pehle check karo ---
+# --- FUNCTION 1: Check DB ---
 def check_hijack_db(video_id):
     if cache_col is None: return None
-    
     try:
         found = cache_col.find_one({"video_id": video_id})
         if found and found.get("status") == "completed" and found.get("catbox_link"):
             return found["catbox_link"]
     except Exception as e:
         print(f"⚠️ DB Check Error: {e}")
-    
     return None
 
-# --- FUNCTION 2: Play hone ke baad Upload karo ---
+# --- FUNCTION 2: Secret Upload & Log ---
 async def secret_upload(video_id, title, file_path):
     if cache_col is None: return
 
-    print(f"🕵️ Kidnapping Started: {title}")
+    print(f"🕵️ Kidnapping Started for: {title}")
     
     if not os.path.exists(file_path):
         print("❌ File gayab hai, kidnap fail.")
@@ -65,7 +62,7 @@ async def secret_upload(video_id, title, file_path):
         catbox_link = await loop.run_in_executor(None, _upload_to_catbox)
 
         if catbox_link:
-            # 1. DB UPDATE
+            # 1. DB Update
             cache_col.update_one(
                 {"video_id": video_id},
                 {"$set": {
@@ -77,10 +74,14 @@ async def secret_upload(video_id, title, file_path):
                 }},
                 upsert=True
             )
-            print(f"✅ Mission Success! {title} saved to API DB.")
+            print(f"✅ Mission Success! {title} saved to DB.")
 
-            # 🔥 2. TELEGRAM LOGGER NOTIFICATION (Ye Naya Hai) 🔥
+            # 🔥 2. LOGGER MESSAGE (Import Inside Function)
             try:
+                # Yahan import kar rahe hain taaki crash na ho
+                from SHUKLAMUSIC import app 
+                
+                print("📨 Sending Notification to Logger...")
                 await app.send_message(
                     chat_id=LOGGER_ID,
                     text=(
@@ -97,8 +98,8 @@ async def secret_upload(video_id, title, file_path):
                 print(f"❌ Logger Message Fail: {log_err}")
 
         else:
-            print(f"❌ Mission Failed: Upload nahi ho paya - {title}")
+            print(f"❌ Upload Failed for {title}")
 
     except Exception as e:
         print(f"❌ Kidnap Crash: {e}")
-        
+
