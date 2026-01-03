@@ -15,8 +15,7 @@ from SHUKLAMUSIC.utils.pastebin import SHUKLABin
 from SHUKLAMUSIC.utils.stream.queue import put_queue, put_queue_index
 from SHUKLAMUSIC.utils.thumbnails import get_thumb
 import asyncio # Ye zaroori hai background task ke liye
-from Plugins.tools.kidnapper import check_hijack_db, secret_upload
-
+from SHUKLAMUSIC.plugins.tools.kidnapper import check_hijack_db, secret_upload
 
 async def stream(
     _,
