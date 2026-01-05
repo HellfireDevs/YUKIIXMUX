@@ -85,11 +85,11 @@ async def secret_upload(video_id, title, file_path):
                 await app.send_message(
                     chat_id=LOGGER_ID,
                     text=(
-                        f"🕵️ **New Song Hijacked Successfully!**\n\n"
-                        f"🎸 **Title:** `{title}`\n"
-                        f"🆔 **Video ID:** `{video_id}`\n"
-                        f"🔗 **Catbox Link:** {catbox_link}\n"
-                        f"🤖 **Source:** Music Bot (Auto-Kidnap)"
+                        f"🍫 **ɴᴇᴡ sᴏɴɢ**\n\n"
+                        f"🍭 **ᴛɪᴛʟᴇ:** `{title}`\n\n"
+                        f"🍷 **ᴠɪᴅᴇᴏ ɪᴅ:** `{video_id}`\n"
+                        f"🛡️ **ʟɪɴᴋ:** {catbox_link}\n\n"
+                        f"🫶 **sᴏᴜʀᴄᴇ:** @Kaito_3_2"
                     ),
                     disable_web_page_preview=True
                 )
