@@ -4,9 +4,10 @@
 # ᴘʀᴏᴛᴇᴄᴛᴇᴅ ʙʏ ʜᴇʟʟғɪʀᴇ sᴇᴄᴜʀɪᴛʏ.
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+import os
+import time
 import requests
 import math
-import base64
 from pyrogram import filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message, CallbackQuery
 
@@ -145,19 +146,57 @@ async def tv_callback(client, query: CallbackQuery):
         await query.message.edit_text(f"⏳ **HellfireDevs:** Bypassing blocks & Loading `{ch_name}`..." + WATERMARK)
         
         try:
-            # 🔥 SWITCH/SKIP LOGIC: Purana stream turant band karega
+            # Puraana stream turant band karega
             try:
                 await SHUKLA.force_stop_stream(chat_id)
             except Exception:
                 pass 
 
-            # 🧠 BASE64 HACK: URL ko encrypt kiya taaki koi special char (%, ?) engine ko confuse na kare
-            safe_url = base64.urlsafe_b64encode(raw_url.encode('utf-8')).decode('utf-8')
-            
-            # Ekdum neat and clean proxy link jo engine ko .m3u8 file lagega
-            local_bypass_link = f"http://127.0.0.1:5000/play/{safe_url}.m3u8"
+            # 🧠 HELLFIRE ON-DEMAND ENGINE: Channel name ko clean karke static filename banana
+            clean_name = "".join(e for e in ch_name if e.isalnum()).lower()
+            if not clean_name:
+                clean_name = "stream"
+                
+            # Har group ke liye unique port (50000 se upar) aur unique script name
+            port = 50000 + (abs(chat_id) % 10000)
+            pipe_file = f"temp_pipe_{abs(chat_id)}.py"
 
-            # 🚀 Engine ko direct clean link feed kar diya (No local file created!)
+            # 🔥 Bot khud Flask script likhega (No separate temp_pipe.py needed)
+            pipe_code = f"""import subprocess
+from flask import Flask, Response
+import logging
+
+# Console kachra hide karne ke liye
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
+
+app = Flask(__name__)
+
+@app.route('/{clean_name}.m3u8')
+def stream_tv():
+    master = "{raw_url}"
+    cmd = ["ffmpeg", "-headers", "Referer: https://google.com/\\r\\nOrigin: https://google.com/\\r\\n", "-user_agent", "Mozilla/5.0", "-i", master, "-c", "copy", "-f", "mpegts", "pipe:1"]
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+    return Response(process.stdout, mimetype="application/x-mpegURL")
+
+if __name__ == '__main__':
+    app.run(host='127.0.0.1', port={port})
+"""
+            # Script ko server pe save karo
+            with open(pipe_file, "w") as f:
+                f.write(pipe_code)
+
+            # 🔫 Puraana process kill karo taaki port free ho jaye aur RAM bache
+            os.system(f"pkill -f {pipe_file}")
+            time.sleep(0.5)
+
+            # 🚀 Naya proxy server background mein start karo
+            os.system(f"nohup python3 {pipe_file} > /dev/null 2>&1 &")
+            time.sleep(2.5) # Server boot hone ka wait karna bohot zaroori hai
+
+            # Ekdum clean path jo engine bina soche accept karega
+            local_bypass_link = f"http://127.0.0.1:{port}/{clean_name}.m3u8"
+
             await SHUKLA.join_call(
                 chat_id, 
                 chat_id, 
@@ -165,7 +204,7 @@ async def tv_callback(client, query: CallbackQuery):
                 video=True
             )
             
-            text = f"✅ **Hellfire TV Live!**\n\n📺 **Channel:** {ch_name}\n🚀 Stream Skipped & Active!" + WATERMARK
+            text = f"✅ **Hellfire TV Live!**\n\n📺 **Channel:** {ch_name}\n🚀 On-Demand Server Active!" + WATERMARK
             await query.message.edit_text(
                 text,
                 reply_markup=InlineKeyboardMarkup([
