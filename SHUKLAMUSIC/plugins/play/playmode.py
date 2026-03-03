@@ -10,10 +10,6 @@ import urllib.parse
 from pyrogram import filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message, CallbackQuery
 
-# PyTgCalls imports for streaming over network
-from pytgcalls.types.input_stream import VideoPiped
-from pytgcalls.types.input_stream.quality import HighQualityAudio, HighQualityVideo
-
 from SHUKLAMUSIC import app
 from SHUKLAMUSIC.core.call import SHUKLA
 from SHUKLAMUSIC.utils.database import get_playmode, get_playtype, is_nonadmin_chat
@@ -149,21 +145,15 @@ async def tv_callback(client, query: CallbackQuery):
         await query.message.edit_text(f"⏳ **HellfireDevs:** Bypassing blocks & Loading `{ch_name}`..." + WATERMARK)
         
         try:
-            # 🔥 MAGIC: Pipe bypass link
+            # 🔥 MAGIC: Pipe bypass link with dummy .m3u8 extension!
             safe_url = urllib.parse.quote(raw_url, safe='')
-            local_bypass_link = f"http://127.0.0.1:5000/stream?url={safe_url}"
+            local_bypass_link = f"http://127.0.0.1:5000/stream?url={safe_url}&ext=.m3u8"
 
-            # 🚀 FIXED: Wrapped the URL in VideoPiped to tell engine it's a stream, not a file
-            stream = VideoPiped(
-                local_bypass_link,
-                audio_parameters=HighQualityAudio(),
-                video_parameters=HighQualityVideo(),
-            )
-
+            # 🚀 DIRECT STRING PASS KARO (stream.py isko natively utha lega)
             await SHUKLA.join_call(
                 chat_id, 
                 chat_id, 
-                stream, # Now passing the VideoPiped object
+                local_bypass_link, 
                 video=True
             )
             
