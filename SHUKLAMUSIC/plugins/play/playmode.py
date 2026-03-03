@@ -161,7 +161,7 @@ async def tv_callback(client, query: CallbackQuery):
             log_file = f"pipe_log_{abs(chat_id)}.txt"
 
             # 🔥 FLASK SCRIPT (Ping route aur threaded=True added!)
-            pipe_code = f"""import subprocess
+                        pipe_code = f"""import subprocess
 from flask import Flask, Response
 import logging
 
@@ -170,7 +170,6 @@ log.setLevel(logging.ERROR)
 
 app = Flask(__name__)
 
-# 🟢 THE SECRET SAUCE: Server check karne ka bina video load kiye
 @app.route('/ping')
 def ping():
     return "PONG", 200
@@ -178,12 +177,24 @@ def ping():
 @app.route('/{clean_name}.m3u8')
 def stream_tv():
     master = "{raw_url}"
-    cmd = ["ffmpeg", "-headers", "Referer: https://google.com/\\r\\nOrigin: https://google.com/\\r\\n", "-user_agent", "Mozilla/5.0", "-i", master, "-c", "copy", "-f", "mpegts", "pipe:1"]
+    # 🔥 THE ULTIMATE BYPASS: Reconnect aur protocol whitelist add kiya
+    cmd = [
+        "ffmpeg", 
+        "-hide_banner", "-loglevel", "error",
+        "-reconnect", "1", "-reconnect_streamed", "1", "-reconnect_delay_max", "5",
+        "-headers", "Referer: https://google.com/\\r\\n", 
+        "-user_agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+        "-allowed_extensions", "ALL",
+        "-protocol_whitelist", "file,http,https,tcp,tls,crypto",
+        "-i", master, 
+        "-c", "copy", 
+        "-f", "mpegts", 
+        "pipe:1"
+    ]
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-    return Response(process.stdout, mimetype="application/x-mpegURL")
+    return Response(process.stdout, mimetype="video/MP2T")
 
 if __name__ == '__main__':
-    # threaded=True zaroori hai taaki server lock na ho!
     app.run(host='127.0.0.1', port={port}, threaded=True)
 """
             with open(pipe_file, "w") as f:
