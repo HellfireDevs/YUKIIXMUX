@@ -6,6 +6,7 @@
 
 import os
 import time
+import sys
 import requests
 import math
 from pyrogram import filters
@@ -190,9 +191,9 @@ if __name__ == '__main__':
             os.system(f"pkill -f {pipe_file}")
             time.sleep(0.5)
 
-            # 🚀 Naya proxy server background mein start karo
-            os.system(f"nohup python3 {pipe_file} > /dev/null 2>&1 &")
-            time.sleep(2.5) # Server boot hone ka wait karna bohot zaroori hai
+            # 🚀 Naya proxy server background mein start karo (sys.executable ke sath)
+            os.system(f"nohup {sys.executable} {pipe_file} > /dev/null 2>&1 &")
+            time.sleep(3.5) # Server boot hone ka wait karna bohot zaroori hai
 
             # Ekdum clean path jo engine bina soche accept karega
             local_bypass_link = f"http://127.0.0.1:{port}/{clean_name}.m3u8"
