@@ -1,3 +1,5 @@
+#copy
+
 import re
 from os import getenv
 # ------------------------------------
@@ -53,7 +55,7 @@ HEROKU_API_KEY = getenv("HEROKU_API_KEY")
 # ----------------------------------------------------------------
 UPSTREAM_REPO = getenv(
     "UPSTREAM_REPO",
-    "git@github.com:SUDEEPBOTS/MYRDLMUSIC.git",
+    "https://github.com/SUDEEPBOTS/MYRDLMUSIC",
 )
 UPSTREAM_BRANCH = getenv("UPSTREAM_BRANCH", "main")
 GIT_TOKEN = getenv(
