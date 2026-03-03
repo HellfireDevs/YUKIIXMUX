@@ -8,6 +8,7 @@ import os
 import json
 import requests
 import math
+import urllib.parse
 from pyrogram import filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message, CallbackQuery
 
@@ -31,29 +32,6 @@ def small_caps(text: str) -> str:
     return "".join(small_caps_dict.get(c, c) for c in text.lower())
 
 WATERMARK = small_caps("\n\n© ʜᴇʟʟғɪʀᴇ ᴅᴇᴠs | ᴅᴏ ɴᴏᴛ ᴄᴏᴘʏ ᴛʜɪs ʙᴏᴛ")
-
-# ==========================================
-# 🎛️ PLAYMODE COMMAND (Cleaned)
-# ==========================================
-@app.on_message(filters.command(["playmode", "mode"], prefixes=["/", "!", "%", ",", ".", "@", "#"]) & filters.group & ~BANNED_USERS)
-@language
-async def playmode_(client, message: Message, _):
-    playmode = await get_playmode(message.chat.id)
-    Direct = True if playmode == "Direct" else None
-    
-    is_non_admin = await is_nonadmin_chat(message.chat.id)
-    Group = None if is_non_admin else True
-    
-    playty = await get_playtype(message.chat.id)
-    Playtype = None if playty == "Everyone" else True
-    
-    buttons = playmode_users_markup(_, Direct, Group, Playtype)
-    original_text = _["play_22"].format(message.chat.title)
-    
-    await message.reply_text(
-        text=original_text + WATERMARK,
-        reply_markup=InlineKeyboardMarkup(buttons),
-    )
 
 # ==========================================
 # 📺 HELLFIRE LIVE TV LOGIC & CUSTOM DB
@@ -179,17 +157,14 @@ async def playtv_cmd(client, message: Message):
             status_msg = await message.reply_text(f"⏳ **HellfireDevs:** Loading Channel No. `{ch_num}`: `{ch_name}`..." + WATERMARK)
             
             try:
-                try:
-                    await SHUKLA.force_stop_stream(chat_id)
-                except Exception:
-                    pass 
+                try: await SHUKLA.force_stop_stream(chat_id)
+                except: pass 
                 
-                # 🔥 THE MASTER FILE HACK (No minus sign)
-                safe_url = raw_url.encode('utf-8').hex()
-                local_bypass_link = f"http://127.0.0.1:5000/play/{safe_url}.m3u8"
+                # 🔥 SIMPLE AND BEST APPROACH (No Hex/Base64)
+                safe_url = urllib.parse.quote(raw_url, safe='')
+                local_bypass_link = f"http://127.0.0.1:5000/stream.m3u8?url={safe_url}"
 
                 os.makedirs("downloads", exist_ok=True)
-                # Chat ID se minus hataya taaki Linux ko command flag na lage
                 clean_id = str(chat_id).replace("-", "G")
                 file_path = f"downloads/live_{clean_id}.m3u8"
                 
@@ -265,12 +240,11 @@ async def tv_callback(client, query: CallbackQuery):
             try: await SHUKLA.force_stop_stream(chat_id)
             except: pass 
 
-            # 🔥 THE MASTER FILE HACK (No minus sign)
-            safe_url = raw_url.encode('utf-8').hex()
-            local_bypass_link = f"http://127.0.0.1:5000/play/{safe_url}.m3u8"
+            # 🔥 SIMPLE AND BEST APPROACH
+            safe_url = urllib.parse.quote(raw_url, safe='')
+            local_bypass_link = f"http://127.0.0.1:5000/stream.m3u8?url={safe_url}"
 
             os.makedirs("downloads", exist_ok=True)
-            # Chat ID se minus hataya
             clean_id = str(chat_id).replace("-", "G")
             file_path = f"downloads/live_{clean_id}.m3u8"
             
@@ -295,4 +269,4 @@ async def tv_callback(client, query: CallbackQuery):
                     [InlineKeyboardButton(text="🔙 Back", callback_data=f"tvcat_{category}_{page}")]
                 ])
                     )
-            
+    
