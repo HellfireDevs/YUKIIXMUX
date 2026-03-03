@@ -87,14 +87,14 @@ def load_iptv_data():
 async def playtv_cmd(client, message: Message):
     data = load_iptv_data()
     if not data:
-        return await message.reply_text("❌ Failed to load IPTV channels." + WATERMARK)
+        return await message.reply_text("🥀 Failed to load IPTV channels." )
     
     buttons = []
     for cat in list(data.keys())[:10]: 
-        buttons.append([InlineKeyboardButton(text=f"📺 {cat}", callback_data=f"tvcat_{cat}_0")])
-    buttons.append([InlineKeyboardButton(text="❌ Close", callback_data="close_tv")])
+        buttons.append([InlineKeyboardButton(text=f"🥀 {cat}", callback_data=f"tvcat_{cat}_0")])
+    buttons.append([InlineKeyboardButton(text="📡 Close", callback_data="close_tv")])
     
-    text = "**🔥 HELLFIRE TV IS LIVE! 🔥**\nSelect a category:" + WATERMARK
+    text = "```Mᴇʟᴏᴅʏ ✘ ᴍᴜsɪᴄ```\nSelect a category:"
     await message.reply_text(text, reply_markup=InlineKeyboardMarkup(buttons))
 
 @app.on_callback_query(filters.regex(r"^(tvcat_|playtv_|retrytv_|close_tv|playtv_main)"))
@@ -117,22 +117,22 @@ async def tv_callback(client, query: CallbackQuery):
         buttons = []
         for idx, ch in enumerate(current_channels):
             real_idx = start_idx + idx
-            buttons.append([InlineKeyboardButton(text=f"▶️ {ch['name']}", callback_data=f"playtv_{category}_{page}_{real_idx}")])
+            buttons.append([InlineKeyboardButton(text=f"🔧 {ch['name']}", callback_data=f"playtv_{category}_{page}_{real_idx}")])
             
         nav = []
-        if page > 0: nav.append(InlineKeyboardButton(text="⬅️ Back", callback_data=f"tvcat_{category}_{page-1}"))
+        if page > 0: nav.append(InlineKeyboardButton(text="🧲 Back", callback_data=f"tvcat_{category}_{page-1}"))
         if page < total_pages - 1: nav.append(InlineKeyboardButton(text="Next ➡️", callback_data=f"tvcat_{category}_{page+1}"))
         if nav: buttons.append(nav)
         
-        buttons.append([InlineKeyboardButton(text="🔙 Main Menu", callback_data="playtv_main")])
+        buttons.append([InlineKeyboardButton(text="🛰️ Main Menu", callback_data="playtv_main")])
         text = f"**📺 {category}** (Page {page+1}/{total_pages})" + WATERMARK
         await query.message.edit_text(text, reply_markup=InlineKeyboardMarkup(buttons))
 
     elif data == "playtv_main":
         data = load_iptv_data()
-        buttons = [[InlineKeyboardButton(text=f"🥀 {cat}", callback_data=f"tvcat_{cat}_0")] for cat in list(data.keys())[:10]]
-        buttons.append([InlineKeyboardButton(text="❌ Close", callback_data="close_tv")])
-        text = "**🔥 HELLFIRE TV IS LIVE! 🔥**\nSelect a category:" + WATERMARK
+        buttons = [[InlineKeyboardButton(text=f"📡 {cat}", callback_data=f"tvcat_{cat}_0")] for cat in list(data.keys())[:10]]
+        buttons.append([InlineKeyboardButton(text="🥀 Close", callback_data="close_tv")])
+        text = "**Mᴇʟᴏᴅʏ ✘ ᴍᴜsɪᴄ**\nSelect a category:" + WATERMARK
         await query.message.edit_text(text, reply_markup=InlineKeyboardMarkup(buttons))
 
     elif data.startswith("playtv_") or data.startswith("retrytv_"):
@@ -142,7 +142,7 @@ async def tv_callback(client, query: CallbackQuery):
         ch_name, raw_url = channel["name"], channel["url"]
         chat_id = query.message.chat.id
         
-        await query.message.edit_text(f"⏳ **HellfireDevs:** Bypassing blocks & Loading `{ch_name}`..." + WATERMARK)
+        await query.message.edit_text(f"```⏳ Mᴇʟᴏᴅʏ ✘ ᴍᴜsɪᴄ Loading 🎧``` `{ch_name}`..." )
         
         try:
             # 🔥 SWITCH/SKIP LOGIC: Purana stream turant band karega
@@ -151,13 +151,13 @@ async def tv_callback(client, query: CallbackQuery):
             except Exception:
                 pass 
 
-            # 🧠 BASE64 HACK: URL encrypt kiya aur '=' hata diya
-            safe_url = base64.urlsafe_b64encode(raw_url.encode('utf-8')).decode('utf-8').rstrip("=")
+            # 🧠 BASE64 HACK: URL ko encrypt kiya taaki koi special char (%, ?) engine ko confuse na kare
+            safe_url = base64.urlsafe_b64encode(raw_url.encode('utf-8')).decode('utf-8')
             
-            # 🚀 PHANTOM LINK FIX: Bot ko ab ye ek clean, external .m3u8 file lagegi
-            # 'localhost' aur fake path use kiya hai taaki engine 127.0.0.1 dekh kar confuse na ho
-            local_bypass_link = f"http://localhost:5000/stream/{safe_url}/video.m3u8"
+            # Ekdum neat and clean proxy link jo engine ko .m3u8 file lagega
+            local_bypass_link = f"http://127.0.0.1:5000/play/{safe_url}.m3u8"
 
+            # 🚀 Engine ko direct clean link feed kar diya (No local file created!)
             await SHUKLA.join_call(
                 chat_id, 
                 chat_id, 
@@ -165,7 +165,7 @@ async def tv_callback(client, query: CallbackQuery):
                 video=True
             )
             
-            text = f"✅ **Hellfire TV Live!**\n\n📺 **Channel:** {ch_name}\n🚀 Phantom Bypass Active!" + WATERMARK
+            text = f"```live tv started```\n\n📺 **Channel:** {ch_name}\n🚀 Stream Skipped & Active!"
             await query.message.edit_text(
                 text,
                 reply_markup=InlineKeyboardMarkup([
@@ -173,12 +173,12 @@ async def tv_callback(client, query: CallbackQuery):
                 ])
             )
         except Exception as e:
-            text = f"❌ **Stream Failed!**\nChannel `{ch_name}` offline hai.\n`{str(e)}`" + WATERMARK
+            text = f"```THIS CHANAL MYBE DWON```\nChannel `{ch_name}` offline hai.\n`{str(e)}`" + WATERMARK
             await query.message.edit_text(
                 text,
                 reply_markup=InlineKeyboardMarkup([
                     [InlineKeyboardButton(text="🔄 Retry", callback_data=f"retrytv_{category}_{page}_{ch_idx}")],
                     [InlineKeyboardButton(text="🔙 Back", callback_data=f"tvcat_{category}_{page}")]
                 ])
-            )
+        )
             
