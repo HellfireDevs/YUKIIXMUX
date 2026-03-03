@@ -147,27 +147,24 @@ async def tv_callback(client, query: CallbackQuery):
         await query.message.edit_text(f"⏳ **HellfireDevs:** Bypassing blocks & Loading `{ch_name}`..." + WATERMARK)
         
         try:
-            # Puraana stream turant band karega
             try:
                 await SHUKLA.force_stop_stream(chat_id)
             except Exception:
                 pass 
 
-            # 🧠 HELLFIRE ON-DEMAND ENGINE: Channel name ko clean karke static filename banana
             clean_name = "".join(e for e in ch_name if e.isalnum()).lower()
             if not clean_name:
                 clean_name = "stream"
                 
-            # Har group ke liye unique port (50000 se upar) aur unique script name
             port = 50000 + (abs(chat_id) % 10000)
             pipe_file = f"temp_pipe_{abs(chat_id)}.py"
+            log_file = f"pipe_log_{abs(chat_id)}.txt"
 
-            # 🔥 Bot khud Flask script likhega (No separate temp_pipe.py needed)
+            # Flask Script Generation
             pipe_code = f"""import subprocess
 from flask import Flask, Response
 import logging
 
-# Console kachra hide karne ke liye
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
 
@@ -183,21 +180,42 @@ def stream_tv():
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port={port})
 """
-            # Script ko server pe save karo
             with open(pipe_file, "w") as f:
                 f.write(pipe_code)
 
-            # 🔫 Puraana process kill karo taaki port free ho jaye aur RAM bache
             os.system(f"pkill -f {pipe_file}")
             time.sleep(0.5)
 
-            # 🚀 Naya proxy server background mein start karo (sys.executable ke sath)
-            os.system(f"nohup {sys.executable} {pipe_file} > /dev/null 2>&1 &")
-            time.sleep(3.5) # Server boot hone ka wait karna bohot zaroori hai
-
-            # Ekdum clean path jo engine bina soche accept karega
+            # 🚀 FLASK KO START KARO AUR LOG SAVE KARO (dev/null hata diya)
+            os.system(f"nohup {sys.executable} {pipe_file} > {log_file} 2>&1 &")
+            
             local_bypass_link = f"http://127.0.0.1:{port}/{clean_name}.m3u8"
 
+            # 🧠 SMART WAIT LOGIC (Bot tab tak wait karega jab tak 200 OK na aaye)
+            server_ready = False
+            for i in range(12): # Max 12 seconds wait
+                try:
+                    res = requests.get(local_bypass_link, stream=True, timeout=2)
+                    if res.status_code == 200:
+                        server_ready = True
+                        break
+                except Exception:
+                    pass
+                time.sleep(1)
+
+            if not server_ready:
+                # Agar start nahi hua, toh log file check karo
+                err_msg = "Proxy Server Timeout ho gaya."
+                try:
+                    with open(log_file, "r") as lf:
+                        err_logs = lf.read()[-300:] # Aakhri 300 characters error ke
+                    if err_logs.strip():
+                        err_msg = f"Local Server Error:\n`{err_logs}`"
+                except:
+                    pass
+                raise Exception(err_msg)
+
+            # Agar 200 mil gaya, toh finally Play karo!
             await SHUKLA.join_call(
                 chat_id, 
                 chat_id, 
@@ -205,7 +223,7 @@ if __name__ == '__main__':
                 video=True
             )
             
-            text = f"✅ **Hellfire TV Live!**\n\n📺 **Channel:** {ch_name}\n🚀 On-Demand Server Active!" + WATERMARK
+            text = f"✅ **Hellfire TV Live!**\n\n📺 **Channel:** {ch_name}\n🚀 Smart Engine Active!" + WATERMARK
             await query.message.edit_text(
                 text,
                 reply_markup=InlineKeyboardMarkup([
@@ -213,7 +231,7 @@ if __name__ == '__main__':
                 ])
             )
         except Exception as e:
-            text = f"❌ **Stream Failed!**\nChannel `{ch_name}` offline hai.\n`{str(e)}`" + WATERMARK
+            text = f"❌ **Stream Failed!**\nChannel `{ch_name}` ya Proxy fail hui.\n\n**🔍 DEBUG INFO:**\n`{str(e)}`" + WATERMARK
             await query.message.edit_text(
                 text,
                 reply_markup=InlineKeyboardMarkup([
