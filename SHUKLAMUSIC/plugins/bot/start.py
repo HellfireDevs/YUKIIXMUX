@@ -36,7 +36,9 @@ YUMI_PICS = [
     "https://files.catbox.moe/csyzob.jpg",
 ]
 
-PROMO =  "───────────────────────\n❖ ᴘᴧɪᴅ ᴘʀσϻσᴛɪση ᴧᴠᴧɪʟᴧʙʟє ❖\n───────────────────────\n<blockquote>❍ ᴄʜᴧᴛᴛɪηɢ ɢʀσυᴘ's\n❍ ᴄσʟσʀ ᴛʀᴧᴅɪηɢ ɢᴧϻє's\n❍ ᴄʜᴧηηєʟ's | ɢʀσυᴘ's .....\n❍ ʙєᴛᴛɪηɢ ᴧᴅs σʀ ᴧηʏᴛʜɪηɢ</blockquote>\n\n───────────────────────\nᴘʟᴧηꜱ-\n<blockquote>||● ᴅᴧɪʟʏ\n● ᴡєєᴋʟʏ\n● ϻσηᴛʜʟʏ||</blockquote>\n───────────────────────\n❍ ᴄσηᴛᴧᴄᴛ - [愛 | 𝗦𝗧么𝗟𝗞𝚵𝗥](https://t.me/hehe_stalker)\n───────────────────────"
+# 🔥 PROMO MEIN CUSTOM EMOJIS ADD KIYE HAIN
+PROMO =  "───────────────────────\n<emoji id='5999100917645841519'>💀</emoji> <b>ᴘᴧɪᴅ ᴘʀσϻσᴛɪση ᴧᴠᴧɪʟᴧʙʟє</b> <emoji id='5999100917645841519'>💀</emoji>\n───────────────────────\n<blockquote><emoji id='6080189526532167993'>😉</emoji> ᴄʜᴧᴛᴛɪηɢ ɢʀσυᴘ's\n<emoji id='5413546177683539369'>😈</emoji> ᴄσʟσʀ ᴛʀᴧᴅɪηɢ ɢᴧϻє's\n<emoji id='6080176744709495278'>🐾</emoji> ᴄʜᴧηηєʟ's | ɢʀσυᴘ's .....\n<emoji id='5415586682286128590'>🔫</emoji> ʙєᴛᴛɪηɢ ᴧᴅs σʀ ᴧηʏᴛʜɪηɢ</blockquote>\n\n───────────────────────\n<emoji id='6080202089311507876'>😎</emoji> <b>ᴘʟᴧηꜱ -</b>\n<blockquote>||<emoji id='5413415116756500503'>☠️</emoji> ᴅᴧɪʟʏ\n<emoji id='5413415116756500503'>☠️</emoji> ᴡєєᴋʟʏ\n<emoji id='5413415116756500503'>☠️</emoji> ϻσηᴛʜʟʏ||</blockquote>\n───────────────────────\n<emoji id='6001132493011425597'>💖</emoji> <b>ᴄσηᴛᴧᴄᴛ -</b> <a href='https://t.me/hehe_stalker'>愛 | 𝗦𝗧么𝗟𝗞𝚵𝗥</a>\n───────────────────────"
+
 GREET = [
     "💞", "🥂", "🔍", "🧪", "🥂", "⚡️", "🔥",
 ]
@@ -44,7 +46,6 @@ GREET = [
 # 🔥 HELLFIRE LIVE ERROR TRACKER INJECTION
 async def inject_premium_markup(chat_id, message_id, markup):
     try:
-        # Token fallback
         token = getattr(config, "BOT_TOKEN", getattr(app, "bot_token", None))
         url = f"https://api.telegram.org/bot{token}/editMessageReplyMarkup"
         
@@ -58,20 +59,14 @@ async def inject_premium_markup(chat_id, message_id, markup):
             async with session.post(url, json=payload) as resp:
                 response_data = await resp.json()
                 
-                # Agar API ne reject kiya, toh sidha chat mein message aayega!
                 if not response_data.get("ok"):
                     err = response_data.get("description", "Unknown API Error")
                     print(f"❌ API REJECTED: {err}")
-                    await app.send_message(
-                        chat_id, 
-                        f"⚠️ **Telegram API Ne Buttons Reject Maar Diye!**\n\n**Reason:** `{err}`\n\n*(Agar custom emoji block ho raha hai, toh hum usko hata denge bhai, no tension)*"
-                    )
                 else:
                     print("✅ Premium Buttons Injected Successfully!")
                     
     except Exception as e:
         print(f"❌ CODE CRASH: {e}")
-        await app.send_message(chat_id, f"⚠️ **Code Crash Ho Gaya Bypass Mein:**\n`{e}`")
 
 
 @app.on_message(filters.command(["start"]) & filters.private & ~BANNED_USERS)
@@ -81,27 +76,21 @@ async def start_pm(client, message: Message, _):
     await add_served_user(message.from_user.id)
     
     await asyncio.sleep(0.1)
-    await loading_1.edit_text("<b>ᴅɪηɢ ᴅᴏηɢ.❤️‍🔥</b>")
+    await loading_1.edit_text("<emoji id='5413546177683539369'>😈</emoji> <b>ᴅɪηɢ ᴅᴏηɢ.</b>")
     await asyncio.sleep(0.1)
-    await loading_1.edit_text("<b>ᴅɪηɢ ᴅᴏηɢ..❤️‍🔥</b>")
+    await loading_1.edit_text("<emoji id='5413546177683539369'>😈</emoji> <b>ᴅɪηɢ ᴅᴏηɢ..</b>")
     await asyncio.sleep(0.1)
-    await loading_1.edit_text("<b>ᴅɪηɢ ᴅᴏηɢ...❤️‍🔥</b>")
+    await loading_1.edit_text("<emoji id='5413546177683539369'>😈</emoji> <b>ᴅɪηɢ ᴅᴏηɢ...</b>")
     await asyncio.sleep(0.1)
-    await loading_1.edit_text("<b>sᴛᴧʀᴛɪηɢ.❤️‍🔥</b>")
+    await loading_1.edit_text("<emoji id='6080202089311507876'>😎</emoji> <b>sᴛᴧʀᴛɪηɢ.</b>")
     await asyncio.sleep(0.1)
-    await loading_1.edit_text("<b>sᴛᴧʀᴛɪηɢ..❤️‍🔥</b>")
+    await loading_1.edit_text("<emoji id='6080202089311507876'>😎</emoji> <b>sᴛᴧʀᴛɪηɢ..</b>")
     await asyncio.sleep(0.1)
-    await loading_1.edit_text("<b>sᴛᴧʀᴛɪηɢ...❤️‍🔥</b>")
+    await loading_1.edit_text("<emoji id='6080202089311507876'>😎</emoji> <b>sᴛᴧʀᴛɪηɢ...</b>")
     await asyncio.sleep(0.1)
-    await loading_1.edit_text("<b>ʜєʏ ʙᴧʙʏ! 💞</b>")
+    await loading_1.edit_text("<emoji id='6001132493011425597'>💖</emoji> <b>ʜєʏ ʙᴧʙʏ!</b>")
     await asyncio.sleep(0.1)
-    await loading_1.edit_text("<b>ᴍɪᴍɪ</b>")
-    await asyncio.sleep(0.1)
-    await loading_1.edit_text("<b>ᴍɪᴍɪ ꭙ</b>")
-    await asyncio.sleep(0.1)
-    await loading_1.edit_text("<b>ᴍɪᴍɪ ꭙ ϻᴜsɪᴄ ♪</b>")
-    await asyncio.sleep(0.1)
-    await loading_1.edit_text("<b>ᴍɪᴍɪ ꭙ ϻᴜsɪᴄ♪\nsᴛᴧʀᴛed❤️‍🔥!🥀</b>")
+    await loading_1.edit_text("<emoji id='5413840936994097463'>🌺</emoji> <b>ᴍɪᴍɪ ꭙ ϻᴜsɪᴄ ♪\nsᴛᴧʀᴛed!</b>")
     await asyncio.sleep(0.1)
     await loading_1.delete()
     
@@ -109,7 +98,6 @@ async def start_pm(client, message: Message, _):
         name = message.text.split(None, 1)[1]
         if name[0:4] == "help":
             keyboard = help_pannel(_)
-            # 🔥 HACK IN ACTION
             run = await message.reply_photo(
                 random.choice(YUMI_PICS),
                 caption=_["help_1"].format(config.SUPPORT_CHAT),
@@ -121,7 +109,7 @@ async def start_pm(client, message: Message, _):
             if await is_on_off(2):
                 return await app.send_message(
                     chat_id=config.LOGGER_ID,
-                    text=f"<blockquote>✦ {message.from_user.mention} ᴊᴜsᴛ sᴛᴀʀᴛᴇᴅ ᴛʜᴇ ʙᴏᴛ ᴛᴏ ᴄʜᴇᴄᴋ <b>sᴜᴅᴏʟɪsᴛ</b>.\n\n<b>✦ ᴜsᴇʀ ɪᴅ ➠</b> <code>{message.from_user.id}</code>\n<b>✦ ᴜsᴇʀɴᴀᴍᴇ ➠</b> @{message.from_user.username}</blockquote>",
+                    text=f"<blockquote><emoji id='6080176744709495278'>🐾</emoji> {message.from_user.mention} ᴊᴜsᴛ sᴛᴀʀᴛᴇᴅ ᴛʜᴇ ʙᴏᴛ ᴛᴏ ᴄʜᴇᴄᴋ <b>sᴜᴅᴏʟɪsᴛ</b>.\n\n<b><emoji id='5413415116756500503'>☠️</emoji> ᴜsᴇʀ ɪᴅ ➠</b> <code>{message.from_user.id}</code>\n<b><emoji id='5999100917645841519'>💀</emoji> ᴜsᴇʀɴᴀᴍᴇ ➠</b> @{message.from_user.username}</blockquote>",
                 )
             return
             
@@ -143,7 +131,6 @@ async def start_pm(client, message: Message, _):
                 title, duration, views, published, channellink, channel, app.mention
             )
             
-            # 🔥 RAW JSON FOR INFO BUTTONS
             key = [
                 [
                     {"text": _["S_B_8"], "url": link, "style": "primary", "icon_custom_emoji_id": "6080202089311507876"},
@@ -161,7 +148,7 @@ async def start_pm(client, message: Message, _):
             if await is_on_off(2):
                 return await app.send_message(
                     chat_id=config.LOGGER_ID,
-                    text=f"✦ {message.from_user.mention} ᴊᴜsᴛ sᴛᴀʀᴛᴇᴅ ᴛʜᴇ ʙᴏᴛ ᴛᴏ ᴄʜᴇᴄᴋ <b>ᴛʀᴀᴄᴋ ɪɴғᴏʀᴍᴀᴛɪᴏɴ</b>.\n\n✦ <b>ᴜsᴇʀ ɪᴅ ➠</b> <code>{message.from_user.id}</code>\n✦ <b>ᴜsᴇʀɴᴀᴍᴇ ➠</b> @{message.from_user.username}",
+                    text=f"<emoji id='6080176744709495278'>🐾</emoji> {message.from_user.mention} ᴊᴜsᴛ sᴛᴀʀᴛᴇᴅ ᴛʜᴇ ʙᴏᴛ ᴛᴏ ᴄʜᴇᴄᴋ <b>ᴛʀᴀᴄᴋ ɪɴғᴏʀᴍᴀᴛɪᴏɴ</b>.\n\n<emoji id='5413415116756500503'>☠️</emoji> <b>ᴜsᴇʀ ɪᴅ ➠</b> <code>{message.from_user.id}</code>\n<emoji id='5999100917645841519'>💀</emoji> <b>ᴜsᴇʀɴᴀᴍᴇ ➠</b> @{message.from_user.username}",
                 )
     else:
         out = private_panel(_)
@@ -169,7 +156,6 @@ async def start_pm(client, message: Message, _):
         served_users = len(await get_served_users())
         UP, CPU, RAM, DISK = await bot_sys_stats()
         
-        # 🔥 HACK IN ACTION: No Pyrogram markup, inject raw API buttons
         run = await message.reply_photo(
             random.choice(YUMI_PICS),
             caption=_["start_2"].format(message.from_user.mention, app.mention, UP, DISK, CPU, RAM,served_users,served_chats),
@@ -179,7 +165,7 @@ async def start_pm(client, message: Message, _):
         if await is_on_off(2):
             return await app.send_message(
                 chat_id=config.LOGGER_ID,
-                text=f"✦ {message.from_user.mention} ᴊᴜsᴛ sᴛᴀʀᴛᴇᴅ ᴛʜᴇ ʙᴏᴛ.\n\n✦ <b>ᴜsᴇʀ ɪᴅ ➠</b> <code>{message.from_user.id}</code>\n✦ <b>ᴜsᴇʀɴᴀᴍᴇ ➠</b> @{message.from_user.username}",
+                text=f"<emoji id='6080176744709495278'>🐾</emoji> {message.from_user.mention} ᴊᴜsᴛ sᴛᴀʀᴛᴇᴅ ᴛʜᴇ ʙᴏᴛ.\n\n<emoji id='5413415116756500503'>☠️</emoji> <b>ᴜsᴇʀ ɪᴅ ➠</b> <code>{message.from_user.id}</code>\n<emoji id='5999100917645841519'>💀</emoji> <b>ᴜsᴇʀɴᴀᴍᴇ ➠</b> @{message.from_user.username}",
             )
 
 @app.on_message(filters.command(["start"]) & filters.group & ~BANNED_USERS)
@@ -188,7 +174,6 @@ async def start_gp(client, message: Message, _):
     out = start_panel(_)
     uptime = int(time.time() - _boot_)
     
-    # 🔥 HACK IN ACTION
     run = await message.reply_photo(
         random.choice(YUMI_PICS),
         caption=_["start_1"].format(app.mention, get_readable_time(uptime)),
@@ -197,12 +182,12 @@ async def start_gp(client, message: Message, _):
 
 @app.on_message(filters.command("promo") & filters.private)
 async def about_command(client: Client, message: Message):
-    # Fixed error in your original promo code
     await message.reply_photo(
         random.choice(YUMI_PICS),
         caption=PROMO
     )
 
+# 🔥 10 SECONDS SELF-DESTRUCTING WELCOME WITH CUSTOM EMOJIS & NO PHOTO
 @app.on_message(filters.new_chat_members, group=-1)
 async def welcome(client, message: Message):
     for member in message.new_chat_members:
@@ -214,6 +199,8 @@ async def welcome(client, message: Message):
                     await message.chat.ban_member(member.id)
                 except:
                     pass
+            
+            # 🔥 CASE 1: Jab tera bot group mein join karta hai
             if member.id == app.id:
                 if message.chat.type != ChatType.SUPERGROUP:
                     await message.reply_text(_["start_4"])
@@ -230,20 +217,38 @@ async def welcome(client, message: Message):
                     return await app.leave_chat(message.chat.id)
 
                 out = start_panel(_)
-                # 🔥 HACK IN ACTION
-                run = await message.reply_photo(
-                    random.choice(YUMI_PICS),
-                    caption=_["start_3"].format(
-                        message.from_user.mention,
-                        app.mention,
-                        message.chat.title,
-                        app.mention,
-                    ),
-                )
+                bot_welcome = f"<emoji id='6080202089311507876'>😎</emoji> <b>𝖶𝖾𝗅𝖼𝗈𝗆𝖾 𝖳𝗈 {message.chat.title}</b>\n<emoji id='6001132493011425597'>💖</emoji> 𝖳𝗁𝖺𝗇𝗄𝗌 𝖿𝗈𝗋 𝖺𝖽𝖽𝗂𝗇𝗀 𝗆𝖾, 𝖨 𝖺𝗆 𝗋𝖾𝖺𝖽𝗒 𝗍𝗈 𝗉𝗅𝖺𝗒!"
+                
+                run = await message.reply_text(text=bot_welcome, disable_web_page_preview=True)
                 await inject_premium_markup(message.chat.id, run.id, out)
                 
                 await add_served_chat(message.chat.id)
+                
+                # 10 Sec Delete Task
+                async def delete_bot_msg():
+                    await asyncio.sleep(10)
+                    try:
+                        await run.delete()
+                    except:
+                        pass
+                asyncio.create_task(delete_bot_msg())
+                
                 await message.stop_propagation()
+            
+            # 🔥 CASE 2: Jab koi normal user group mein join karta hai
+            else:
+                user_welcome = f"<emoji id='5413840936994097463'>🌺</emoji> <b>𝖶𝖾𝗅𝖼𝗈𝗆𝖾 𝖳𝗈 {message.chat.title}, {member.mention}!</b>"
+                run = await message.reply_text(text=user_welcome, disable_web_page_preview=True)
+                
+                # 10 Sec Delete Task
+                async def delete_user_msg():
+                    await asyncio.sleep(10)
+                    try:
+                        await run.delete()
+                    except:
+                        pass
+                asyncio.create_task(delete_user_msg())
+
         except Exception as ex:
             print(ex)
-                               
+                
