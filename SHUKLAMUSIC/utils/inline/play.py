@@ -60,7 +60,7 @@ def stream_markup_timer(_, chat_id, played, dur):
         ],
         [
             # Update Blue, Support Red
-            api_btn(text=" ᴜᴘᴅᴀᴛᴇ ", url="https://t.me/heartstealer_x", style="primary"),
+            api_btn(text=" ᴜᴘᴅᴀᴛᴇ ", url="https://t.me/heartstealer_x", style="success"),
             api_btn(text=" sᴜᴘᴘᴏʀᴛ ", url="https://t.me/+N08m5L1mCTU2NTE1", style="danger"),
         ],
         [
@@ -77,7 +77,7 @@ def stream_markup_timer(_, chat_id, played, dur):
 def stream_markup(_, chat_id):
     buttons = [
         [
-            api_btn(text=" ᴜᴘᴅᴀᴛᴇ ", url="https://t.me/drxgiveway", style="primary"),
+            api_btn(text=" ᴜᴘᴅᴀᴛᴇ ", url="https://t.me/drxgiveway", style="success"),
             api_btn(text=" sᴜᴘᴘᴏʀᴛ ", url="https://t.me/drx_supportchat", style="danger"),
         ],
         [
