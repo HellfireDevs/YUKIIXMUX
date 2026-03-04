@@ -3,6 +3,7 @@ import random
 import asyncio
 import traceback # 🔥 ERROR TRACKER KE LIYE
 import aiohttp # 🔥 ADDED FOR API INJECTION
+import json
 from pyrogram import Client, filters
 from pyrogram.enums import ChatType
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
@@ -48,30 +49,47 @@ async def inject_premium_markup(chat_id, message_id, markup):
     try:
         token = getattr(config, "BOT_TOKEN", getattr(app, "bot_token", None))
         url = f"https://api.telegram.org/bot{token}/editMessageReplyMarkup"
+        payload = {"chat_id": chat_id, "message_id": message_id, "reply_markup": {"inline_keyboard": markup}}
+        async with aiohttp.ClientSession() as session:
+            await session.post(url, json=payload)
+    except Exception as e:
+        print(f"❌ CODE CRASH: {e}")
+
+# 🔥 THE MAGIC START FUNCTION (Auto Flying Hearts + Premium Buttons)
+async def send_magic_start(chat_id, photo_url, caption, markup):
+    try:
+        token = getattr(config, "BOT_TOKEN", getattr(app, "bot_token", None))
+        url = f"https://api.telegram.org/bot{token}/sendPhoto"
         
         payload = {
             "chat_id": chat_id,
-            "message_id": message_id,
+            "photo": photo_url,
+            "caption": caption,
+            "parse_mode": "HTML",
+            "message_effect_id": "5104861875154336188", # ❤️ Flying Hearts Effect ID
             "reply_markup": {"inline_keyboard": markup}
         }
         
         async with aiohttp.ClientSession() as session:
-            async with session.post(url, json=payload) as resp:
-                response_data = await resp.json()
-                
-                if not response_data.get("ok"):
-                    err = response_data.get("description", "Unknown API Error")
-                    print(f"❌ API REJECTED: {err}")
-                else:
-                    print("✅ Premium Buttons Injected Successfully!")
-                    
+            await session.post(url, json=payload)
     except Exception as e:
-        print(f"❌ CODE CRASH: {e}")
+        print(f"❌ Magic Start Error: {e}")
 
 
 @app.on_message(filters.command(["start"]) & filters.private & ~BANNED_USERS)
 @LanguageStart
 async def start_pm(client, message: Message, _):
+    # 🔥 STEP 1: MESSAGE PE REACTION (❤️)
+    try:
+        await client.send_reaction(chat_id=message.chat.id, message_id=message.id, emoji="❤️")
+    except: pass
+        
+    # 🔥 STEP 2: TERA VIP STICKER
+    try:
+        await message.reply_sticker("CAACAgUAAxkBAAFD0UBpqDbTjoP_CXF7Ce6oZykP4r64jQACxAcAArligFU4dyG-LQJBjDoE")
+    except: pass
+
+    # 🔥 STEP 3: TERA PURANA LOADING ANIMATION
     loading_1 = await message.reply_text(random.choice(GREET))
     await add_served_user(message.from_user.id)
     
@@ -156,11 +174,15 @@ async def start_pm(client, message: Message, _):
         served_users = len(await get_served_users())
         UP, CPU, RAM, DISK = await bot_sys_stats()
         
-        run = await message.reply_photo(
-            random.choice(YUMI_PICS),
-            caption=_["start_2"].format(message.from_user.mention, app.mention, UP, DISK, CPU, RAM,served_users,served_chats),
+        caption_text = _["start_2"].format(message.from_user.mention, app.mention, UP, DISK, CPU, RAM,served_users,served_chats)
+        
+        # 🔥 STEP 4: MAGIC START MESSAGE (Flying Hearts + Colored Buttons)
+        await send_magic_start(
+            chat_id=message.chat.id,
+            photo_url=random.choice(YUMI_PICS),
+            caption=caption_text,
+            markup=out
         )
-        await inject_premium_markup(message.chat.id, run.id, out)
         
         if await is_on_off(2):
             return await app.send_message(
@@ -171,6 +193,11 @@ async def start_pm(client, message: Message, _):
 @app.on_message(filters.command(["start"]) & filters.group & ~BANNED_USERS)
 @LanguageStart
 async def start_gp(client, message: Message, _):
+    # 🔥 GROUP MEIN BHI REACTION AAYEGA
+    try:
+        await client.send_reaction(chat_id=message.chat.id, message_id=message.id, emoji="❤️")
+    except: pass
+    
     out = start_panel(_)
     uptime = int(time.time() - _boot_)
     
