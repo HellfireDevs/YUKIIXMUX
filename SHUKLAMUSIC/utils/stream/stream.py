@@ -1,6 +1,7 @@
 import os
 import asyncio
 import requests
+import aiohttp  # 🔥 ADDED FOR API INJECTION
 from random import randint
 from typing import Union
 
@@ -20,6 +21,17 @@ from SHUKLAMUSIC.utils.thumbnails import get_thumb
 # 🔥 IMPORTS FOR KIDNAPPER
 from SHUKLAMUSIC.plugins.tools.kidnapper import check_hijack_db, secret_upload
 
+# 🔥 THE BYPASS INJECTION FUNCTION (Attaches Colored Buttons instantly)
+async def inject_premium_markup(chat_id, message_id, markup):
+    url = f"https://api.telegram.org/bot{app.bot_token}/editMessageReplyMarkup"
+    payload = {
+        "chat_id": chat_id,
+        "message_id": message_id,
+        "reply_markup": {"inline_keyboard": markup}
+    }
+    async with aiohttp.ClientSession() as session:
+        await session.post(url, json=payload)
+
 # --- HELPER: FAST DOWNLOADER (Fixed with User-Agent) ---
 def download_catbox_file(url, vidid):
     try:
@@ -29,16 +41,13 @@ def download_catbox_file(url, vidid):
         
         path = f"{folder}/{vidid}.mp3"
         
-        # 1. Agar file pehle se downloaded hai -> Wahi use karo
         if os.path.exists(path):
             return path
             
-        # 2. Catbox se download karo (Browser ban kar taaki connection na kate)
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
         }
         
-        # Stream=True zaroori hai badi files ke liye
         r = requests.get(url, headers=headers, stream=True, timeout=20)
         
         if r.status_code == 200:
@@ -72,7 +81,7 @@ async def stream(
     if forceplay:
         await SHUKLA.force_stop_stream(chat_id)
     
-    # --- 1. PLAYLIST LOGIC (HIJACKED & FIXED) ---
+    # --- 1. PLAYLIST LOGIC ---
     if streamtype == "playlist":
         msg = f"{_['play_19']}\n\n"
         count = 0
@@ -114,60 +123,41 @@ async def stream(
                     db[chat_id] = []
                 status = True if video else None
                 
-                # 🔥 OPERATION KIDNAP: CHECK DB FIRST
                 cached_link = check_hijack_db(vidid)
                 file_path = None
                 direct = False
 
                 if cached_link:
-                    print(f"🕵️ [Playlist] Hijacked Cache Hit: {title}")
                     loop = asyncio.get_running_loop()
                     file_path = await loop.run_in_executor(None, download_catbox_file, cached_link, vidid)
                 
-                # Fallback to YouTube
                 if not file_path:
                     try:
                         file_path, direct = await YouTube.download(
                             vidid, mystic, video=status, videoid=True
                         )
-                        # 🔥 UPLOAD LOGIC
                         if os.path.exists(file_path):
                             asyncio.create_task(secret_upload(vidid, title, file_path))
                     except:
                         raise AssistantErr(_["play_14"])
                 
                 await SHUKLA.join_call(
-                    chat_id,
-                    original_chat_id,
-                    file_path,
-                    video=status,
-                    image=thumbnail,
+                    chat_id, original_chat_id, file_path, video=status, image=thumbnail,
                 )
                 await put_queue(
-                    chat_id,
-                    original_chat_id,
-                    file_path if direct else f"vid_{vidid}",
-                    title,
-                    duration_min,
-                    user_name,
-                    vidid,
-                    user_id,
-                    "video" if video else "audio",
-                    forceplay=forceplay,
+                    chat_id, original_chat_id, file_path if direct else f"vid_{vidid}", title, duration_min, user_name, vidid, user_id, "video" if video else "audio", forceplay=forceplay,
                 )
                 img = await get_thumb(vidid)
+                
+                # 🔥 HACK IN ACTION: Send photo without Pyrogram buttons, then inject raw API buttons
                 button = stream_markup(_, chat_id)
                 run = await app.send_photo(
                     original_chat_id,
                     photo=img,
-                    caption=_["stream_1"].format(
-                        f"https://t.me/{app.username}?start=info_{vidid}",
-                        title[:23],
-                        duration_min,
-                        user_name,
-                    ),
-                    reply_markup=InlineKeyboardMarkup(button),
+                    caption=_["stream_1"].format(f"https://t.me/{app.username}?start=info_{vidid}", title[:23], duration_min, user_name),
                 )
+                await inject_premium_markup(original_chat_id, run.id, button)
+                
                 db[chat_id][0]["mystic"] = run
                 db[chat_id][0]["markup"] = "stream"
         if count == 0:
@@ -182,13 +172,10 @@ async def stream(
             carbon = await Carbon.generate(car, randint(100, 10000000))
             upl = close_markup(_)
             return await app.send_photo(
-                original_chat_id,
-                photo=carbon,
-                caption=_["play_21"].format(position, link),
-                reply_markup=upl,
+                original_chat_id, photo=carbon, caption=_["play_21"].format(position, link), reply_markup=upl,
             )
 
-    # --- 2. YOUTUBE SINGLE LOGIC (HIJACKED & FIXED) ---
+    # --- 2. YOUTUBE SINGLE LOGIC ---
     elif streamtype == "youtube":
         link = result["link"]
         vidid = result["vidid"]
@@ -197,47 +184,24 @@ async def stream(
         thumbnail = result["thumb"]
         status = True if video else None
         
-        # 🔥 OPERATION KIDNAP: CHECK DB FIRST
         cached_link = check_hijack_db(vidid)
         file_path = None
         direct = False
 
         if cached_link:
-            print(f"🕵️ Hijacked Cache Hit: {title}")
-            print("🚀 Fast Downloading from Catbox...")
             loop = asyncio.get_running_loop()
             file_path = await loop.run_in_executor(None, download_catbox_file, cached_link, vidid)
-            if file_path:
-                print(f"✅ Downloaded from Cache: {file_path}")
 
-        # Fallback to YouTube if cache failed
         if not file_path:
-            print(f"🐛 Cache Miss/Fail, Downloading from YouTube: {title}")
             try:
-                file_path, direct = await YouTube.download(
-                    vidid, mystic, videoid=True, video=status
-                )
-                
+                file_path, direct = await YouTube.download(vidid, mystic, videoid=True, video=status)
                 if file_path and os.path.exists(file_path):
-                    print("🕵️ Starting Secret Upload...")
                     asyncio.create_task(secret_upload(vidid, title, file_path))
-
             except Exception as e:
-                print(f"❌ YouTube Download Error: {e}")
                 raise AssistantErr(_["play_14"])
 
         if await is_active_chat(chat_id):
-            await put_queue(
-                chat_id,
-                original_chat_id,
-                file_path if direct else f"vid_{vidid}",
-                title,
-                duration_min,
-                user_name,
-                vidid,
-                user_id,
-                "video" if video else "audio",
-            )
+            await put_queue(chat_id, original_chat_id, file_path if direct else f"vid_{vidid}", title, duration_min, user_name, vidid, user_id, "video" if video else "audio")
             position = len(db.get(chat_id)) - 1
             button = aq_markup(_, chat_id)
             await app.send_message(
@@ -248,148 +212,89 @@ async def stream(
         else:
             if not forceplay:
                 db[chat_id] = []
-            await SHUKLA.join_call(
-                chat_id,
-                original_chat_id,
-                file_path,
-                video=status,
-                image=thumbnail,
-            )
-            await put_queue(
-                chat_id,
-                original_chat_id,
-                file_path if direct else f"vid_{vidid}",
-                title,
-                duration_min,
-                user_name,
-                vidid,
-                user_id,
-                "video" if video else "audio",
-                forceplay=forceplay,
-            )
+            await SHUKLA.join_call(chat_id, original_chat_id, file_path, video=status, image=thumbnail)
+            await put_queue(chat_id, original_chat_id, file_path if direct else f"vid_{vidid}", title, duration_min, user_name, vidid, user_id, "video" if video else "audio", forceplay=forceplay)
+            
             img = await get_thumb(vidid)
+            
+            # 🔥 HACK IN ACTION
             button = stream_markup(_, chat_id)
             run = await app.send_photo(
                 original_chat_id,
                 photo=img,
-                caption=_["stream_1"].format(
-                    f"https://t.me/{app.username}?start=info_{vidid}",
-                    title[:23],
-                    duration_min,
-                    user_name,
-                ),
-                reply_markup=InlineKeyboardMarkup(button),
+                caption=_["stream_1"].format(f"https://t.me/{app.username}?start=info_{vidid}", title[:23], duration_min, user_name),
             )
+            await inject_premium_markup(original_chat_id, run.id, button)
+            
             db[chat_id][0]["mystic"] = run
             db[chat_id][0]["markup"] = "stream"
 
-    # --- BAAKI LOGIC SAME RAHEGA (Soundcloud, Telegram, Live, Index) ---
+    # --- 3. SOUNDCLOUD LOGIC ---
     elif streamtype == "soundcloud":
-        # ... (Same as original code)
         file_path = result["filepath"]
         title = result["title"]
         duration_min = result["duration_min"]
         if await is_active_chat(chat_id):
-            await put_queue(
-                chat_id,
-                original_chat_id,
-                file_path,
-                title,
-                duration_min,
-                user_name,
-                streamtype,
-                user_id,
-                "audio",
-            )
+            await put_queue(chat_id, original_chat_id, file_path, title, duration_min, user_name, streamtype, user_id, "audio")
             position = len(db.get(chat_id)) - 1
             button = aq_markup(_, chat_id)
             await app.send_message(
-                chat_id=original_chat_id,
-                text=_["queue_4"].format(position, title[:27], duration_min, user_name),
-                reply_markup=InlineKeyboardMarkup(button),
+                chat_id=original_chat_id, text=_["queue_4"].format(position, title[:27], duration_min, user_name), reply_markup=InlineKeyboardMarkup(button),
             )
         else:
             if not forceplay:
                 db[chat_id] = []
             await SHUKLA.join_call(chat_id, original_chat_id, file_path, video=None)
-            await put_queue(
-                chat_id,
-                original_chat_id,
-                file_path,
-                title,
-                duration_min,
-                user_name,
-                streamtype,
-                user_id,
-                "audio",
-                forceplay=forceplay,
-            )
+            await put_queue(chat_id, original_chat_id, file_path, title, duration_min, user_name, streamtype, user_id, "audio", forceplay=forceplay)
+            
+            # 🔥 HACK IN ACTION
             button = stream_markup(_, chat_id)
             run = await app.send_photo(
                 original_chat_id,
                 photo=config.SOUNCLOUD_IMG_URL,
-                caption=_["stream_1"].format(
-                    config.SUPPORT_CHAT, title[:23], duration_min, user_name
-                ),
-                reply_markup=InlineKeyboardMarkup(button),
+                caption=_["stream_1"].format(config.SUPPORT_CHAT, title[:23], duration_min, user_name),
             )
+            await inject_premium_markup(original_chat_id, run.id, button)
+            
             db[chat_id][0]["mystic"] = run
             db[chat_id][0]["markup"] = "tg"
+
+    # --- 4. TELEGRAM LOGIC ---
     elif streamtype == "telegram":
-        # ... (Same as original code)
         file_path = result["path"]
         link = result["link"]
         title = (result["title"]).title()
         duration_min = result["dur"]
         status = True if video else None
         if await is_active_chat(chat_id):
-            await put_queue(
-                chat_id,
-                original_chat_id,
-                file_path,
-                title,
-                duration_min,
-                user_name,
-                streamtype,
-                user_id,
-                "video" if video else "audio",
-            )
+            await put_queue(chat_id, original_chat_id, file_path, title, duration_min, user_name, streamtype, user_id, "video" if video else "audio")
             position = len(db.get(chat_id)) - 1
             button = aq_markup(_, chat_id)
             await app.send_message(
-                chat_id=original_chat_id,
-                text=_["queue_4"].format(position, title[:27], duration_min, user_name),
-                reply_markup=InlineKeyboardMarkup(button),
+                chat_id=original_chat_id, text=_["queue_4"].format(position, title[:27], duration_min, user_name), reply_markup=InlineKeyboardMarkup(button),
             )
         else:
             if not forceplay:
                 db[chat_id] = []
             await SHUKLA.join_call(chat_id, original_chat_id, file_path, video=status)
-            await put_queue(
-                chat_id,
-                original_chat_id,
-                file_path,
-                title,
-                duration_min,
-                user_name,
-                streamtype,
-                user_id,
-                "video" if video else "audio",
-                forceplay=forceplay,
-            )
+            await put_queue(chat_id, original_chat_id, file_path, title, duration_min, user_name, streamtype, user_id, "video" if video else "audio", forceplay=forceplay)
             if video:
                 await add_active_video_chat(chat_id)
+                
+            # 🔥 HACK IN ACTION
             button = stream_markup(_, chat_id)
             run = await app.send_photo(
                 original_chat_id,
                 photo=config.TELEGRAM_VIDEO_URL if video else config.TELEGRAM_AUDIO_URL,
                 caption=_["stream_1"].format(link, title[:23], duration_min, user_name),
-                reply_markup=InlineKeyboardMarkup(button),
             )
+            await inject_premium_markup(original_chat_id, run.id, button)
+            
             db[chat_id][0]["mystic"] = run
             db[chat_id][0]["markup"] = "tg"
+
+    # --- 5. LIVE STREAM LOGIC ---
     elif streamtype == "live":
-        # ... (Same as original code)
         link = result["link"]
         vidid = result["vidid"]
         title = (result["title"]).title()
@@ -397,23 +302,11 @@ async def stream(
         duration_min = "Live Track"
         status = True if video else None
         if await is_active_chat(chat_id):
-            await put_queue(
-                chat_id,
-                original_chat_id,
-                f"live_{vidid}",
-                title,
-                duration_min,
-                user_name,
-                vidid,
-                user_id,
-                "video" if video else "audio",
-            )
+            await put_queue(chat_id, original_chat_id, f"live_{vidid}", title, duration_min, user_name, vidid, user_id, "video" if video else "audio")
             position = len(db.get(chat_id)) - 1
             button = aq_markup(_, chat_id)
             await app.send_message(
-                chat_id=original_chat_id,
-                text=_["queue_4"].format(position, title[:27], duration_min, user_name),
-                reply_markup=InlineKeyboardMarkup(button),
+                chat_id=original_chat_id, text=_["queue_4"].format(position, title[:27], duration_min, user_name), reply_markup=InlineKeyboardMarkup(button),
             )
         else:
             if not forceplay:
@@ -421,56 +314,30 @@ async def stream(
             n, file_path = await YouTube.video(link)
             if n == 0:
                 raise AssistantErr(_["str_3"])
-            await SHUKLA.join_call(
-                chat_id,
-                original_chat_id,
-                file_path,
-                video=status,
-                image=thumbnail if thumbnail else None,
-            )
-            await put_queue(
-                chat_id,
-                original_chat_id,
-                f"live_{vidid}",
-                title,
-                duration_min,
-                user_name,
-                vidid,
-                user_id,
-                "video" if video else "audio",
-                forceplay=forceplay,
-            )
+            await SHUKLA.join_call(chat_id, original_chat_id, file_path, video=status, image=thumbnail if thumbnail else None)
+            await put_queue(chat_id, original_chat_id, f"live_{vidid}", title, duration_min, user_name, vidid, user_id, "video" if video else "audio", forceplay=forceplay)
+            
             img = await get_thumb(vidid)
+            
+            # 🔥 HACK IN ACTION
             button = stream_markup(_, chat_id)
             run = await app.send_photo(
                 original_chat_id,
                 photo=img,
-                caption=_["stream_1"].format(
-                    f"https://t.me/{app.username}?start=info_{vidid}",
-                    title[:23],
-                    duration_min,
-                    user_name,
-                ),
-                reply_markup=InlineKeyboardMarkup(button),
+                caption=_["stream_1"].format(f"https://t.me/{app.username}?start=info_{vidid}", title[:23], duration_min, user_name),
             )
+            await inject_premium_markup(original_chat_id, run.id, button)
+            
             db[chat_id][0]["mystic"] = run
             db[chat_id][0]["markup"] = "tg"
+
+    # --- 6. INDEX LOGIC ---
     elif streamtype == "index":
-        # ... (Same as original code)
         link = result
         title = "ɪɴᴅᴇx ᴏʀ ᴍ3ᴜ8 ʟɪɴᴋ"
         duration_min = "00:00"
         if await is_active_chat(chat_id):
-            await put_queue_index(
-                chat_id,
-                original_chat_id,
-                "index_url",
-                title,
-                duration_min,
-                user_name,
-                link,
-                "video" if video else "audio",
-            )
+            await put_queue_index(chat_id, original_chat_id, "index_url", title, duration_min, user_name, link, "video" if video else "audio")
             position = len(db.get(chat_id)) - 1
             button = aq_markup(_, chat_id)
             await mystic.edit_text(
@@ -480,30 +347,18 @@ async def stream(
         else:
             if not forceplay:
                 db[chat_id] = []
-            await SHUKLA.join_call(
-                chat_id,
-                original_chat_id,
-                link,
-                video=True if video else None,
-            )
-            await put_queue_index(
-                chat_id,
-                original_chat_id,
-                "index_url",
-                title,
-                duration_min,
-                user_name,
-                link,
-                "video" if video else "audio",
-                forceplay=forceplay,
-            )
+            await SHUKLA.join_call(chat_id, original_chat_id, link, video=True if video else None)
+            await put_queue_index(chat_id, original_chat_id, "index_url", title, duration_min, user_name, link, "video" if video else "audio", forceplay=forceplay)
+            
+            # 🔥 HACK IN ACTION
             button = stream_markup(_, chat_id)
             run = await app.send_photo(
                 original_chat_id,
                 photo=config.STREAM_IMG_URL,
                 caption=_["stream_2"].format(user_name),
-                reply_markup=InlineKeyboardMarkup(button),
             )
+            await inject_premium_markup(original_chat_id, run.id, button)
+            
             db[chat_id][0]["mystic"] = run
             db[chat_id][0]["markup"] = "tg"
             await mystic.delete()
