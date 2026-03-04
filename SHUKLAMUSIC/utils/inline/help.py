@@ -1,7 +1,7 @@
 from typing import Union
 from SHUKLAMUSIC import app
 
-# 🔥 HELLFIRE DEVS HACK: Raw API Button Generator
+# 🔥 HELLFIRE DEVS HACK: Raw API Button Generator (100% Safe)
 def api_btn(text, callback_data=None, url=None, style=None, custom_emoji_id=None):
     btn = {"text": text}
     if callback_data:
@@ -19,18 +19,34 @@ def api_btn(text, callback_data=None, url=None, style=None, custom_emoji_id=None
 
 
 def help_pannel(_, START: Union[bool, int] = None):
-    # Close button (Red + 💀)
-    first = [api_btn(text=_["CLOSE_BUTTON"], callback_data="close", style="danger", custom_emoji_id="5999100917645841519")]
+    # Close Button (Red + 💀)
+    first = [api_btn(text=_["CLOSE_BUTTON"], callback_data=f"close", style="danger", custom_emoji_id="5999100917645841519")]
     
-    # Navigation buttons
+    # Next/Back Menu Buttons (Blue & Red)
     second = [
-        api_btn(text=_["BACK_PAGE"], callback_data="mbot_cb", style="primary", custom_emoji_id="6001419401121765310"),
-        api_btn(text=_["BACK_BUTTON"], callback_data="settingsback_helper", style="danger", custom_emoji_id="5998834801472182366"),
-        api_btn(text=_["NEXT_PAGE"], callback_data="mbot_cb", style="primary", custom_emoji_id="6001483331709966655"),
+        api_btn(
+            text=_["BACK_PAGE"],
+            callback_data=f"mbot_cb",
+            style="primary",
+            custom_emoji_id="6001419401121765310"
+        ),
+        api_btn(
+            text=_["BACK_BUTTON"],
+            callback_data=f"settingsback_helper",
+            style="danger",
+            custom_emoji_id="5998834801472182366"
+        ),
+        api_btn(
+            text=_["NEXT_PAGE"],
+            callback_data=f"mbot_cb",
+            style="primary",
+            custom_emoji_id="6001483331709966655"
+        ),
     ]
+    
+    # Original START logic kept EXACTLY as it is!
     mark = second if START else first
     
-    # 🔥 HACK IN ACTION: Hata diya Pyrogram Markup, ab raw API list return hogi
     upl = [
         [
             api_btn(text=_["H_B_1"], callback_data="help_callback hb1", style="primary"),
@@ -65,10 +81,9 @@ def help_pannel(_, START: Union[bool, int] = None):
 def help_back_markup(_):
     upl = [
         [
-            # Back Button (Red + 💔)
             api_btn(
                 text=_["BACK_BUTTON"],
-                callback_data="settings_back_helper",
+                callback_data=f"settings_back_helper",
                 style="danger",
                 custom_emoji_id="5998834801472182366"
             ),
@@ -80,7 +95,6 @@ def help_back_markup(_):
 def private_help_panel(_):
     buttons = [
         [
-            # Help Panel Button (Blue + 💖)
             api_btn(
                 text=_["S_B_4"],
                 url=f"https://t.me/{app.username}?start=help",
