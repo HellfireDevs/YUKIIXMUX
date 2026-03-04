@@ -1,34 +1,37 @@
 import config
 from SHUKLAMUSIC import app
 
-# 🔥 HELLFIRE DEVS HACK: Raw API Button Generator (WITH AUTO-URL FIXER)
+# 🔥 HELLFIRE DEVS HACK: Raw API Button Generator (Fixed for Telegram Limits)
 def api_btn(text, callback_data=None, url=None, style=None, custom_emoji_id=None):
     btn = {"text": text}
     if callback_data:
         btn["callback_data"] = callback_data
     if url:
-        # Raw API strictly requires http/https/tg links. Yeh usko auto-fix karega:
         url_str = str(url)
         if not url_str.startswith("http") and not url_str.startswith("tg://"):
             url_str = f"https://t.me/{url_str.replace('@', '')}"
         btn["url"] = url_str
-    if style:
-        btn["style"] = style  # 'primary' (Blue), 'danger' (Red), 'secondary' (Grey)
+        
+    # 🔥 FIX: Sirf Valid Telegram Styles Allow Karenge!
+    if style in ["primary", "danger", "success"]:
+        btn["style"] = style  
+        
     if custom_emoji_id:
         btn["icon_custom_emoji_id"] = str(custom_emoji_id) 
     return btn
 
+
 def start_panel(_):
     buttons = [
         [
-            # Add to Group (Blue + 💖 Emoji)
+            # Add to Group (Blue)
             api_btn(
                 text=_["S_B_1"], 
                 url=f"https://t.me/{app.username}?startgroup=true", 
                 style="primary", 
                 custom_emoji_id="6001132493011425597"
             ),
-            # Support Chat (Red + 💀 Emoji)
+            # Support Chat (Red)
             api_btn(
                 text=_["S_B_2"], 
                 url=config.SUPPORT_CHAT, 
@@ -41,12 +44,11 @@ def start_panel(_):
 
 
 def private_panel(_):
-    # Owner ID list error bypass:
     safe_owner_id = config.OWNER_ID[0] if isinstance(config.OWNER_ID, list) else config.OWNER_ID
     
     buttons = [
         [
-            # Add to Group (Blue + 😎 Emoji)
+            # Add to Group (Blue)
             api_btn(
                 text=_["S_B_3"],
                 url=f"https://t.me/{app.username}?startgroup=true",
@@ -55,14 +57,14 @@ def private_panel(_):
             )
         ],
         [
-            # Settings/Help (Grey + 🐾 Emoji)
+            # Settings/Help (🔥 GREEN banaya isko taaki crash na ho)
             api_btn(
                 text=_["S_B_4"], 
                 callback_data="settings_back_helper", 
-                style="secondary", 
+                style="success", 
                 custom_emoji_id="6080176744709495278"
             ),
-            # Mimi Tunes (Blue + 🌺 Emoji)
+            # Mimi Tunes (Blue)
             api_btn(
                 text="˹ᴍɪᴍɪ ᴛᴜɴᴇs˼♪", 
                 url="http://t.me/IAM_MIMBOT", 
@@ -71,14 +73,14 @@ def private_panel(_):
             ),
         ],
         [
-            # Updates/Channel (Blue + 🔫 Emoji)
+            # Updates/Channel (Blue)
             api_btn(
                 text=_["S_B_6"], 
                 url=config.SUPPORT_CHANNEL, 
                 style="primary", 
                 custom_emoji_id="5415586682286128590"
             ),
-            # Support Chat (Red + ☠️ Emoji)
+            # Support Chat (Red)
             api_btn(
                 text=_["S_B_2"], 
                 url=config.SUPPORT_CHAT, 
@@ -87,7 +89,7 @@ def private_panel(_):
             ),
         ],
         [
-            # Owner (Red + 😈 Emoji)
+            # Owner (Red)
             api_btn(
                 text=_["S_B_5"], 
                 url=f"tg://user?id={safe_owner_id}", 
