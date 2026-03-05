@@ -21,10 +21,11 @@ def load_fonts():
 
 FONTS = load_fonts()
 
-
 FALLBACK_IMAGE_PATH = "SHUKLAMUSIC/assets/controller.png"
-
 YOUTUBE_IMG_URL = "https://i.ytimg.com/vi/default.jpg"
+
+# 🔥 PERMANENT THUMBNAIL
+PERMANENT_THUMB_URL = "https://files.catbox.moe/3h0f6v.jpeg"
 
 async def resize_youtube_thumbnail(img: Image.Image) -> Image.Image:
     target_width, target_height = 1280, 720
@@ -57,7 +58,9 @@ async def fetch_image(url: str) -> Image.Image:
             response = await client.get(url, timeout=5)
             response.raise_for_status()
             img = Image.open(BytesIO(response.content)).convert("RGBA")
-            if url.startswith("https://i.ytimg.com"):
+            
+            # 👇 TERA ORIGINAL LOGIC (Bas catbox ko VIP pass diya hai taaki white screen na ho)
+            if url.startswith("https://i.ytimg.com") or url == PERMANENT_THUMB_URL:
                 img = await resize_youtube_thumbnail(img)
             else:
                 img.close()
@@ -161,11 +164,12 @@ async def get_thumb(videoid: str) -> str:
         result = (await results.next())["result"][0]
         title = clean_text(result.get("title", "Unknown Title"), limit=25)
         artist = clean_text(result.get("channel", {}).get("name", "Unknown Artist"), limit=28)
-        thumbnail_url = result.get("thumbnails", [{}])[0].get("url", "").split("?")[0]
     except Exception as e:
         LOGGER.error("YouTube metadata fetch error for video %s: %s", videoid, e)
         title, artist = "Unknown Title", "Unknown Artist"
-        thumbnail_url = YOUTUBE_IMG_URL
+        
+    # 🔥 Yahan set ki hai teri permanent Catbox wali image
+    thumbnail_url = PERMANENT_THUMB_URL
 
     thumb = await fetch_image(thumbnail_url)
     bg = await add_controls(thumb)
