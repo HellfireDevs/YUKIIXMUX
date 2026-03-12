@@ -64,6 +64,7 @@ async def send_magic_start(chat_id, photo_url, caption, markup):
             "photo": photo_url,
             "caption": caption,
             "parse_mode": "HTML",
+            "has_spoiler": True,
             "message_effect_id": "5159385139981059251", # ❤️ Flying Hearts Effect ID
             "reply_markup": {"inline_keyboard": markup}
         }
@@ -180,7 +181,7 @@ async def start_pm(client, message: Message, _):
             await m.delete()
             
             # 🚨 HACKER SHIELD: Thumbnail bypass (ab hamesha teri catbox/safe pic hi aayegi)
-            safe_thumbnail = random.choice(YUMI_PICS)
+            safe_thumbnail = https://i.ibb.co/nswdf199/9e78edd7-f3b5-4496-87ae-8b5ee0a76d3d.jpg
             
             # 🔥 Magic Start Call for Info (With Hearts Animation)
             await send_magic_start(
