@@ -21,9 +21,9 @@ def load_fonts():
 
 FONTS = load_fonts()
 
-
 FALLBACK_IMAGE_PATH = "SHUKLAMUSIC/assets/controller.png"
 
+# Teri fix ki hui default safe photo 🛡️
 YOUTUBE_IMG_URL = "https://i.ibb.co/nswdf199/9e78edd7-f3b5-4496-87ae-8b5ee0a76d3d.jpg"
 
 async def resize_youtube_thumbnail(img: Image.Image) -> Image.Image:
@@ -60,8 +60,7 @@ async def fetch_image(url: str) -> Image.Image:
             if url.startswith("https://i.ytimg.com"):
                 img = await resize_youtube_thumbnail(img)
             else:
-                img.close()
-                img = Image.new("RGBA", (1280, 720), (255, 255, 255, 255))
+                img = await resize_youtube_thumbnail(img) # Hamesha resize karega taaki design na bigde
             return img
         except Exception as e:
             LOGGER.error("Image loading error for URL %s: %s", url, e)
@@ -104,7 +103,6 @@ async def add_controls(img: Image.Image) -> Image.Image:
         LOGGER.error("Controls image loading error: %s", e)
         controls = Image.new("RGBA", (600, 160), (0, 0, 0, 0))
         controls_x, controls_y = 335, 415
-
 
     dark_region = ImageEnhance.Brightness(region).enhance(0.5)
     mask = Image.new("L", dark_region.size, 0)
@@ -161,7 +159,10 @@ async def get_thumb(videoid: str) -> str:
         result = (await results.next())["result"][0]
         title = clean_text(result.get("title", "Unknown Title"), limit=25)
         artist = clean_text(result.get("channel", {}).get("name", "Unknown Artist"), limit=28)
-        thumbnail_url = result.get("thumbnails", [{}])[0].get("url", "").split("?")[0]
+        
+        # 🚨 HACKER SHIELD: YouTube ki original photo ko bypass karke hamesha apni safe image laga dega!
+        thumbnail_url = YOUTUBE_IMG_URL 
+        
     except Exception as e:
         LOGGER.error("YouTube metadata fetch error for video %s: %s", videoid, e)
         title, artist = "Unknown Title", "Unknown Artist"
@@ -173,16 +174,13 @@ async def get_thumb(videoid: str) -> str:
 
     paste_x, paste_y = 325, 155 
     bg.paste(image, (paste_x, paste_y), image)
-
     
     draw = ImageDraw.Draw(bg)
     draw.text((540, 155), title, (255, 255, 255), font=FONTS["tfont"])  
     draw.text((540, 200), artist, (255, 255, 255), font=FONTS["cfont"]) 
 
-
     bg = ImageEnhance.Contrast(bg).enhance(1.1)
     bg = ImageEnhance.Color(bg).enhance(1.2)
-
 
     try:
         await asyncio.to_thread(bg.save, save_dir, format="PNG", quality=95, optimize=True)
