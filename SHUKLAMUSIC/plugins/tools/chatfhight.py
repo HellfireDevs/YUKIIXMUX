@@ -92,8 +92,8 @@ async def start_word_game(chat_id):
         img_path = create_game_image(word)
         
         caption = (
-            "⚡ Be the first to write the word shown in the photo to climb the mini-game leaderboard.\n\n"
-            "⏱ **Time remaining:** 10 minutes"
+            "<emoji id='6334696528145286813'>⚡</emoji> **Be the first to write the word shown in the photo to climb the mini-game leaderboard.**\n\n"
+            "<emoji id='6334789677396002338'>⏱</emoji> **Time remaining:** 10 minutes"
         )
         
         # Send Game with SPOILER EFFECT
@@ -167,8 +167,8 @@ async def chat_activity_tracker(client, message: Message):
             
             # Send Success Message
             msg = (
-                f"⚡ **How fast!** ({time_taken} seconds)\n"
-                f"🎉 {message.from_user.mention} guessed the word in record time!\n"
+                f"<emoji id='6334696528145286813'>⚡</emoji> **How fast!** ({time_taken} seconds)\n"
+                f"<emoji id='6334471179801200139'>🎉</emoji> {message.from_user.mention} guessed the word in record time!\n"
                 f"Correct Word: **{correct_word}**\n"
                 f"*+15 in the global game ranking*"
             )
@@ -179,7 +179,7 @@ async def chat_activity_tracker(client, message: Message):
 @app.on_message(filters.command(["wordleaderboard", "gametop"]) & filters.group)
 async def word_leaderboard(client, message: Message):
     top_users = game_db.find().sort("points", -1).limit(10)
-    text = "🏆 **Word Game Global Leaderboard** 🏆\n\n"
+    text = "<emoji id='6334381440754517833'>🏆</emoji> **Word Game Global Leaderboard** <emoji id='6334381440754517833'>🏆</emoji>\n\n"
     count = 1
     
     has_users = False
@@ -195,24 +195,38 @@ async def word_leaderboard(client, message: Message):
     await message.reply_text(text)
 
 
-# --- 6. THE BACKGROUND GAME LOOP (Trigger on Inactivity) ---
+# --- 6. THE BACKGROUND GAME LOOP & EXPIRY CHECKER ---
 async def inactivity_checker_loop():
     while True:
         await asyncio.sleep(60) # Checks every 1 minute
         current_time = time.time()
         
+        # 1. Check for expired games (Time Up = 10 mins / 600 seconds)
+        for chat_id, game_data in list(active_games.items()):
+            if (current_time - game_data["start_time"]) > 600:
+                try:
+                    # Delete the game image message
+                    await app.delete_messages(chat_id, game_data["message_id"])
+                    # Send a time's up message
+                    await app.send_message(chat_id, f"<emoji id='6334789677396002338'>⏱</emoji> **Time's up!** Nobody guessed it.\nThe correct word was: **{game_data['word']}**")
+                except Exception:
+                    pass
+                # Remove from active games so a new one can start later
+                del active_games[chat_id]
+
+        # 2. Check for inactivity to start a new game
         for chat_id, last_time in list(last_message_time.items()):
-            # Trigger if 5 mins passed and no active game is running in that chat
+            # Trigger if 5 mins passed and no active game is running
             if (current_time - last_time) > INACTIVITY_LIMIT and chat_id not in active_games:
                 try:
                     # Send Warning first
-                    warning = await app.send_message(chat_id, "⏱ Time passes. Tick tock, tick tock...")
+                    warning = await app.send_message(chat_id, "<emoji id='6334789677396002338'>⏱</emoji> Time passes. Tick tock, tick tock...")
                     await asyncio.sleep(3)
                     await warning.delete()
                     
                     # Start Game
                     await start_word_game(chat_id)
-                except Exception as e:
+                except Exception:
                     pass
 
 # Start the background loop when the plugin loads
