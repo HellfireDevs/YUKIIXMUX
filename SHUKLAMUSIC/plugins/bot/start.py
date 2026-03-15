@@ -7,8 +7,8 @@ import json
 from pyrogram import Client, filters
 from pyrogram.enums import ChatType
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
-from youtubesearchpython.__future__ import VideosSearch
 from pyrogram.types import CallbackQuery
+from youtubesearchpython.__future__ import VideosSearch
 
 import config
 from SHUKLAMUSIC import app
@@ -64,7 +64,7 @@ async def send_magic_start(chat_id, photo_url, caption, markup):
             "photo": photo_url,
             "caption": caption,
             "parse_mode": "HTML",
-            "has_spoiler": True,
+            "has_spoiler": True,  # 👈 Spoiler Here
             "message_effect_id": "5159385139981059251", # ❤️ Flying Hearts Effect ID
             "reply_markup": {"inline_keyboard": markup}
         }
@@ -75,12 +75,12 @@ async def send_magic_start(chat_id, photo_url, caption, markup):
                 
                 # Agar API ne Magic Effect reject kar diya, toh normal message bhejega
                 if not res.get("ok"):
-                    run = await app.send_photo(chat_id, photo=photo_url, caption=caption)
+                    run = await app.send_photo(chat_id, photo=photo_url, caption=caption, has_spoiler=True) # 👈 Spoiler Here
                     await inject_premium_markup(chat_id, run.id, markup)
                     
     except Exception as e:
         # Crash hone par bhi normal message bhejega
-        run = await app.send_photo(chat_id, photo=photo_url, caption=caption)
+        run = await app.send_photo(chat_id, photo=photo_url, caption=caption, has_spoiler=True) # 👈 Spoiler Here
         await inject_premium_markup(chat_id, run.id, markup)
 
 
@@ -135,11 +135,13 @@ async def start_pm(client, message: Message, _):
                     random.choice(YUMI_PICS),
                     caption=_["help_1"].format(config.SUPPORT_CHAT),
                     message_effect_id=5159385139981059251, # ❤️ Hearts added here
+                    has_spoiler=True  # 👈 Spoiler Here
                 )
             except:
                 run = await message.reply_photo(
                     random.choice(YUMI_PICS),
                     caption=_["help_1"].format(config.SUPPORT_CHAT),
+                    has_spoiler=True  # 👈 Spoiler Here
                 )
             return await inject_premium_markup(message.chat.id, run.id, keyboard)
             
@@ -183,7 +185,7 @@ async def start_pm(client, message: Message, _):
             # 🚨 HACKER SHIELD: Thumbnail bypass (ab hamesha teri catbox/safe pic hi aayegi)
             safe_thumbnail = "https://files.catbox.moe/i3w4v7.jpeg"
             
-            # 🔥 Magic Start Call for Info (With Hearts Animation)
+            # 🔥 Magic Start Call for Info (With Hearts Animation & Spoiler)
             await send_magic_start(
                 chat_id=message.chat.id,
                 photo_url=safe_thumbnail,
@@ -204,7 +206,7 @@ async def start_pm(client, message: Message, _):
         
         caption_text = _["start_2"].format(message.from_user.mention, app.mention, UP, DISK, CPU, RAM,served_users,served_chats)
         
-        # 🔥 Normal Start Call (With Hearts Animation)
+        # 🔥 Normal Start Call (With Hearts Animation & Spoiler)
         await send_magic_start(
             chat_id=message.chat.id,
             photo_url=random.choice(YUMI_PICS),
@@ -235,11 +237,13 @@ async def start_gp(client, message: Message, _):
             random.choice(YUMI_PICS),
             caption=_["start_1"].format(app.mention, get_readable_time(uptime)),
             message_effect_id=5159385139981059251, # ❤️ Hearts effect
+            has_spoiler=True # 👈 Spoiler Here
         )
     except:
         run = await message.reply_photo(
             random.choice(YUMI_PICS),
             caption=_["start_1"].format(app.mention, get_readable_time(uptime)),
+            has_spoiler=True # 👈 Spoiler Here
         )
     await inject_premium_markup(message.chat.id, run.id, out)
 
@@ -247,7 +251,8 @@ async def start_gp(client, message: Message, _):
 async def about_command(client: Client, message: Message):
     await message.reply_photo(
         random.choice(YUMI_PICS),
-        caption=PROMO
+        caption=PROMO,
+        has_spoiler=True # 👈 Spoiler Here
     )
 
 @app.on_message(filters.new_chat_members, group=-1)
@@ -304,4 +309,4 @@ async def welcome(client, message: Message):
 
         except Exception as ex:
             pass
-                    
+            
