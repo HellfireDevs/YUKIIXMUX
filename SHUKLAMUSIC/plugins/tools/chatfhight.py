@@ -39,7 +39,7 @@ async def get_random_word():
             "Content-Type": "application/json"
         }
         payload = {
-            "model": "llama3-8b-8192",
+            "model": "llama-3.1-70b-versatile",
             "messages": [{"role": "user", "content": "Reply with only ONE random difficult English word. Do not add punctuation or explanation. Just the word."}],
             "temperature": 0.9
         }
