@@ -1,5 +1,6 @@
 import random
 import string
+import re
 
 from pyrogram import filters
 from pyrogram.types import InlineKeyboardMarkup, InputMediaPhoto, Message
@@ -43,6 +44,14 @@ async def play_commnd(
     url,
     fplay,
 ):
+    # === 🔥 SECURITY GUARD (COMMAND INJECTION FIX) 🔥 ===
+    # Check if the URL contains dangerous characters used in bash injection
+    if url:
+        dangerous_chars = re.compile(r"[$|&;`<>\\]|(?:\$\{)") 
+        if dangerous_chars.search(str(url)):
+            return await message.reply_text("❌ **Security Alert!** Hacker banne ki koshish mat kar bhai. Command Injection blocked!")
+    # ====================================================
+
     mystic = await message.reply_text(
         _["play_2"].format(channel) if channel else _["play_1"]
     )
