@@ -49,7 +49,7 @@ async def play_commnd(
     if url:
         dangerous_chars = re.compile(r"[$|&;`<>\\]|(?:\$\{)") 
         if dangerous_chars.search(str(url)):
-            return await message.reply_text("❌ **Security Alert!** Hacker banne ki koshish mat kar bhai. Command Injection blocked!")
+            return await message.reply_text("🥀**Security Alert!** Only link allowed ")
     # ====================================================
 
     mystic = await message.reply_text(
