@@ -181,7 +181,7 @@ async def start_pm(client, message: Message, _):
             await m.delete()
             
             # 🚨 HACKER SHIELD: Thumbnail bypass (ab hamesha teri catbox/safe pic hi aayegi)
-            safe_thumbnail = https://files.catbox.moe/i3w4v7.jpeg
+            safe_thumbnail = "https://files.catbox.moe/i3w4v7.jpeg"
             
             # 🔥 Magic Start Call for Info (With Hearts Animation)
             await send_magic_start(
