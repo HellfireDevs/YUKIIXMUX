@@ -1,5 +1,4 @@
-import asyncio, os, re, httpx, random
-import aiofiles.os
+import asyncio, os, re, httpx, aiofiles.os
 from io import BytesIO 
 from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont, ImageOps
 from aiofiles.os import path as aiopath
@@ -24,15 +23,8 @@ FONTS = load_fonts()
 
 FALLBACK_IMAGE_PATH = "SHUKLAMUSIC/assets/controller.png"
 
-# Teri fix ki hui default safe photos ki list 🛡️ (Ab har baar random aayegi)
-YOUTUBE_IMG_URLS = [
-    "https://files.catbox.moe/hjsv83.jpeg",
-    "https://files.catbox.moe/woke5f.jpeg",
-    "https://files.catbox.moe/ty6zcs.jpg",
-    "https://files.catbox.moe/bj5s8s.jpeg",
-    "https://files.catbox.moe/ah5y0f.jpeg",
-    "https://files.catbox.moe/we4yju.jpeg"
-]
+# Teri fix ki hui default safe photo 🛡️
+YOUTUBE_IMG_URL = "https://i.ibb.co/nswdf199/9e78edd7-f3b5-4496-87ae-8b5ee0a76d3d.jpg"
 
 async def resize_youtube_thumbnail(img: Image.Image) -> Image.Image:
     target_width, target_height = 1280, 720
@@ -73,9 +65,7 @@ async def fetch_image(url: str) -> Image.Image:
         except Exception as e:
             LOGGER.error("Image loading error for URL %s: %s", url, e)
             try:
-                # Agar main url fail hota hai toh random photo uthayega
-                fallback_url = random.choice(YOUTUBE_IMG_URLS)
-                response = await client.get(fallback_url, timeout=5)
+                response = await client.get(YOUTUBE_IMG_URL, timeout=5)
                 response.raise_for_status()
                 img = Image.open(BytesIO(response.content)).convert("RGBA")
                 img = await resize_youtube_thumbnail(img)
@@ -170,13 +160,13 @@ async def get_thumb(videoid: str) -> str:
         title = clean_text(result.get("title", "Unknown Title"), limit=25)
         artist = clean_text(result.get("channel", {}).get("name", "Unknown Artist"), limit=28)
         
-        # 🚨 HACKER SHIELD: YouTube ki original photo ko bypass karke hamesha apni safe image list se ek random uthayega!
-        thumbnail_url = random.choice(YOUTUBE_IMG_URLS) 
+        # 🚨 HACKER SHIELD: YouTube ki original photo ko bypass karke hamesha apni safe image laga dega!
+        thumbnail_url = YOUTUBE_IMG_URL 
         
     except Exception as e:
         LOGGER.error("YouTube metadata fetch error for video %s: %s", videoid, e)
         title, artist = "Unknown Title", "Unknown Artist"
-        thumbnail_url = random.choice(YOUTUBE_IMG_URLS)
+        thumbnail_url = YOUTUBE_IMG_URL
 
     thumb = await fetch_image(thumbnail_url)
     bg = await add_controls(thumb)
