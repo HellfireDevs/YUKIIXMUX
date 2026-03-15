@@ -75,12 +75,12 @@ def stream_markup_timer(_, chat_id, played, dur):
         ],
         [
             # Mimi Tunes & Home - Extra spaces removed to fix button height
-            api_btn(text="˹ᴍɪᴍɪ ᴛᴜɴᴇs˼♪", url="http://t.me/IAM_MIMBOT", style="primary", custom_emoji_id="6334333036473091884"),
+            api_btn(text="  ᴛᴜɴᴇs˼♪", url="http://t.me/IAM_MIMBOT", style="primary", custom_emoji_id="6334333036473091884"),
             api_btn(text="ʜᴏᴍᴇ", url=config.SUPPORT_CHAT, style="primary", custom_emoji_id="6334648089504122382"),
         ],
         [
             # Privacy Policy - Extra spaces removed
-            api_btn(text="ᴘʀɪᴠᴀᴄʏ ᴘᴏʟɪᴄʏ", url="https://telegra.ph/Privacy-Policy-03-15-2", style="success", custom_emoji_id="6334672948774831861")
+            api_btn(text="ᴘʀɪᴠᴀᴄʏ  ", url="https://telegra.ph/Privacy-Policy-03-15-2", style="success", custom_emoji_id="6334672948774831861")
         ],
         [
             # Close Red - Stripped to prevent spacing issues
@@ -98,11 +98,11 @@ def stream_markup(_, chat_id):
             api_btn(text=" ", callback_data=f"ADMIN Stop|{chat_id}", style="danger", custom_emoji_id="5343635672156623047"), 
         ],
         [
-            api_btn(text="˹ᴍɪᴍɪ ᴛᴜɴᴇs˼♪", url="http://t.me/IAM_MIMBOT", style="primary", custom_emoji_id="6334333036473091884"),
+            api_btn(text="˹  ᴛᴜɴᴇs˼♪", url="http://t.me/IAM_MIMBOT", style="primary", custom_emoji_id="6334333036473091884"),
             api_btn(text="ʜᴏᴍᴇ", url=config.SUPPORT_CHAT, style="primary", custom_emoji_id="6334648089504122382"),
         ],
         [
-            api_btn(text="ᴘʀɪᴠᴀᴄʏ ᴘᴏʟɪᴄʏ", url="https://telegra.ph/Privacy-Policy-03-15-2", style="success", custom_emoji_id="6334672948774831861")
+            api_btn(text="ᴘʀɪᴠᴀᴄʏ. ", url="https://telegra.ph/Privacy-Policy-03-15-2", style="success", custom_emoji_id="6334672948774831861")
         ],
         [
             api_btn(text=str(_["CLOSE_BUTTON"]).strip(), callback_data="close", style="danger", custom_emoji_id="6334598469746952256")
