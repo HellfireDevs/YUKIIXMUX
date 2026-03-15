@@ -3,15 +3,22 @@ from SHUKLAMUSIC import app
 import config
 from SHUKLAMUSIC.utils.formatters import time_to_seconds
 
-# 🔥 HACK: Pyrogram bypass ke liye raw JSON dictionaries
-def api_btn(text, callback_data=None, url=None, style=None):
+# 🔥 HACK: Pyrogram bypass ke liye raw JSON dictionaries (Updated for Premium Emojis)
+def api_btn(text, callback_data=None, url=None, style=None, custom_emoji_id=None):
     btn = {"text": text}
     if callback_data:
         btn["callback_data"] = callback_data
     if url:
-        btn["url"] = url
-    if style:
-        btn["style"] = style  # 'primary' = Blue, 'danger' = Red
+        url_str = str(url)
+        if not url_str.startswith("http") and not url_str.startswith("tg://"):
+            url_str = f"https://t.me/{url_str.replace('@', '')}"
+        btn["url"] = url_str
+        
+    if style in ["primary", "danger", "success"]:
+        btn["style"] = style  # 'primary' = Blue, 'danger' = Red, 'success' = Green
+        
+    if custom_emoji_id:
+        btn["icon_custom_emoji_id"] = str(custom_emoji_id) 
     return btn
 
 def track_markup(_, videoid, user_id, channel, fplay):
@@ -55,17 +62,24 @@ def stream_markup_timer(_, chat_id, played, dur):
         
     buttons = [
         [
-            # Blue Timer Bar
+            # Blue Timer Bar (Bilkul safe hai!)
             api_btn(text=f"{played} {bar} {dur}", callback_data="GetTimer", style="primary")
         ],
         [
-            # Update Blue, Support Red
-            api_btn(text=" ᴜᴘᴅᴀᴛᴇ ", url="https://t.me/heartstealer_x", style="success"),
-            api_btn(text=" sᴜᴘᴘᴏʀᴛ ", url="https://t.me/+N08m5L1mCTU2NTE1", style="danger"),
+            # 4 Premium Emoji Buttons (Play, Pause, Skip, Stop)
+            api_btn(text=" ", callback_data=f"ADMIN Resume|{chat_id}", style="primary", custom_emoji_id="5343597635926245720"), 
+            api_btn(text=" ", callback_data=f"ADMIN Pause|{chat_id}", style="primary", custom_emoji_id="5427104474608974234"), 
+            api_btn(text=" ", callback_data=f"ADMIN Skip|{chat_id}", style="primary", custom_emoji_id="5341270334882463507"), 
+            api_btn(text=" ", callback_data=f"ADMIN Stop|{chat_id}", style="primary", custom_emoji_id="5343635672156623047"), 
         ],
         [
-            # Mimi Tunes Blue
-            api_btn(text=" ˹ ᴍɪᴍɪ ᴛᴜɴᴇs ˼ ♪ ", url="https://t.me/SPSUPPORTT1", style="primary")
+            # Mimi Tunes & Home (Dono Blue / Primary)
+            api_btn(text=" ˹ ᴍɪᴍɪ ᴛᴜɴᴇs ˼ ♪ ", url="http://t.me/IAM_MIMBOT", style="primary"),
+            api_btn(text=" ʜᴏᴍᴇ ", url=config.SUPPORT_CHAT, style="primary"),
+        ],
+        [
+            # Privacy Policy
+            api_btn(text=" ᴘʀɪᴠᴀᴄʏ ᴘᴏʟɪᴄʏ ", url="https://telegra.ph/Privacy-Policy-03-15-2", style="primary")
         ],
         [
             # Close Red
@@ -77,12 +91,19 @@ def stream_markup_timer(_, chat_id, played, dur):
 def stream_markup(_, chat_id):
     buttons = [
         [
-            api_btn(text=" ᴜᴘᴅᴀᴛᴇ ", url="https://t.me/drxgiveway", style="success"),
-            api_btn(text=" sᴜᴘᴘᴏʀᴛ ", url="https://t.me/drx_supportchat", style="danger"),
+            # 4 Premium Emoji Buttons for Live Stream too
+            api_btn(text=" ", callback_data=f"ADMIN Resume|{chat_id}", style="primary", custom_emoji_id="5343597635926245720"), 
+            api_btn(text=" ", callback_data=f"ADMIN Pause|{chat_id}", style="primary", custom_emoji_id="5427104474608974234"), 
+            api_btn(text=" ", callback_data=f"ADMIN Skip|{chat_id}", style="primary", custom_emoji_id="5341270334882463507"), 
+            api_btn(text=" ", callback_data=f"ADMIN Stop|{chat_id}", style="primary", custom_emoji_id="5343635672156623047"), 
         ],
         [
-            api_btn(text=" ˹ ᴛιᴅᴀʟ ᴛᴜɴᴇs ˼ ♪ ", url="http://t.me/TidalXMusicBot/tidaltunes", style="primary")
-        ], 
+            api_btn(text=" ˹ ᴍɪᴍɪ ᴛᴜɴᴇs ˼ ♪ ", url="http://t.me/IAM_MIMBOT", style="primary"),
+            api_btn(text=" ʜᴏᴍᴇ ", url=config.SUPPORT_CHAT, style="primary"),
+        ],
+        [
+            api_btn(text=" ᴘʀɪᴠᴀᴄʏ ᴘᴏʟɪᴄʏ ", url="https://telegra.ph/Privacy-Policy-03-15-2", style="primary")
+        ],
         [
             api_btn(text=_["CLOSE_BUTTON"], callback_data="close", style="danger")
         ],
@@ -126,4 +147,3 @@ def slider_markup(_, videoid, user_id, query, query_type, channel, fplay):
         ],
     ]
     return buttons
-    
