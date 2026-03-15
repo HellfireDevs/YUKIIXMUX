@@ -31,10 +31,10 @@ from config import BANNED_USERS
 from strings import get_string
 
 YUMI_PICS = [
-    "https://files.catbox.moe/v0v41s.jpg",
-    "https://files.catbox.moe/v0v41s.jpg",
-    "https://files.catbox.moe/sbaei4.jpg",
-    "https://files.catbox.moe/csyzob.jpg",
+    "https://files.catbox.moe/eje8y8.jpeg",
+    "https://files.catbox.moe/ey2jzp.jpeg",
+    "https://files.catbox.moe/ah5y0f.jpeg",
+    "https://files.catbox.moe/we4yju.jpeg",
 ]
 
 # 🔥 PROMO MEIN CUSTOM EMOJIS
@@ -181,7 +181,7 @@ async def start_pm(client, message: Message, _):
             await m.delete()
             
             # 🚨 HACKER SHIELD: Thumbnail bypass (ab hamesha teri catbox/safe pic hi aayegi)
-            safe_thumbnail = https://i.ibb.co/nswdf199/9e78edd7-f3b5-4496-87ae-8b5ee0a76d3d.jpg
+            safe_thumbnail = https://files.catbox.moe/i3w4v7.jpeg
             
             # 🔥 Magic Start Call for Info (With Hearts Animation)
             await send_magic_start(
