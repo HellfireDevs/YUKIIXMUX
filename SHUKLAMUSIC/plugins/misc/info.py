@@ -7,7 +7,7 @@ import config
 from SHUKLAMUSIC import app
 
 # --- STATIC SAFE IMAGE (Anti-Abuse) ---
-SAFE_PFP = "https://catbox.moe/woke5f.jpeg"
+SAFE_PFP = "https://i.ibb.co/cSphm5Sz/1d356388-a993-478a-b358-69c96fb57597.jpg"
 
 # --- PREMIUM INJECTION FUNCTION ---
 async def inject_premium_markup(chat_id, message_id, markup):
