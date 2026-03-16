@@ -4,7 +4,7 @@ from SHUKLAMUSIC import app
 import config
 from SHUKLAMUSIC.utils.formatters import time_to_seconds
 
-# 🔥 HACK: Pyrogram bypass ke liye raw JSON dictionaries (Updated for Premium Emojis)
+# HACK: Pyrogram bypass ke liye raw JSON dictionaries (Updated for Premium Emojis)
 def api_btn(text, callback_data=None, url=None, style=None, custom_emoji_id=None):
     btn = {"text": text}
     if callback_data:
@@ -39,14 +39,14 @@ def stream_markup_timer(_, chat_id, played, dur):
     played_sec = time_to_seconds(played)
     duration_sec = time_to_seconds(dur)
     
-    # 🔥 Safe Division & Percentage Logic
+    # Safe Division & Percentage Logic
     if duration_sec == 0:
         percentage = 0
     else:
         percentage = (played_sec / duration_sec) * 100
         
     # ==========================================
-    # 🔥 VIP SPOTIFY SLIDER WITH EMOJI KNOB 🔥
+    # VIP SPOTIFY SLIDER WITH EMOJI KNOB
     # ==========================================
     length = 11
     pos = math.floor((percentage / 100) * length)
@@ -61,7 +61,7 @@ def stream_markup_timer(_, chat_id, played, dur):
             
     buttons = [
         [
-            # 🔥 Full Premium Timer Bar! (Kyunki ab call.py isko support karta hai)
+            # Full Premium Timer Bar! (Kyunki ab call.py isko support karta hai)
             api_btn(text=f"{played}  {bar}  {dur}", callback_data="GetTimer", style="primary", custom_emoji_id="6334696528145286813")
         ],
         [
@@ -147,17 +147,17 @@ def slider_markup(_, videoid, user_id, query, query_type, channel, fplay):
     return buttons
 
 # ==========================================
-# 🔥 NEW VIP MUSIC END MARKUP (With Premium Hack) 🔥
+# SAFE VIP MUSIC END MARKUP
 # ==========================================
 def music_end_markup(_):
     buttons = [
         [
-            api_btn(text="ᴀᴅᴅ ᴍᴇ", url=f"https://t.me/{app.username}?startgroup=true", style="primary", custom_emoji_id="6334789677396002338"),
-            api_btn(text="ʜᴏᴍᴇ", url=f"https://t.me/{app.username}?start=help", style="primary", custom_emoji_id="6334648089504122382"),
+            InlineKeyboardButton(text="➕ ᴀᴅᴅ ᴍᴇ", url=f"https://t.me/{app.username}?startgroup=true"),
+            InlineKeyboardButton(text="🏠 ʜᴏᴍᴇ", url=f"https://t.me/{app.username}?start=help"),
         ],
         [
-            api_btn(text="ᴘʀɪᴠᴀᴄʏ", url=getattr(config, "SUPPORT_CHAT", f"https://t.me/{app.username}"), style="success", custom_emoji_id="6334672948774831861"),
-            api_btn(text=str(_["CLOSE_BUTTON"]).strip(), callback_data="close", style="danger", custom_emoji_id="6334598469746952256"),
+            InlineKeyboardButton(text="🔐 ᴘʀɪᴠᴀᴄʏ", url=getattr(config, "SUPPORT_CHAT", f"https://t.me/{app.username}")),
+            InlineKeyboardButton(text=str(_["CLOSE_BUTTON"]).strip(), callback_data="close"),
         ],
     ]
     return InlineKeyboardMarkup(buttons)
