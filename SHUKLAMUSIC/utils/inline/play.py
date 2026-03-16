@@ -1,4 +1,5 @@
 import math
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from SHUKLAMUSIC import app
 import config
 from SHUKLAMUSIC.utils.formatters import time_to_seconds
@@ -37,53 +38,50 @@ def track_markup(_, videoid, user_id, channel, fplay):
 def stream_markup_timer(_, chat_id, played, dur):
     played_sec = time_to_seconds(played)
     duration_sec = time_to_seconds(dur)
-    percentage = (played_sec / duration_sec) * 100
-    umm = math.floor(percentage)
     
-    if 0 < umm <= 10:
-        bar = "▰▱▱▱▱▱▱▱▱▱"
-    elif 10 < umm < 20:
-        bar = "▰▰▱▱▱▱▱▱▱▱"
-    elif 20 <= umm < 30:
-        bar = "▰▰▰▱▱▱▱▱▱▱"
-    elif 30 <= umm < 40:
-        bar = "▰▰▰▰▱▱▱▱▱▱"
-    elif 40 <= umm < 50:
-        bar = "▰▰▰▰▰▱▱▱▱▱"
-    elif 50 <= umm < 60:
-        bar = "▰▰▰▰▰▰▱▱▱▱"
-    elif 60 <= umm < 70:
-        bar = "▰▰▰▰▰▰▰▱▱▱"
-    elif 70 <= umm < 80:
-        bar = "▰▰▰▰▰▰▰▰▱▱"
-    elif 80 <= umm < 95:
-        bar = "▰▰▰▰▰▰▰▰▰▱" 
+    # 🔥 Safe Division & Percentage Logic
+    if duration_sec == 0:
+        percentage = 0
     else:
-        bar = "▰▰▰▰▰▰▰▰▰▰"
+        percentage = (played_sec / duration_sec) * 100
         
+    # ==========================================
+    # 🔥 VIP SPOTIFY SLIDER WITH EMOJI KNOB 🔥
+    # ==========================================
+    length = 11
+    pos = math.floor((percentage / 100) * length)
+    bar = ""
+    for i in range(length):
+        if i < pos:
+            bar += "━"
+        elif i == pos:
+            bar += "✨"  # Premium Emoji as the slider dot!
+        else:
+            bar += "─"
+            
     buttons = [
         [
-            # Blue Timer Bar
-            api_btn(text=f"{played} {bar} {dur}", callback_data="GetTimer", style="primary", custom_emoji_id="6334696528145286813")
+            # 🔥 Full Premium Timer Bar! (Kyunki ab call.py isko support karta hai)
+            api_btn(text=f"{played}  {bar}  {dur}", callback_data="GetTimer", style="primary", custom_emoji_id="6334696528145286813")
         ],
         [
-            # 4 Premium Emoji Buttons (Play, Pause, Skip, Stop) - Kept space minimum
+            # 4 Premium Emoji Buttons (Play, Pause, Skip, Stop)
             api_btn(text=" ", callback_data=f"ADMIN Resume|{chat_id}", style="primary", custom_emoji_id="5343597635926245720"), 
             api_btn(text=" ", callback_data=f"ADMIN Pause|{chat_id}", style="danger", custom_emoji_id="5408916593780470262"), 
             api_btn(text=" ", callback_data=f"ADMIN Skip|{chat_id}", style="success", custom_emoji_id="5409262351532701571"), 
             api_btn(text=" ", callback_data=f"ADMIN Stop|{chat_id}", style="danger", custom_emoji_id="5409042015415448331"), 
         ],
         [
-            # Mimi Tunes & Home - Extra spaces removed to fix button height
+            # Mimi Tunes & Home
             api_btn(text="  ᴛᴜɴᴇs˼♪", url="http://t.me/IAM_MIMBOT", style="primary", custom_emoji_id="6334333036473091884"),
             api_btn(text="ʜᴏᴍᴇ", url=config.SUPPORT_CHAT, style="primary", custom_emoji_id="6334648089504122382"),
         ],
         [
-            # Privacy Policy - Extra spaces removed
+            # Privacy Policy
             api_btn(text="ᴘʀɪᴠᴀᴄʏ  ", url="https://telegra.ph/Privacy-Policy-03-15-2", style="success", custom_emoji_id="6334672948774831861")
         ],
         [
-            # Close Red - Stripped to prevent spacing issues
+            # Close Red
             api_btn(text=str(_["CLOSE_BUTTON"]).strip(), callback_data="close", style="danger", custom_emoji_id="6334598469746952256")
         ],
     ]
@@ -147,4 +145,20 @@ def slider_markup(_, videoid, user_id, query, query_type, channel, fplay):
         ],
     ]
     return buttons
+
+# ==========================================
+# 🔥 NEW VIP MUSIC END MARKUP (With Premium Hack) 🔥
+# ==========================================
+def music_end_markup(_):
+    buttons = [
+        [
+            api_btn(text="ᴀᴅᴅ ᴍᴇ", url=f"https://t.me/{app.username}?startgroup=true", style="primary", custom_emoji_id="6334789677396002338"),
+            api_btn(text="ʜᴏᴍᴇ", url=f"https://t.me/{app.username}?start=help", style="primary", custom_emoji_id="6334648089504122382"),
+        ],
+        [
+            api_btn(text="ᴘʀɪᴠᴀᴄʏ", url=getattr(config, "SUPPORT_CHAT", f"https://t.me/{app.username}"), style="success", custom_emoji_id="6334672948774831861"),
+            api_btn(text=str(_["CLOSE_BUTTON"]).strip(), callback_data="close", style="danger", custom_emoji_id="6334598469746952256"),
+        ],
+    ]
+    return InlineKeyboardMarkup(buttons)
     
