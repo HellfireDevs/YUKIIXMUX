@@ -23,6 +23,14 @@ INACTIVITY_LIMIT = 300  # 5 minutes in seconds
 TEMPLATE_PATH = "SHUKLAMUSIC/assets/template.jpg"
 FONT_PATH = "SHUKLAMUSIC/assets/arial.ttf"
 
+# --- RANDOM WARNING MESSAGES ---
+WARNING_MESSAGES = [
+    "<emoji id='6334789677396002338'>⏱</emoji> Time passes. Tick tock, tick tock...",
+    "⚠️ Alarm: time is running out!!",
+    "🥱 It's too quiet here... let's play a game!",
+    "👀 Anyone there? Get ready to type..."
+]
+
 # --- 1. GROQ API WORD GENERATOR ---
 async def get_random_word():
     # Fallback words in case API fails
@@ -101,7 +109,7 @@ async def start_word_game(chat_id):
             chat_id, 
             photo=img_path, 
             caption=caption,
-            has_spoiler=True  # 🔥 Spoiler effect added here!
+            has_spoiler=True  # 🔥 Spoiler effect
         )
         
         # Clean up local storage
@@ -115,8 +123,6 @@ async def start_word_game(chat_id):
             "message_id": sent_msg.id
         }
         
-        # Reset timer so it doesn't loop spam
-        last_message_time[chat_id] = time.time()
     except Exception as e:
         print(f"Failed to start game in {chat_id}: {e}")
 
@@ -124,13 +130,11 @@ async def start_word_game(chat_id):
 # --- 3. COMMAND: TEST GAME INSTANTLY ---
 @app.on_message(filters.command("testgame") & filters.group)
 async def test_game_cmd(client, message: Message):
-    # Sirf admins use kar payenge testgame (optional safety)
     if message.from_user:
         await start_word_game(message.chat.id)
 
 
 # --- 4. TRACKER & ANSWER CHECKER ---
-# Group 10 ensures it runs in background and doesn't block your normal music commands
 @app.on_message(filters.group & ~filters.bot, group=10)
 async def chat_activity_tracker(client, message: Message):
     chat_id = message.chat.id
@@ -140,7 +144,7 @@ async def chat_activity_tracker(client, message: Message):
         
     user_id = message.from_user.id
     
-    # 1. Update last message time for this group
+    # 1. Update last message time for this group (Awakes the bot)
     last_message_time[chat_id] = time.time()
     
     # 2. Check if there is an active game and someone answered
@@ -149,13 +153,13 @@ async def chat_activity_tracker(client, message: Message):
         
         if message.text.strip().upper() == correct_word:
             time_taken = round(time.time() - active_games[chat_id]["start_time"], 1)
-            del active_games[chat_id] # End the game immediately so others can't claim it
+            del active_games[chat_id] # End the game
             
             # 🔥 Send Reaction to the Correct Answer 🔥
             try:
                 await client.send_reaction(chat_id=chat_id, message_id=message.id, emoji="❤️")
             except Exception:
-                pass # Ignore if bot doesn't have reaction rights in the group
+                pass
                 
             # Update Points in MongoDB
             user_data = await game_db.find_one({"user_id": user_id})
@@ -205,22 +209,27 @@ async def inactivity_checker_loop():
         for chat_id, game_data in list(active_games.items()):
             if (current_time - game_data["start_time"]) > 600:
                 try:
-                    # Delete the game image message
+                    # Silently delete the game image message, no answer reveal
                     await app.delete_messages(chat_id, game_data["message_id"])
-                    # Send a time's up message
-                    await app.send_message(chat_id, f"<emoji id='6334789677396002338'>⏱</emoji> **Time's up!** Nobody guessed it.\nThe correct word was: **{game_data['word']}**")
                 except Exception:
                     pass
-                # Remove from active games so a new one can start later
+                
+                # Remove from active games
                 del active_games[chat_id]
+                
+                # 🔥 CRITICAL FIX: Delete from last_message_time so it STOPS overnight loop.
+                # It will only restart when a real user sends a new message.
+                if chat_id in last_message_time:
+                    del last_message_time[chat_id]
 
         # 2. Check for inactivity to start a new game
         for chat_id, last_time in list(last_message_time.items()):
             # Trigger if 5 mins passed and no active game is running
             if (current_time - last_time) > INACTIVITY_LIMIT and chat_id not in active_games:
                 try:
-                    # Send Warning first
-                    warning = await app.send_message(chat_id, "<emoji id='6334789677396002338'>⏱</emoji> Time passes. Tick tock, tick tock...")
+                    # Send Random Warning
+                    warning_text = random.choice(WARNING_MESSAGES)
+                    warning = await app.send_message(chat_id, warning_text)
                     await asyncio.sleep(3)
                     await warning.delete()
                     
