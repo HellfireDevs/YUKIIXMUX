@@ -14,7 +14,7 @@ async def raw_edit_message(chat_id, message_id, caption, markup):
         "chat_id": chat_id,
         "message_id": message_id,
         "caption": caption,
-        "parse_mode": "HTML",  # 🔥 CHANGED TO HTML FOR <emoji id> SUPPORT
+        "parse_mode": "HTML",
         "reply_markup": {"inline_keyboard": markup}
     }
     try:
@@ -43,13 +43,11 @@ async def get_github_stats(username="SUDEEPBOTS"):
     stars_count = 0
     try:
         async with aiohttp.ClientSession() as session:
-            # 1. Fetch total public repositories
             async with session.get(f"https://api.github.com/users/{username}") as resp:
                 if resp.status == 200:
                     data = await resp.json()
                     repos_count = data.get("public_repos", 0)
             
-            # 2. Fetch total stars across all repositories
             async with session.get(f"https://api.github.com/users/{username}/repos?per_page=100") as resp:
                 if resp.status == 200:
                     repos = await resp.json()
@@ -69,6 +67,12 @@ async def promote_me(client, message: Message):
     if message.from_user.id not in owner_id:
         return
         
+    # 🔥 Delete command to keep chat clean
+    try:
+        await message.delete()
+    except:
+        pass
+        
     try:
         await client.promote_chat_member(
             message.chat.id,
@@ -86,22 +90,21 @@ async def promote_me(client, message: Message):
                 can_pin_messages=True
             )
         )
-        await message.reply_text("<blockquote><emoji id='6334381440754517833'>👑</emoji> <b>ʙᴏꜱꜱ ɪꜱ ʜᴇʀᴇ!</b></blockquote>\n\n<emoji id='6334696528145286813'>⚡</emoji> ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ᴘʀᴏᴍᴏᴛᴇᴅ ʏᴏᴜ ᴛᴏ <b>ꜰᴜʟʟ ᴀᴅᴍɪɴ</b> ɪɴ ᴛʜɪꜱ ɢʀᴏᴜᴘ.", parse_mode=enums.ParseMode.HTML)
+        # 🔥 Direct send (No Reply)
+        await client.send_message(message.chat.id, "<blockquote><emoji id='6334381440754517833'>👑</emoji> <b>ʙᴏꜱꜱ ɪꜱ ʜᴇʀᴇ!</b></blockquote>\n\n<emoji id='6334696528145286813'>⚡</emoji> ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ᴘʀᴏᴍᴏᴛᴇᴅ ʏᴏᴜ ᴛᴏ <b>ꜰᴜʟʟ ᴀᴅᴍɪɴ</b> ɪɴ ᴛʜɪꜱ ɢʀᴏᴜᴘ.", parse_mode=enums.ParseMode.HTML)
     except Exception as e:
-        await message.reply_text(f"❌ <b>ꜰᴀɪʟᴇᴅ ᴛᴏ ᴘʀᴏᴍᴏᴛᴇ:</b> <code>{e}</code>\n<i>(Make sure bot is admin with add_admin rights)</i>", parse_mode=enums.ParseMode.HTML)
+        await client.send_message(message.chat.id, f"❌ <b>ꜰᴀɪʟᴇᴅ ᴛᴏ ᴘʀᴏᴍᴏᴛᴇ:</b> <code>{e}</code>\n<i>(Make sure bot is admin with add_admin rights)</i>", parse_mode=enums.ParseMode.HTML)
 
 
 # ==========================================
 # 💎 PREMIUM OWNER PROFILE DATA
 # ==========================================
-PROFILE_PIC_URL = config.SUPPORT_CHANNEL if hasattr(config, "SUPPORT_CHANNEL") else "https://telegra.ph/file/8b383eb685ed1d8f1e626.jpg"
-
-async def get_page_content(page_num):
+async def get_page_content(client, page_num, user_id):
     if page_num == 1:
         caption = (
             "<blockquote><emoji id='6334381440754517833'>👑</emoji> <b>ᴠɪᴘ ᴏᴡɴᴇʀ ᴘʀᴏꜰɪʟᴇ</b> 👑</blockquote>\n\n"
             "<emoji id='6334672948774831861'>👤</emoji> <b>ɴᴀᴍᴇ:</b> ꜱᴜᴅᴇᴇᴘ\n"
-            "<emoji id='6334696528145286813'>👨‍💻</emoji> <b>ʀᴏʟᴇ:</b> ᴅᴇᴠᴇʟᴏᴘᴇʀ \n"
+            "<emoji id='6334696528145286813'>👨‍💻</emoji> <b>ʀᴏʟᴇ:</b> ᴅᴇᴠᴇʟᴏᴘᴇʀ (HellfireDevs)\n"
             "<emoji id='6334471179801200139'>🎂</emoji> <b>ᴀɢᴇ:</b> 17\n"
             "<emoji id='6334648089504122382'>🏫</emoji> <b>ᴄʟᴀꜱꜱ:</b> 11ᴛʜ\n"
             "<emoji id='6334333036473091884'>🕉</emoji> <b>ʀᴇʟɪɢɪᴏɴ:</b> ʜɪɴᴅᴜ\n"
@@ -114,14 +117,19 @@ async def get_page_content(page_num):
         ]
         
     elif page_num == 2:
+        user_info = await client.get_users(user_id)
+        dc_id = user_info.dc_id if user_info.dc_id else "Unknown"
+        is_premium = "Yes ✅" if user_info.is_premium else "No ❌"
+        
         caption = (
-            "<blockquote><emoji id='6334471179801200139'>✨</emoji> <b>ᴘᴇʀꜱᴏɴᴀʟ ɪɴꜰᴏ & ɢɪꜰᴛꜱ</b> ✨</blockquote>\n\n"
+            "<blockquote><emoji id='6334471179801200139'>✨</emoji> <b>ᴘᴇʀꜱᴏɴᴀʟ ɪɴꜰᴏ & ᴛɢ ꜱᴛᴀᴛꜱ</b> ✨</blockquote>\n\n"
             "<emoji id='6334648089504122382'>📝</emoji> <b>ʙɪᴏ:</b> ᴄᴏᴅɪɴɢ ɪꜱ ʟɪꜰᴇ, ᴍᴜꜱɪᴄ ɪꜱ ʟᴏᴠᴇ.\n"
-            "<emoji id='6334381440754517833'>🎁</emoji> <b>ɢɪꜰᴛꜱ:</b> 500+ ᴘʀᴇᴍɪᴜᴍ ɢɪꜰᴛꜱ ʀᴇᴄᴇɪᴠᴇᴅ\n"
-            "<emoji id='6334696528145286813'>🎮</emoji> <b>ʜᴏʙʙɪᴇꜱ:</b> ᴘᴜʙɢ (ʙɢᴍɪ), ᴛᴇʟᴇɢʀᴀᴍ ʙᴏᴛꜱ\n"
+            "<emoji id='6334381440754517833'>🎁</emoji> <b>ɢɪꜰᴛꜱ:</b> 500+ ᴘʀᴇᴍɪᴜᴍ ɢɪꜰᴛꜱ <i>(Static)</i>\n"
             "<emoji id='6334672948774831861'>💞</emoji> <b>ʀᴇʟᴀᴛɪᴏɴꜱʜɪᴘ:</b> ᴄᴏᴍᴍɪᴛᴛᴇᴅ ᴛᴏ ᴍᴏᴛɪ 🎀\n"
-            "<emoji id='6334789677396002338'>💼</emoji> <b>ᴘʀᴏᴊᴇᴄᴛꜱ:</b> ᴍᴜꜱɪᴄ ʙᴏᴛ, ᴛᴇʟᴇɢʀᴀᴍ ᴛᴏᴏʟꜱ"
-        )
+            "<emoji id='6334789677396002338'>🌍</emoji> <b>ᴛɢ ᴅᴀᴛᴀ ᴄᴇɴᴛᴇʀ:</b> DC {dc}\n"
+            "<emoji id='6334696528145286813'>💎</emoji> <b>ᴛɢ ᴘʀᴇᴍɪᴜᴍ:</b> {prem}"
+        ).format(dc=dc_id, prem=is_premium)
+        
         markup = [
             [api_btn("⬅️ ʙᴀᴄᴋ", callback_data="myinfo_p1", style="primary", custom_emoji_id="6334333036473091884"),
              api_btn("ɢɪᴛʜᴜʙ ➡️", callback_data="myinfo_p3", style="success", custom_emoji_id="6334381440754517833")],
@@ -129,7 +137,6 @@ async def get_page_content(page_num):
         ]
         
     elif page_num == 3:
-        # 🔥 FETCH REAL GITHUB STATS HERE
         repos, stars = await get_github_stats("SUDEEPBOTS")
         
         caption = (
@@ -153,21 +160,39 @@ async def get_page_content(page_num):
 # ==========================================
 # 👑 MYINFO COMMAND
 # ==========================================
-@app.on_message(filters.command(["myinfo"], prefixes=["/", "."]))
+@app.on_message(filters.command(["myinfo", "myintro"], prefixes=["/", "."]))
 async def send_my_info(client, message: Message):
     owner_id = config.OWNER_ID if isinstance(config.OWNER_ID, list) else [config.OWNER_ID]
     if message.from_user.id not in owner_id:
         return
         
-    # Loading message bhejenge spoiler aur HTML support ke sath
-    msg = await message.reply_photo(
-        photo=PROFILE_PIC_URL,
+    # 🔥 Delete command to keep chat clean
+    try:
+        await message.delete()
+    except:
+        pass
+        
+    # 🔥 Fetch Real Telegram Profile Pic
+    try:
+        user_info = await client.get_users(message.from_user.id)
+        if user_info.photo:
+            REAL_PROFILE_PIC = user_info.photo.big_file_id
+        else:
+            # Fallback agar DP hidden ya removed hai
+            REAL_PROFILE_PIC = "https://telegra.ph/file/8b383eb685ed1d8f1e626.jpg"
+    except:
+        REAL_PROFILE_PIC = "https://telegra.ph/file/8b383eb685ed1d8f1e626.jpg"
+        
+    # 🔥 Direct send (No Reply)
+    msg = await client.send_photo(
+        chat_id=message.chat.id,
+        photo=REAL_PROFILE_PIC,
         caption="<blockquote><emoji id='6334789677396002338'>⏳</emoji> <b>ʟᴏᴀᴅɪɴɢ ᴠɪᴘ ᴘʀᴏꜰɪʟᴇ...</b></blockquote>",
         has_spoiler=True,
         parse_mode=enums.ParseMode.HTML
     )
     
-    caption, markup = await get_page_content(1)
+    caption, markup = await get_page_content(client, 1, message.from_user.id)
     await raw_edit_message(message.chat.id, msg.id, caption, markup)
 
 
@@ -181,7 +206,7 @@ async def myinfo_callbacks(client, callback_query):
         return await callback_query.answer("❌ This is the Boss's profile, you can't click it!", show_alert=True)
         
     page = int(callback_query.data.split("_p")[1])
-    caption, markup = await get_page_content(page)
+    caption, markup = await get_page_content(client, page, callback_query.from_user.id)
     
     await raw_edit_message(
         callback_query.message.chat.id, 
@@ -190,4 +215,4 @@ async def myinfo_callbacks(client, callback_query):
         markup
     )
     await callback_query.answer("Page Changed!")
-          
+    
