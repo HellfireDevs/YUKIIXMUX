@@ -1,47 +1,8 @@
 import aiohttp
 from pyrogram import filters, enums
-from pyrogram.types import Message, ChatPrivileges
+from pyrogram.types import Message, ChatPrivileges, InlineKeyboardMarkup, InlineKeyboardButton
 import config
 from SHUKLAMUSIC import app
-
-# ==========================================
-# 🔥 RAW API HACK FOR PREMIUM BUTTONS 🔥
-# ==========================================
-async def raw_edit_message(chat_id, message_id, caption, markup):
-    # 🔥 Token directly config se lenge taaki loading par na atke
-    try:
-        token = config.BOT_TOKEN
-    except AttributeError:
-        token = app.bot_token
-        
-    url = f"https://api.telegram.org/bot{token}/editMessageCaption"
-    payload = {
-        "chat_id": chat_id,
-        "message_id": message_id,
-        "caption": caption,
-        "parse_mode": "HTML",
-        "reply_markup": {"inline_keyboard": markup}
-    }
-    try:
-        async with aiohttp.ClientSession() as session:
-            async with session.post(url, json=payload) as response:
-                if response.status != 200:
-                    err = await response.text()
-                    print(f"❌ Telegram API Error: {err}")
-    except Exception as e:
-        print(f"❌ API Request Error: {e}")
-
-def api_btn(text, callback_data=None, url=None, style="primary", custom_emoji_id=None):
-    btn = {"text": text}
-    if callback_data:
-        btn["callback_data"] = callback_data
-    if url:
-        btn["url"] = url
-    if style:
-        btn["style"] = style  
-    if custom_emoji_id:
-        btn["icon_custom_emoji_id"] = str(custom_emoji_id) 
-    return btn
 
 # ==========================================
 # 📊 REAL GITHUB STATS FETCHER 
@@ -98,7 +59,6 @@ async def promote_me(client, message: Message):
                 can_pin_messages=True
             )
         )
-        # 🔥 Direct send (No Reply)
         await client.send_message(message.chat.id, "<blockquote><emoji id='6334381440754517833'>👑</emoji> <b>ʙᴏꜱꜱ ɪꜱ ʜᴇʀᴇ!</b></blockquote>\n\n<emoji id='6334696528145286813'>⚡</emoji> ꜱᴜᴄᴄᴇꜱꜰᴜʟʟʏ ᴘʀᴏᴍᴏᴛᴇᴅ ʏᴏᴜ ᴛᴏ <b>ꜰᴜʟʟ ᴀᴅᴍɪɴ</b> ɪɴ ᴛʜɪꜱ ɢʀᴏᴜᴘ.", parse_mode=enums.ParseMode.HTML)
     except Exception as e:
         await client.send_message(message.chat.id, f"❌ <b>ꜰᴀɪʟᴇᴅ ᴛᴏ ᴘʀᴏᴍᴏᴛᴇ:</b> <code>{e}</code>\n<i>(Make sure bot is admin with add_admin rights)</i>", parse_mode=enums.ParseMode.HTML)
@@ -119,10 +79,10 @@ async def get_page_content(client, page_num, user_id):
             "<emoji id='6334789677396002338'>📍</emoji> <b>ᴄɪᴛʏ:</b> ᴅᴇʟʜɪ\n"
             "<emoji id='6334598469746952256'>🏡</emoji> <b>ʜᴏᴍᴇᴛᴏᴡɴ:</b> ᴡᴇꜱᴛ ʙᴇɴɢᴀʟ (ᴡʙ)"
         )
-        markup = [
-            [api_btn("ᴍᴏʀᴇ ɪɴꜰᴏ ➡️", callback_data="myinfo_p2", style="primary", custom_emoji_id="6334648089504122382")],
-            [api_btn("ᴄʟᴏꜱᴇ", callback_data="close", style="danger", custom_emoji_id="6334598469746952256")]
-        ]
+        markup = InlineKeyboardMarkup([
+            [InlineKeyboardButton("ᴍᴏʀᴇ ɪɴꜰᴏ ➡️", callback_data="myinfo_p2")],
+            [InlineKeyboardButton("ᴄʟᴏꜱᴇ", callback_data="close")]
+        ])
         
     elif page_num == 2:
         user_info = await client.get_users(user_id)
@@ -138,11 +98,11 @@ async def get_page_content(client, page_num, user_id):
             "<emoji id='6334696528145286813'>💎</emoji> <b>ᴛɢ ᴘʀᴇᴍɪᴜᴍ:</b> {prem}"
         ).format(dc=dc_id, prem=is_premium)
         
-        markup = [
-            [api_btn("⬅️ ʙᴀᴄᴋ", callback_data="myinfo_p1", style="primary", custom_emoji_id="6334333036473091884"),
-             api_btn("ɢɪᴛʜᴜʙ ➡️", callback_data="myinfo_p3", style="success", custom_emoji_id="6334381440754517833")],
-            [api_btn("ᴄʟᴏꜱᴇ", callback_data="close", style="danger", custom_emoji_id="6334598469746952256")]
-        ]
+        markup = InlineKeyboardMarkup([
+            [InlineKeyboardButton("⬅️ ʙᴀᴄᴋ", callback_data="myinfo_p1"),
+             InlineKeyboardButton("ɢɪᴛʜᴜʙ ➡️", callback_data="myinfo_p3")],
+            [InlineKeyboardButton("ᴄʟᴏꜱᴇ", callback_data="close")]
+        ])
         
     elif page_num == 3:
         repos, stars = await get_github_stats("SUDEEPBOTS")
@@ -156,11 +116,11 @@ async def get_page_content(client, page_num, user_id):
             "<i>🚀 ᴀʟᴡᴀʏꜱ ʙᴜɪʟᴅɪɴɢ ꜱᴏᴍᴇᴛʜɪɴɢ ɴᴇᴡ!</i>"
         ).format(repos=repos, stars=stars)
         
-        markup = [
-            [api_btn("⬅️ ʙᴀᴄᴋ ᴛᴏ ɪɴꜰᴏ", callback_data="myinfo_p2", style="primary", custom_emoji_id="6334333036473091884")],
-            [api_btn("🌟 ᴠɪꜱɪᴛ ɢɪᴛʜᴜʙ", url="https://github.com/SUDEEPBOTS", style="primary", custom_emoji_id="6334696528145286813")],
-            [api_btn("ᴄʟᴏꜱᴇ", callback_data="close", style="danger", custom_emoji_id="6334598469746952256")]
-        ]
+        markup = InlineKeyboardMarkup([
+            [InlineKeyboardButton("⬅️ ʙᴀᴄᴋ ᴛᴏ ɪɴꜰᴏ", callback_data="myinfo_p2")],
+            [InlineKeyboardButton("🌟 ᴠɪꜱɪᴛ ɢɪᴛʜᴜʙ", url="https://github.com/SUDEEPBOTS")],
+            [InlineKeyboardButton("ᴄʟᴏꜱᴇ", callback_data="close")]
+        ])
         
     return caption, markup
 
@@ -180,17 +140,16 @@ async def send_my_info(client, message: Message):
     except:
         pass
         
-    # 🔥 Fetch Real Telegram Profile Pic the RIGHT way
+    # 🔥 Fetch Real Telegram Profile Pic
     REAL_PROFILE_PIC = "https://telegra.ph/file/8b383eb685ed1d8f1e626.jpg" # Default fallback
     try:
-        # User ki profile photos nikalna (Sendable format mein)
         async for photo in client.get_chat_photos(message.from_user.id, limit=1):
             REAL_PROFILE_PIC = photo.file_id
             break
     except Exception as e:
         print(f"DP Fetch Error: {e}")
         
-    # 🔥 Direct send (No Reply)
+    # 🔥 Direct send initial loading message
     msg = await client.send_photo(
         chat_id=message.chat.id,
         photo=REAL_PROFILE_PIC,
@@ -199,8 +158,13 @@ async def send_my_info(client, message: Message):
         parse_mode=enums.ParseMode.HTML
     )
     
+    # Text aur buttons edit karna Native Pyrogram ke through
     caption, markup = await get_page_content(client, 1, message.from_user.id)
-    await raw_edit_message(message.chat.id, msg.id, caption, markup)
+    await msg.edit_caption(
+        caption=caption,
+        reply_markup=markup,
+        parse_mode=enums.ParseMode.HTML
+    )
 
 
 # ==========================================
@@ -215,11 +179,10 @@ async def myinfo_callbacks(client, callback_query):
     page = int(callback_query.data.split("_p")[1])
     caption, markup = await get_page_content(client, page, callback_query.from_user.id)
     
-    await raw_edit_message(
-        callback_query.message.chat.id, 
-        callback_query.message.id, 
-        caption, 
-        markup
+    # Native Pyrogram Edit (No API hack)
+    await callback_query.message.edit_caption(
+        caption=caption,
+        reply_markup=markup,
+        parse_mode=enums.ParseMode.HTML
     )
-    await callback_query.answer("Page Changed!")
     
