@@ -31,6 +31,7 @@ GROQ_API_KEY="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"
 MONGO_DB_URI = getenv("MONGO_DB_URI", "mongodb+srv://theriyamusic94:f67KlgTyzr3TTutn@cluster0.lym5x.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 #---------------------------------------------------------------
 #---------------------------------------------------------------
+NSFWAPI = "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"
 
 # ----------------------------------------------------------------
 DURATION_LIMIT_MIN = int(getenv("DURATION_LIMIT", 17000))
