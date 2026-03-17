@@ -14,7 +14,7 @@ from SHUKLAMUSIC.utils.database import is_on_off
 from SHUKLAMUSIC.utils.formatters import time_to_seconds
 
 # SHRUTI API CONFIG
-FALLBACK_API_URL = "https://shrutibots.sie"
+FALLBACK_API_URL = "https://shrutibots.site"
 YOUR_API_URL = None
 
 cookies_file = "SHUKLAMUSIC/assets/cookies.txt"
