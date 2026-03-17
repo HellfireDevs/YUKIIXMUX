@@ -91,16 +91,18 @@ async def analyze_media_fast(image_path):
             "stream": False
         }
         
+        # 🔥 TIMEOUT BADHA DIYA HAI (60 Seconds)
         async with aiohttp.ClientSession() as session:
-            async with session.post(OLLAMA_VISION, json=payload, timeout=20) as resp:
+            async with session.post(OLLAMA_VISION, json=payload, timeout=60) as resp:
                 data = await resp.json()
                 os.remove(jpg_path)
                 return data.get("response", "error analyzing media.")
                 
     except Exception as e:
-        print(f"Vision API Error: {e}")
-        # 🔥 YAHAN REAL ERROR MESSAGE RETURN HOGA
-        return f"ᴇʀʀᴏʀ: {str(e)}"
+        error_name = type(e).__name__
+        print(f"Vision API Error: {error_name} - {str(e)}")
+        # 🔥 AB KHALI ERROR NAHI, ERROR KA ASLI NAAM AAYEGA
+        return f"ᴇʀʀᴏʀ: {to_small_caps(error_name)}"
 
 # ─────────────────────────────
 # 🚨 MAIN SCANNER (PHOTOS & STICKERS)
@@ -112,7 +114,7 @@ async def nsfw_scanner(client, message: Message):
     if not chat_nsfw_state.get(chat_id, True):
         return
 
-    # 🔥 NAYA FIX: Ignore Animated and Video Stickers
+    # Ignore Animated and Video Stickers
     if message.sticker and (message.sticker.is_animated or message.sticker.is_video):
         return
 
@@ -147,8 +149,8 @@ async def nsfw_scanner(client, message: Message):
         
     except Exception as e:
         print(f"Scanner crash: {e}")
+        error_name = type(e).__name__
         if dl_path and os.path.exists(dl_path):
             os.remove(dl_path)
-        # 🔥 AGAR DOWNLOAD YA MAIN FUNCTION CRASH HUA TOH YAHAN BHI REAL ERROR DIKHEGA
-        await message.reply(f"❌ **sᴄᴀɴɴᴇʀ ᴄʀᴀsʜ:** {str(e)}", parse_mode=ParseMode.HTML)
+        await message.reply(f"❌ **sᴄᴀɴɴᴇʀ ᴄʀᴀsʜ:** {to_small_caps(error_name)}", parse_mode=ParseMode.HTML)
         
