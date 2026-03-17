@@ -2,20 +2,20 @@ import os
 import aiohttp
 import base64
 import random
+import asyncio
 from PIL import Image
 from pyrogram import filters
 from pyrogram.types import Message
-from pyrogram.enums import ChatAction, ParseMode
+from pyrogram.enums import ParseMode
 
 from SHUKLAMUSIC import app
-from config import BANNED_USERS
+from config import BANNED_USERS, NSFWAPI
 
 # ─────────────────────────────
-# 🔥 NSFW STATE & EMOJIS
+# 🔥 NSFW STATE, EMOJIS & DATABASE
 # ─────────────────────────────
 chat_nsfw_state = {}
-
-OLLAMA_VISION = "http://localhost:11434/api/generate"
+BANNED_STICKERS = set() # Fatafat block karne ke liye in-memory database
 
 PREMIUM_EMOJIS = [
     '<emoji id="6334598469746952256">🎀</emoji>',
@@ -29,21 +29,24 @@ PREMIUM_EMOJIS = [
 ]
 
 # ─────────────────────────────
-# ✨ SMALL CAPS FONT CONVERTER
+# 🛠️ MANUAL BAN COMMAND (For Stickers)
 # ─────────────────────────────
-SMALL_CAPS_MAP = {
-    'a': 'ᴀ', 'b': 'ʙ', 'c': 'ᴄ', 'd': 'ᴅ', 'e': 'ᴇ', 'f': 'ғ', 'g': 'ɢ',
-    'h': 'ʜ', 'i': 'ɪ', 'j': 'ᴊ', 'k': 'ᴋ', 'l': 'ʟ', 'm': 'ᴍ', 'n': 'ɴ',
-    'o': 'ᴏ', 'p': 'ᴘ', 'q': 'ǫ', 'r': 'ʀ', 's': 's', 't': 'ᴛ', 'u': 'ᴜ',
-    'v': 'ᴠ', 'w': 'ᴡ', 'x': 'x', 'y': 'ʏ', 'z': 'ᴢ',
-    'A': 'ᴀ', 'B': 'ʙ', 'C': 'ᴄ', 'D': 'ᴅ', 'E': 'ᴇ', 'F': 'ғ', 'G': 'ɢ',
-    'H': 'ʜ', 'I': 'ɪ', 'J': 'ᴊ', 'K': 'ᴋ', 'L': 'ʟ', 'M': 'ᴍ', 'N': 'ɴ',
-    'O': 'ᴏ', 'P': 'ᴘ', 'Q': 'ǫ', 'R': 'ʀ', 'S': 's', 'T': 'ᴛ', 'U': 'ᴜ',
-    'V': 'ᴠ', 'W': 'ᴡ', 'X': 'x', 'Y': 'ʏ', 'Z': 'ᴢ'
-}
-
-def to_small_caps(text: str) -> str:
-    return "".join(SMALL_CAPS_MAP.get(c, c) for c in text)
+@app.on_message(filters.command("bansticker") & filters.reply & filters.group)
+async def ban_manual_sticker(client, message: Message):
+    if not message.reply_to_message.sticker:
+        return await message.reply("<blockquote>⚠️ ᴘʟᴇᴀsᴇ ʀᴇᴘʟʏ ᴛᴏ ᴀ sᴛɪᴄᴋᴇʀ ᴛᴏ ʙᴀɴ ɪᴛ!</blockquote>", parse_mode=ParseMode.HTML)
+    
+    sticker_id = message.reply_to_message.sticker.file_unique_id
+    BANNED_STICKERS.add(sticker_id)
+    
+    try:
+        await message.reply_to_message.delete()
+    except: pass
+    
+    emo = random.choice(PREMIUM_EMOJIS)
+    msg = await message.reply(f"<blockquote>✅ sᴛɪᴄᴋᴇʀ ᴀᴅᴅᴇᴅ ᴛᴏ ʙʟᴀᴄᴋʟɪsᴛ! ɪᴛ ᴡɪʟʟ ʙᴇ ᴀᴜᴛᴏ-ᴅᴇʟᴇᴛᴇᴅ ɴᴏᴡ. {emo}</blockquote>", parse_mode=ParseMode.HTML)
+    await asyncio.sleep(15)
+    await msg.delete()
 
 # ─────────────────────────────
 # 🛠️ ON/OFF COMMAND
@@ -54,28 +57,29 @@ async def toggle_nsfw(client, message: Message):
     emo = random.choice(PREMIUM_EMOJIS)
     
     if len(message.command) < 2:
-        state = chat_nsfw_state.get(chat_id, True) # Default True
+        state = chat_nsfw_state.get(chat_id, True)
         status = "ᴏɴ ✅" if state else "ᴏғғ ❌"
-        msg = f"ᴠɪsɪᴏɴ sᴄᴀɴɴᴇʀ ɪs ᴄᴜʀʀᴇɴᴛʟʏ **{status}**.\nᴛᴏ ᴄʜᴀɴɢᴇ, ᴛʏᴘᴇ: `/nsfw on` ᴏʀ `/nsfw off` {emo}"
-        return await message.reply(msg, parse_mode=ParseMode.HTML)
+        msg_text = f"<blockquote>ᴠɪsɪᴏɴ sᴄᴀɴɴᴇʀ ɪs ᴄᴜʀʀᴇɴᴛʟʏ **{status}**.\nᴛᴏ ᴄʜᴀɴɢᴇ, ᴛʏᴘᴇ: `/nsfw on` ᴏʀ `/nsfw off` {emo}</blockquote>"
+        return await message.reply(msg_text, parse_mode=ParseMode.HTML)
     
     cmd = message.command[1].lower()
     if cmd == "on":
         chat_nsfw_state[chat_id] = True
-        msg = f"✅ ᴠɪsɪᴏɴ sᴄᴀɴɴᴇʀ ɪs ɴᴏᴡ ᴏɴ. ᴀʟʟ ᴍᴇᴅɪᴀ ᴡɪʟʟ ʙᴇ ᴄʜᴇᴄᴋᴇᴅ! {emo}"
-        await message.reply(msg, parse_mode=ParseMode.HTML)
+        msg_text = f"<blockquote>✅ ᴠɪsɪᴏɴ sᴄᴀɴɴᴇʀ ɪs ɴᴏᴡ ᴏɴ. {emo}</blockquote>"
+        msg = await message.reply(msg_text, parse_mode=ParseMode.HTML)
+        await asyncio.sleep(15)
+        await msg.delete()
     elif cmd == "off":
         chat_nsfw_state[chat_id] = False
-        msg = f"❌ ᴠɪsɪᴏɴ sᴄᴀɴɴᴇʀ ɪs ɴᴏᴡ ᴏғғ. {emo}"
-        await message.reply(msg, parse_mode=ParseMode.HTML)
-    else:
-        msg = f"ɪɴᴠᴀʟɪᴅ ᴄᴏᴍᴍᴀɴᴅ! ᴜsᴇ `/nsfw on` ᴏʀ `/nsfw off` {emo}"
-        await message.reply(msg, parse_mode=ParseMode.HTML)
+        msg_text = f"<blockquote>❌ ᴠɪsɪᴏɴ sᴄᴀɴɴᴇʀ ɪs ɴᴏᴡ ᴏғғ. {emo}</blockquote>"
+        msg = await message.reply(msg_text, parse_mode=ParseMode.HTML)
+        await asyncio.sleep(15)
+        await msg.delete()
 
 # ─────────────────────────────
-# 👁️ VISION ENGINE (MOONDREAM)
+# 👁️ GROQ VISION ENGINE
 # ─────────────────────────────
-async def analyze_media_fast(image_path):
+async def analyze_media_groq(image_path):
     try:
         img = Image.open(image_path).convert("RGB")
         jpg_path = image_path + ".jpg"
@@ -84,28 +88,42 @@ async def analyze_media_fast(image_path):
         with open(jpg_path, "rb") as f:
             img_b64 = base64.b64encode(f.read()).decode('utf-8')
             
-        payload = {
-            "model": "moondream",
-            "prompt": "Analyze this image. Is it safe or 18+/NSFW? Tell me what it is in EXACTLY 2 to 5 words in English. Example: 'Safe, a cute cat' or '18+ NSFW content detected'. Do not write long sentences.",
-            "images": [img_b64],
-            "stream": False
+        headers = {
+            "Authorization": f"Bearer {NSFWAPI}",
+            "Content-Type": "application/json"
         }
         
-        # 🔥 TIMEOUT BADHA DIYA HAI (60 Seconds)
+        payload = {
+            "model": "llama-3.2-11b-vision-preview",
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": "Is this image safe or 18+/NSFW? Reply ONLY with '18+' if it has nudity, adult content, or is highly suggestive. Otherwise reply ONLY with 'SAFE'."},
+                        {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{img_b64}"}}
+                    ]
+                }
+            ],
+            "temperature": 0.1,
+            "max_tokens": 10
+        }
+        
         async with aiohttp.ClientSession() as session:
-            async with session.post(OLLAMA_VISION, json=payload, timeout=60) as resp:
+            async with session.post("https://api.groq.com/openai/v1/chat/completions", headers=headers, json=payload, timeout=20) as resp:
                 data = await resp.json()
                 os.remove(jpg_path)
-                return data.get("response", "error analyzing media.")
                 
+                if "choices" in data:
+                    return data["choices"][0]["message"]["content"].strip().lower()
+                else:
+                    return "error"
+                    
     except Exception as e:
-        error_name = type(e).__name__
-        print(f"Vision API Error: {error_name} - {str(e)}")
-        # 🔥 AB KHALI ERROR NAHI, ERROR KA ASLI NAAM AAYEGA
-        return f"ᴇʀʀᴏʀ: {to_small_caps(error_name)}"
+        print(f"Groq Vision Crash: {e}")
+        return "error"
 
 # ─────────────────────────────
-# 🚨 MAIN SCANNER (PHOTOS & STICKERS)
+# 🚨 MAIN SCANNER (SILENT & DEADLY)
 # ─────────────────────────────
 @app.on_message((filters.photo | filters.sticker) & filters.group & ~BANNED_USERS)
 async def nsfw_scanner(client, message: Message):
@@ -114,43 +132,57 @@ async def nsfw_scanner(client, message: Message):
     if not chat_nsfw_state.get(chat_id, True):
         return
 
-    # Ignore Animated and Video Stickers
-    if message.sticker and (message.sticker.is_animated or message.sticker.is_video):
-        return
-
-    await client.send_chat_action(chat_id, ChatAction.TYPING)
-    
-    dl_path = None
-    try:
-        dl_path = await message.download()
-        
-        raw_result = await analyze_media_fast(dl_path)
-        
-        if os.path.exists(dl_path):
-            os.remove(dl_path)
-            
-        raw_lower = raw_result.lower()
-        if "18+" in raw_lower or "nsfw" in raw_lower:
+    # 1. DATABASE CHECK (Superfast Auto-Delete, Completely Silent)
+    if message.sticker:
+        sticker_id = message.sticker.file_unique_id
+        if sticker_id in BANNED_STICKERS:
             try:
                 await message.delete()
             except Exception as e:
-                print(f"Delete permission error: {e}")
-            
-            emo = random.choice(PREMIUM_EMOJIS)
-            user_mention = message.from_user.mention if message.from_user else "ᴜsᴇʀ"
-            warn_msg = f"⚠️ ᴡᴀʀɴɪɴɢ {user_mention}!\nʏᴏᴜʀ ᴍᴇssᴀɢᴇ ᴡᴀs ᴅᴇʟᴇᴛᴇᴅ ʙᴇᴄᴀᴜsᴇ ɪᴛ ᴄᴏɴᴛᴀɪɴᴇᴅ 18+/ɴsғᴡ ᴄᴏɴᴛᴇɴᴛ. {emo}"
-            await client.send_message(chat_id, warn_msg, parse_mode=ParseMode.HTML)
-            
+                # Permission warning if bot is not admin
+                if "MESSAGE_DELETE_FORBIDDEN" in str(e) or "chat_admin_required" in str(e).lower():
+                     emo = random.choice(PREMIUM_EMOJIS)
+                     perm_msg = await client.send_message(chat_id, f"<blockquote>⚠️ ᴘʟᴇᴀsᴇ ɢɪᴠᴇ ᴍᴇ 'ᴅᴇʟᴇᴛᴇ ᴍᴇssᴀɢᴇs' ᴘᴇʀᴍɪssɪᴏɴ ᴛᴏ ᴡᴏʀᴋ ᴘʀᴏᴘᴇʀʟʏ! {emo}</blockquote>", parse_mode=ParseMode.HTML)
+                     await asyncio.sleep(15)
+                     await perm_msg.delete()
+            return
+
+    # 2. DOWNLOAD & SCAN (Thumbnail Bypass + Silent Delete)
+    dl_path = None
+    try:
+        # Check if animated/video sticker and extract thumbnail
+        if message.sticker and (message.sticker.is_animated or message.sticker.is_video):
+            if message.sticker.thumbs:
+                thumb_id = message.sticker.thumbs[0].file_id
+                dl_path = await client.download_media(thumb_id)
+            else:
+                return # Skip if no thumbnail
         else:
-            styled_result = to_small_caps(raw_result)
-            emo = random.choice(PREMIUM_EMOJIS)
-            final_msg = f"👁️ **sᴄᴀɴ:** {styled_result} {emo}"
-            await message.reply(final_msg, parse_mode=ParseMode.HTML)
+            dl_path = await message.download()
+        
+        if dl_path:
+            result = await analyze_media_groq(dl_path)
+            
+            if os.path.exists(dl_path):
+                os.remove(dl_path)
+                
+            if "18+" in result or "nsfw" in result:
+                if message.sticker:
+                    BANNED_STICKERS.add(message.sticker.file_unique_id)
+                    
+                try:
+                    await message.delete() # SILENT DELETE
+                except Exception as e:
+                    if "MESSAGE_DELETE_FORBIDDEN" in str(e) or "chat_admin_required" in str(e).lower():
+                         emo = random.choice(PREMIUM_EMOJIS)
+                         perm_msg = await client.send_message(chat_id, f"<blockquote>⚠️ ᴘʟᴇᴀsᴇ ɢɪᴠᴇ ᴍᴇ 'ᴅᴇʟᴇᴛᴇ ᴍᴇssᴀɢᴇs' ᴘᴇʀᴍɪssɪᴏɴ ᴛᴏ ᴡᴏʀᴋ ᴘʀᴏᴘᴇʀʟʏ! {emo}</blockquote>", parse_mode=ParseMode.HTML)
+                         await asyncio.sleep(15)
+                         await perm_msg.delete()
+                
+        # IF SAFE -> DO NOTHING
         
     except Exception as e:
         print(f"Scanner crash: {e}")
-        error_name = type(e).__name__
         if dl_path and os.path.exists(dl_path):
             os.remove(dl_path)
-        await message.reply(f"❌ **sᴄᴀɴɴᴇʀ ᴄʀᴀsʜ:** {to_small_caps(error_name)}", parse_mode=ParseMode.HTML)
-        
+            
