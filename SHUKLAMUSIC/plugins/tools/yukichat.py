@@ -51,14 +51,15 @@ async def get_kimi_response(messages_list):
         "Authorization": f"Bearer {NVIDIA_API_KEY}",
         "Accept": "application/json"
     }
-        payload = {
+    
+    payload = {
         "model": "moonshotai/kimi-k2.5",
         "messages": messages_list,
         "max_tokens": 1024, 
         "temperature": 1.00,
         "top_p": 1.00,
         "stream": False
-        }
+    }
     
     try:
         async with aiohttp.ClientSession() as session:
