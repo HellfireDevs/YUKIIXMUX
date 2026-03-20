@@ -51,15 +51,14 @@ async def get_kimi_response(messages_list):
         "Authorization": f"Bearer {NVIDIA_API_KEY}",
         "Accept": "application/json"
     }
-    payload = {
+        payload = {
         "model": "moonshotai/kimi-k2.5",
         "messages": messages_list,
-        "max_tokens": 1024, # Bot replies ke liye 1024 kafi hai, speed fast rahegi
+        "max_tokens": 1024, 
         "temperature": 1.00,
         "top_p": 1.00,
-        "stream": False,
-        "chat_template_kwargs": {"thinking": True}
-    }
+        "stream": False
+        }
     
     try:
         async with aiohttp.ClientSession() as session:
