@@ -10,7 +10,7 @@ from pyrogram.types import Message
 import config
 from YUKIIMUSIC import app
 from YUKIIMUSIC.misc import mongodb
-from YUKIIMUSIC.utils.database import get_served_users # 🔥 Import kiya taaki register check kar sakein
+from YUKIIMUSIC.utils.database import get_served_users
 
 # 🔥 MONGODB COLLECTION FOR LEADERBOARD 🔥
 game_db = mongodb["wordgame_leaderboard"]
@@ -232,11 +232,22 @@ async def check_cooldown(user_id, callback_query):
             return True
     return False
 
-# 🔥 REWARD CLAIM CHECKER
+# 🔥 BULLETPROOF REWARD CLAIM CHECKER
 async def check_and_send_claim(client, chat_id, user_id, message_id, success_text):
-    served_users = await get_served_users()
-    is_registered = any(user_id == (u.get("user_id") if isinstance(u, dict) else u) for u in served_users)
-    
+    is_registered = False
+    try:
+        # Check if user is already in bot's database
+        served_users = await get_served_users()
+        for u in served_users:
+            uid = u.get("user_id") if isinstance(u, dict) else u
+            if str(uid) == str(user_id):
+                is_registered = True
+                break
+    except Exception as e:
+        print(f"DB Check Error: {e}")
+        # Agar db check fail ho jaye, toh safety ke liye button bhej denge
+        is_registered = False
+
     run = await client.send_message(chat_id, success_text)
     
     # Agar registered NAHI hai, tabhi claim button bhejo
@@ -266,6 +277,7 @@ async def guess_game_callback(client, callback_query):
         success_text = f"🎉 **{smallcaps(f'The {game_name_str} was guessed correctly by')} {user.mention} {smallcaps(f'in {time_taken} seconds!')}**\n*+{points_won} {smallcaps('points')}*"
         
         del active_games[chat_id] 
+        # Points are instantly saved, they are 100% safe!
         user_data = await game_db.find_one({"user_id": user.id})
         if user_data: await game_db.update_one({"user_id": user.id}, {"$set": {"points": user_data["points"] + points_won, "name": user.first_name}})
         else: await game_db.insert_one({"user_id": user.id, "name": user.first_name, "points": points_won})
@@ -290,18 +302,19 @@ async def giveup_callback(client, callback_query):
     await client.send_message(chat_id, f"🏳️ **{smallcaps('Game Over!')}** {callback_query.from_user.mention} {smallcaps('gave up.')}\n\n{smallcaps('The correct word was:')} **{correct_word}**")
 
 # ==========================================
-#              COMMANDS & TRACKERS
+#              COMMANDS & TRACKERS (OWNER ONLY FOR TEST)
 # ==========================================
 
-@app.on_message(filters.command("testword") & filters.group)
+# 🔥 Added filters.user(config.OWNER_ID) so only you can trigger test games!
+@app.on_message(filters.command("testword") & filters.group & filters.user(config.OWNER_ID))
 async def test_word_cmd(client, message: Message):
     if message.from_user: await start_word_game(message.chat.id)
 
-@app.on_message(filters.command("testemoji") & filters.group)
+@app.on_message(filters.command("testemoji") & filters.group & filters.user(config.OWNER_ID))
 async def test_emoji_cmd(client, message: Message):
     if message.from_user: await start_emoji_game(message.chat.id)
     
-@app.on_message(filters.command("testflag") & filters.group)
+@app.on_message(filters.command("testflag") & filters.group & filters.user(config.OWNER_ID))
 async def test_flag_cmd(client, message: Message):
     if message.from_user: await start_flag_game(message.chat.id)
 
@@ -366,3 +379,4 @@ async def inactivity_checker_loop():
                 except Exception: pass
 
 asyncio.create_task(inactivity_checker_loop())
+    
