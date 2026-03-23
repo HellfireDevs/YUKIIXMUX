@@ -4,7 +4,7 @@ from SHUKLAMUSIC import app, userbot
 from SHUKLAMUSIC.misc import SUDOERS
 from pyrogram import * 
 from pyrogram.types import *
-from SHUKLAMUSIC.utils.Shukla_ban import admin_filter
+from SHUKLAMUSIC.utils.Yukii_ban import admin_filter
 
 
 

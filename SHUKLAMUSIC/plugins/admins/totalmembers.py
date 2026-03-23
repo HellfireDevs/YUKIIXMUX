@@ -1,4 +1,4 @@
-from SHUKLAMUSIC.utils.Shukla_ban import admin_filter
+from SHUKLAMUSIC.utils.Yukii_ban import admin_filter
 import os
 import csv
 from pyrogram import Client, filters
