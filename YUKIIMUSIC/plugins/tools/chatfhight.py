@@ -128,7 +128,7 @@ async def get_random_word():
         url = "https://api.groq.com/openai/v1/chat/completions"
         headers = {"Authorization": f"Bearer {config.GROQ_API_KEY}", "Content-Type": "application/json"}
         payload = {
-            "model": "llama-3.1-70b-versatile",
+            "model": "llama-3.1-8b-instant",
             "messages": [{"role": "user", "content": "Reply with only ONE random difficult English word. No punctuation."}],
             "temperature": 0.9
         }
