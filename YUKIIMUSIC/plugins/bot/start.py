@@ -68,24 +68,6 @@ async def inject_premium_markup(chat_id, message_id, markup):
     except Exception as e:
         pass
 
-# 🔥 TELEGRAM 9.3 LIVE STREAMING DRAFT HACK
-async def stream_draft_text(chat_id: int, draft_id: int, text: str):
-    token = getattr(config, "BOT_TOKEN", getattr(app, "bot_token", None))
-    url = f"https://api.telegram.org/bot{token}/sendMessageDraft"
-    
-    payload = {
-        "chat_id": chat_id,
-        "draft_id": draft_id,
-        "text": text,
-        "parse_mode": "HTML"
-    }
-    
-    try:
-        async with aiohttp.ClientSession() as session:
-            await session.post(url, json=payload)
-    except Exception as e:
-        pass
-
 # 🔥 THE MAGIC START FUNCTION (100% PERFECTED)
 async def send_magic_start(chat_id, photo_url, caption, markup, reply_to_id=None):
     markup = get_raw_markup(markup)
@@ -135,25 +117,22 @@ async def start_pm(client, message: Message, _):
         await stk.delete()     
     except: pass
 
-    # 🔥 STEP 3: NEW 9.3 API LIVE STREAMING LOADING ANIMATION
+    # 🔥 STEP 3: LOADING ANIMATION
+    loading_1 = await message.reply_text(random.choice(GREET))
     await add_served_user(message.from_user.id)
-    draft_id = int(time.time()) 
     
-    stream_phrases = [
-        "<emoji id='5413546177683539369'>😈</emoji> <b>ᴅɪηɢ ᴅᴏηɢ..</b>\n",
-        "<emoji id='6080202089311507876'>😎</emoji> <b>sᴛᴧʀᴛɪηɢ...</b>\n",
-        "<emoji id='6001132493011425597'>💖</emoji> <b>ʜєʏ ʙᴧʙʏ!</b>\n",
-        "<emoji id='5413840936994097463'>🌺</emoji> <b>ᴍɪᴍɪ ꭙ ϻᴜsɪᴄ ♪ sᴛᴧʀᴛed!</b>"
-    ]
-    
-    current_stream = ""
-    for phrase in stream_phrases:
-        current_stream += phrase
-        await stream_draft_text(message.chat.id, draft_id, current_stream)
-        await asyncio.sleep(0.4)
-        
-    # Stream ko clear kar do final photo bhejte waqt taaki screen saaf rahe
-    await stream_draft_text(message.chat.id, draft_id, "")
+    await asyncio.sleep(0.4)
+    await loading_1.edit_text("<emoji id='5413546177683539369'>😈</emoji> <b>ᴅɪηɢ ᴅᴏηɢ.</b>")
+    await asyncio.sleep(0.4)
+    await loading_1.edit_text("<emoji id='5413546177683539369'>😈</emoji> <b>ᴅɪηɢ ᴅᴏηɢ..</b>")
+    await asyncio.sleep(0.4)
+    await loading_1.edit_text("<emoji id='6080202089311507876'>😎</emoji> <b>sᴛᴧʀᴛɪηɢ...</b>")
+    await asyncio.sleep(0.4)
+    await loading_1.edit_text("<emoji id='6001132493011425597'>💖</emoji> <b>ʜєʏ ʙᴧʙʏ!</b>")
+    await asyncio.sleep(0.4)
+    await loading_1.edit_text("<emoji id='5413840936994097463'>🌺</emoji> <b>ᴍɪᴍɪ ꭙ ϻᴜsɪᴄ ♪\nsᴛᴧʀᴛed!</b>")
+    await asyncio.sleep(0.5)
+    await loading_1.delete()
     
     # 🔥 STEP 4: FINAL START MESSAGE HANDLING
     if len(message.text.split()) > 1:
@@ -295,4 +274,4 @@ async def welcome(client, message: Message):
 
         except Exception as ex:
             pass
-            
+                
