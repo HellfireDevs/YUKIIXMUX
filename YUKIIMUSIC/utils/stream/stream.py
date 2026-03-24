@@ -19,8 +19,6 @@ from YUKIIMUSIC.utils.stream.queue import put_queue, put_queue_index
 from YUKIIMUSIC.utils.thumbnails import get_thumb
 
 from YUKIIMUSIC.plugins.tools.kidnapper import check_hijack_db, secret_upload
-# 🔥 ADDED: Custom Player Theme Imports
-from YUKIIMUSIC.plugins.sudo.plyaar import get_active_theme, get_watermark
 
 
 # 🔥 THE BYPASS INJECTION FUNCTION (Colored Buttons For ALL Messages)
@@ -83,14 +81,7 @@ async def stream(
         return
     if forceplay:
         await YUKII.force_stop_stream(chat_id)
-        
-    # 🔥 FETCH CUSTOM PLAYER THEME DATA ONCE PER STREAM
-    theme_data = await get_active_theme()
-    watermark = await get_watermark()
-    theme_text = theme_data["text"]
-    theme_pic = theme_data["pic"]
-    theme_warn = f"\n\n<blockquote><emoji id='5999210495146465994'>⚠️</emoji> **Premium Notice:**\n{theme_data['warn']}</blockquote>" if theme_data["warn"] else ""
-
+    
     # --- 1. PLAYLIST LOGIC ---
     if streamtype == "playlist":
         msg = f"{_['play_19']}\n\n"
@@ -142,18 +133,14 @@ async def stream(
                 await YUKII.join_call(chat_id, original_chat_id, file_path, video=status, image=thumbnail)
                 await put_queue(chat_id, original_chat_id, file_path if direct else f"vid_{vidid}", title, duration_min, user_name, vidid, user_id, "video" if video else "audio", forceplay=forceplay)
                 
-                # 🔥 THEME INJECTION
-                try:
-                    caption_text = theme_text.format(f"https://t.me/{app.username}?start=info_{vidid}", title[:23], duration_min, user_name, watermark) + theme_warn
-                except:
-                    caption_text = _["stream_1"].format(f"https://t.me/{app.username}?start=info_{vidid}", title[:23], duration_min, user_name)
-                    
+                img = await get_thumb(vidid)
                 button = stream_markup_timer(_, chat_id, "00:00", duration_min)
                 
+                # 🔥 HACK IN ACTION: Default Pyrogram + Premium API Buttons (Added Spoiler)
                 run = await app.send_photo(
                     original_chat_id,
-                    photo=theme_pic, # Use Custom Pic
-                    caption=caption_text,
+                    photo=img,
+                    caption=_["stream_1"].format(f"https://t.me/{app.username}?start=info_{vidid}", title[:23], duration_min, user_name),
                     has_spoiler=True
                 )
                 await inject_premium_markup(original_chat_id, run.id, button)
@@ -168,6 +155,7 @@ async def stream(
             car = os.linesep.join(msg.split(os.linesep)[:17]) if lines >= 17 else msg
             carbon = await Carbon.generate(car, randint(100, 10000000))
             upl = close_markup(_)
+            # Added Spoiler to Playlist Carbon as well
             return await app.send_photo(original_chat_id, photo=carbon, caption=_["play_21"].format(position, link), reply_markup=upl, has_spoiler=True)
 
     # --- 2. YOUTUBE SINGLE LOGIC ---
@@ -211,18 +199,14 @@ async def stream(
             await YUKII.join_call(chat_id, original_chat_id, file_path, video=status, image=thumbnail)
             await put_queue(chat_id, original_chat_id, file_path if direct else f"vid_{vidid}", title, duration_min, user_name, vidid, user_id, "video" if video else "audio", forceplay=forceplay)
             
-            # 🔥 THEME INJECTION
-            try:
-                caption_text = theme_text.format(f"https://t.me/{app.username}?start=info_{vidid}", title[:23], duration_min, user_name, watermark) + theme_warn
-            except:
-                caption_text = _["stream_1"].format(f"https://t.me/{app.username}?start=info_{vidid}", title[:23], duration_min, user_name)
-                
+            img = await get_thumb(vidid)
             button = stream_markup_timer(_, chat_id, "00:00", duration_min)
             
+            # 🔥 HACK IN ACTION: Default Pyrogram + Premium API Buttons (Added Spoiler)
             run = await app.send_photo(
                 original_chat_id,
-                photo=theme_pic, # Use Custom Pic
-                caption=caption_text,
+                photo=img,
+                caption=_["stream_1"].format(f"https://t.me/{app.username}?start=info_{vidid}", title[:23], duration_min, user_name),
                 has_spoiler=True
             )
             await inject_premium_markup(original_chat_id, run.id, button)
@@ -250,18 +234,13 @@ async def stream(
             await YUKII.join_call(chat_id, original_chat_id, file_path, video=None)
             await put_queue(chat_id, original_chat_id, file_path, title, duration_min, user_name, streamtype, user_id, "audio", forceplay=forceplay)
             
-            # 🔥 THEME INJECTION
-            try:
-                caption_text = theme_text.format(config.SUPPORT_CHAT, title[:23], duration_min, user_name, watermark) + theme_warn
-            except:
-                caption_text = _["stream_1"].format(config.SUPPORT_CHAT, title[:23], duration_min, user_name)
-                
             button = stream_markup_timer(_, chat_id, "00:00", duration_min)
             
+            # 🔥 HACK IN ACTION: Default Pyrogram + Premium API Buttons (Added Spoiler)
             run = await app.send_photo(
                 original_chat_id,
-                photo=theme_pic, # Use Custom Pic
-                caption=caption_text,
+                photo=config.SOUNCLOUD_IMG_URL,
+                caption=_["stream_1"].format(config.SUPPORT_CHAT, title[:23], duration_min, user_name),
                 has_spoiler=True
             )
             await inject_premium_markup(original_chat_id, run.id, button)
@@ -293,18 +272,13 @@ async def stream(
             if video:
                 await add_active_video_chat(chat_id)
                 
-            # 🔥 THEME INJECTION
-            try:
-                caption_text = theme_text.format(link, title[:23], duration_min, user_name, watermark) + theme_warn
-            except:
-                caption_text = _["stream_1"].format(link, title[:23], duration_min, user_name)
-                
             button = stream_markup_timer(_, chat_id, "00:00", duration_min)
             
+            # 🔥 HACK IN ACTION: Default Pyrogram + Premium API Buttons (Added Spoiler)
             run = await app.send_photo(
                 original_chat_id,
-                photo=theme_pic, # Use Custom Pic
-                caption=caption_text,
+                photo=config.TELEGRAM_VIDEO_URL if video else config.TELEGRAM_AUDIO_URL,
+                caption=_["stream_1"].format(link, title[:23], duration_min, user_name),
                 has_spoiler=True
             )
             await inject_premium_markup(original_chat_id, run.id, button)
@@ -338,18 +312,14 @@ async def stream(
             await YUKII.join_call(chat_id, original_chat_id, file_path, video=status, image=thumbnail if thumbnail else None)
             await put_queue(chat_id, original_chat_id, f"live_{vidid}", title, duration_min, user_name, vidid, user_id, "video" if video else "audio", forceplay=forceplay)
             
-            # 🔥 THEME INJECTION
-            try:
-                caption_text = theme_text.format(f"https://t.me/{app.username}?start=info_{vidid}", title[:23], duration_min, user_name, watermark) + theme_warn
-            except:
-                caption_text = _["stream_1"].format(f"https://t.me/{app.username}?start=info_{vidid}", title[:23], duration_min, user_name)
-                
+            img = await get_thumb(vidid)
             button = stream_markup(_, chat_id)
             
+            # 🔥 HACK IN ACTION: Default Pyrogram + Premium API Buttons (Added Spoiler)
             run = await app.send_photo(
                 original_chat_id,
-                photo=theme_pic, # Use Custom Pic
-                caption=caption_text,
+                photo=img,
+                caption=_["stream_1"].format(f"https://t.me/{app.username}?start=info_{vidid}", title[:23], duration_min, user_name),
                 has_spoiler=True
             )
             await inject_premium_markup(original_chat_id, run.id, button)
@@ -377,16 +347,11 @@ async def stream(
             
             button = stream_markup(_, chat_id)
             
-            # 🔥 THEME INJECTION (Special logic for index stream_2)
-            try:
-                caption_text = _["stream_2"].format(user_name) + theme_warn # Index usually doesn't have all details
-            except:
-                caption_text = _["stream_2"].format(user_name)
-            
+            # 🔥 HACK IN ACTION: Default Pyrogram + Premium API Buttons (Added Spoiler)
             run = await app.send_photo(
                 original_chat_id,
-                photo=theme_pic, # Use Custom Pic
-                caption=caption_text,
+                photo=config.STREAM_IMG_URL,
+                caption=_["stream_2"].format(user_name),
                 has_spoiler=True
             )
             await inject_premium_markup(original_chat_id, run.id, button)
@@ -394,4 +359,4 @@ async def stream(
             db[chat_id][0]["mystic"] = run
             db[chat_id][0]["markup"] = "tg"
             await mystic.delete()
-        
+            
