@@ -123,7 +123,10 @@ async def on_user_join_or_update(client, update: ChatMemberUpdated):
 
 @app.on_message(filters.command(["history"]))
 async def name_history(client, message: Message):
-    try: await message.delete() except: pass
+    try:
+        await message.delete()
+    except:
+        pass
     
     # Check history of the replied user, or the sender if no reply
     target_user = message.reply_to_message.from_user if message.reply_to_message else message.from_user
@@ -151,7 +154,10 @@ async def name_history(client, message: Message):
 
 @app.on_message(filters.command(["testname"]))
 async def test_name(client, message: Message):
-    try: await message.delete() except: pass
+    try:
+        await message.delete()
+    except:
+        pass
     
     user_id = message.from_user.id
     user_data = await get_user_history(user_id)
