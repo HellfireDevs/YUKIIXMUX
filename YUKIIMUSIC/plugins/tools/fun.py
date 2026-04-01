@@ -12,7 +12,7 @@ def smallcaps(text):
     chars = {
         'a': 'ᴀ', 'b': 'ʙ', 'c': 'ᴄ', 'd': 'ᴅ', 'e': 'ᴇ', 'f': 'ғ', 'g': 'ɢ', 
         'h': 'ʜ', 'i': 'ɪ', 'j': 'ᴊ', 'k': 'ᴋ', 'l': 'ʟ', 'm': 'ᴍ', 'n': 'ɴ', 
-        'o': 'ᴏ', 'p': 'ᴏ', 'q': 'ǫ', 'r': 'ʀ', 's': 's', 't': 'ᴛ', 'u': 'ᴜ', 
+        'o': 'ᴏ', 'p': 'ᴘ', 'q': 'ǫ', 'r': 'ʀ', 's': 's', 't': 'ᴛ', 'u': 'ᴜ', 
         'v': 'ᴠ', 'w': 'ᴡ', 'x': 'x', 'y': 'ʏ', 'z': 'ᴢ',
         'A': 'ᴀ', 'B': 'ʙ', 'C': 'ᴄ', 'D': 'ᴅ', 'E': 'ᴇ', 'F': 'ғ', 'G': 'ɢ', 
         'H': 'ʜ', 'I': 'ɪ', 'J': 'ᴊ', 'K': 'ᴋ', 'L': 'ʟ', 'M': 'ᴍ', 'N': 'ɴ', 
@@ -60,59 +60,86 @@ def get_target_user(message: Message):
 @app.on_message(filters.command(["slap", "slep"], prefixes=["/", ".", "!"]))
 async def slap_cmd(client, message: Message):
     target = get_target_user(message)
-    if not target:
-        return await message.reply_text(smallcaps("kisko thappad marna hai? uske message par reply karke batao."))
+    chat_id = message.chat.id
     
+    if not target:
+        try: await message.delete() except: pass
+        return await client.send_message(chat_id, smallcaps("who do you want to slap? reply to their message."))
+    
+    target_msg_id = message.reply_to_message.id
     sender = message.from_user.mention
     receiver = target.mention
     gif = random.choice(SLAP_GIFS)
     
-    caption = f"{sender} {smallcaps('ne')} {receiver} {smallcaps('ko zor ka thappad mara')}! 💥"
-    await message.reply_animation(animation=gif, caption=caption)
+    caption = f"{sender} {smallcaps('slapped')} {receiver} {smallcaps('hard')}! 💥"
+    
+    try: await message.delete() except: pass
+    await client.send_animation(chat_id, animation=gif, caption=caption, reply_to_message_id=target_msg_id)
 
 @app.on_message(filters.command(["kiss"], prefixes=["/", ".", "!"]))
 async def kiss_cmd(client, message: Message):
     target = get_target_user(message)
-    if not target:
-        return await message.reply_text(smallcaps("kisi ko reply karo kiss karne ke liye."))
+    chat_id = message.chat.id
     
+    if not target:
+        try: await message.delete() except: pass
+        return await client.send_message(chat_id, smallcaps("reply to someone to kiss them."))
+    
+    target_msg_id = message.reply_to_message.id
     sender = message.from_user.mention
     receiver = target.mention
     gif = random.choice(KISS_GIFS)
     
-    caption = f"{sender} {smallcaps('ne')} {receiver} {smallcaps('ko pyar se kiss kiya')}. 💋"
-    await message.reply_animation(animation=gif, caption=caption)
+    caption = f"{sender} {smallcaps('gave')} {receiver} {smallcaps('a sweet kiss')}. 💋"
+    
+    try: await message.delete() except: pass
+    await client.send_animation(chat_id, animation=gif, caption=caption, reply_to_message_id=target_msg_id)
 
 @app.on_message(filters.command(["hug"], prefixes=["/", ".", "!"]))
 async def hug_cmd(client, message: Message):
     target = get_target_user(message)
-    if not target:
-        return await message.reply_text(smallcaps("kisko gale lagana hai? reply karke batao."))
+    chat_id = message.chat.id
     
+    if not target:
+        try: await message.delete() except: pass
+        return await client.send_message(chat_id, smallcaps("who do you want to hug? reply to their message."))
+    
+    target_msg_id = message.reply_to_message.id
     sender = message.from_user.mention
     receiver = target.mention
     gif = random.choice(HUG_GIFS)
     
-    caption = f"{sender} {smallcaps('ne')} {receiver} {smallcaps('ko zor se hug kiya')}. 🫂"
-    await message.reply_animation(animation=gif, caption=caption)
+    caption = f"{sender} {smallcaps('gave')} {receiver} {smallcaps('a tight hug')}. 🫂"
+    
+    try: await message.delete() except: pass
+    await client.send_animation(chat_id, animation=gif, caption=caption, reply_to_message_id=target_msg_id)
 
 @app.on_message(filters.command(["handsup", "handup"], prefixes=["/", ".", "!"]))
 async def handsup_cmd(client, message: Message):
     target = get_target_user(message)
-    if not target:
-        return await message.reply_text(smallcaps("kisko bol rahe ho hands up? reply karo."))
+    chat_id = message.chat.id
     
+    if not target:
+        try: await message.delete() except: pass
+        return await client.send_message(chat_id, smallcaps("who are you telling to put their hands up? reply to them."))
+    
+    target_msg_id = message.reply_to_message.id
     sender = message.from_user.mention
     receiver = target.mention
     gif = random.choice(HANDSUP_GIFS)
     
-    caption = f"ᴏʏᴇ {receiver}! {sender} {smallcaps('ne bola hai hands up! chup chap haath upar kar lo')}. 👐"
-    await message.reply_animation(animation=gif, caption=caption)
+    caption = f"ʜᴇʏ {receiver}! {sender} {smallcaps('said hands up! put your hands in the air')}. 👐"
+    
+    try: await message.delete() except: pass
+    await client.send_animation(chat_id, animation=gif, caption=caption, reply_to_message_id=target_msg_id)
 
 @app.on_message(filters.command(["gojo"], prefixes=["/", ".", "!"]))
 async def gojo_cmd(client, message: Message):
+    chat_id = message.chat.id
     gif = random.choice(GOJO_GIFS)
-    await message.reply_animation(animation=gif, caption=smallcaps("gojo satoru in the house! 😎"))
+    
+    try: await message.delete() except: pass
+    await client.send_animation(chat_id, animation=gif, caption=smallcaps("gojo satoru in the house! 😎"))
 
 # ─────────────────────────────
 # FUN METERS (Stupid, Crush, Love)
@@ -120,36 +147,56 @@ async def gojo_cmd(client, message: Message):
 @app.on_message(filters.command(["stupid", "stupidmeter", "stupidmittar"], prefixes=["/", ".", "!"]))
 async def stupid_meter(client, message: Message):
     target = get_target_user(message) or message.from_user
-    percentage = random.randint(0, 100)
+    chat_id = message.chat.id
+    target_msg_id = message.reply_to_message.id if message.reply_to_message else None
     
+    percentage = random.randint(0, 100)
     text = f"**{smallcaps('Stupid Meter')}**\n\n{target.mention} {smallcaps('is')} **{percentage}%** {smallcaps('stupid')}. 📉"
-    await message.reply_text(text)
+    
+    try: await message.delete() except: pass
+    
+    if target_msg_id:
+        await client.send_message(chat_id, text, reply_to_message_id=target_msg_id)
+    else:
+        await client.send_message(chat_id, text)
 
 @app.on_message(filters.command(["crush", "crushmeter", "crushmittar"], prefixes=["/", ".", "!"]))
 async def crush_meter(client, message: Message):
     target = get_target_user(message)
-    if not target:
-        return await message.reply_text(smallcaps("crush check karne ke liye reply karna padega."))
+    chat_id = message.chat.id
     
+    if not target:
+        try: await message.delete() except: pass
+        return await client.send_message(chat_id, smallcaps("reply to someone to check your crush meter."))
+    
+    target_msg_id = message.reply_to_message.id
     percentage = random.randint(0, 100)
     sender = message.from_user.mention
     receiver = target.mention
     
-    text = f"**{smallcaps('Crush Meter')}**\n\n{sender} {smallcaps('aur')} {receiver} {smallcaps('ka pyaar')} **{percentage}%** {smallcaps('match karta hai')}. 💘"
-    await message.reply_text(text)
+    text = f"**{smallcaps('Crush Meter')}**\n\n{sender} {smallcaps('and')} {receiver}'s {smallcaps('crush compatibility is')} **{percentage}%**. 💘"
+    
+    try: await message.delete() except: pass
+    await client.send_message(chat_id, text, reply_to_message_id=target_msg_id)
 
 @app.on_message(filters.command(["love", "lovemeter", "lovemittar"], prefixes=["/", ".", "!"]))
 async def love_meter(client, message: Message):
     target = get_target_user(message)
-    if not target:
-        return await message.reply_text(smallcaps("love check karne ke liye apne partner ko reply karo."))
+    chat_id = message.chat.id
     
+    if not target:
+        try: await message.delete() except: pass
+        return await client.send_message(chat_id, smallcaps("reply to your partner to check the love meter."))
+    
+    target_msg_id = message.reply_to_message.id
     percentage = random.randint(0, 100)
     sender = message.from_user.mention
     receiver = target.mention
     
-    text = f"**{smallcaps('Love Meter')}**\n\n{sender} {smallcaps('aur')} {receiver} {smallcaps('ka pyaar')} **{percentage}%** {smallcaps('hai')}. ❤️"
-    await message.reply_text(text)
+    text = f"**{smallcaps('Love Meter')}**\n\n{smallcaps('the love between')} {sender} {smallcaps('and')} {receiver} {smallcaps('is')} **{percentage}%**. ❤️"
+    
+    try: await message.delete() except: pass
+    await client.send_message(chat_id, text, reply_to_message_id=target_msg_id)
 
 # ─────────────────────────────
 # PROPOSE COMMAND WITH INLINE BUTTONS
@@ -157,17 +204,21 @@ async def love_meter(client, message: Message):
 @app.on_message(filters.command(["propose"], prefixes=["/", ".", "!"]))
 async def propose_cmd(client, message: Message):
     target = get_target_user(message)
+    chat_id = message.chat.id
     
     if not target:
-        return await message.reply_text(smallcaps("propose karna hai toh reply karo, hawa mein nahi."))
+        try: await message.delete() except: pass
+        return await client.send_message(chat_id, smallcaps("reply to someone to propose to them."))
     
     if target.id == message.from_user.id:
-        return await message.reply_text(smallcaps("khud ko hi propose kar raha hai?"))
+        try: await message.delete() except: pass
+        return await client.send_message(chat_id, smallcaps("are you trying to propose to yourself?"))
 
+    target_msg_id = message.reply_to_message.id
     sender = message.from_user
     receiver = target
     
-    text = f"ʜᴇʏ {receiver.mention},\n{sender.mention} {smallcaps('ne tumhe propose kiya hai. kya tum accept karogi?')} 💍"
+    text = f"ʜᴇʏ {receiver.mention},\n{sender.mention} {smallcaps('has proposed to you. will you accept?')} 💍"
     
     buttons = InlineKeyboardMarkup([
         [
@@ -176,7 +227,8 @@ async def propose_cmd(client, message: Message):
         ]
     ])
     
-    await message.reply_text(text, reply_markup=buttons)
+    try: await message.delete() except: pass
+    await client.send_message(chat_id, text, reply_markup=buttons, reply_to_message_id=target_msg_id)
 
 @app.on_callback_query(filters.regex(r"^prop_"))
 async def propose_callback(client, query: CallbackQuery):
@@ -188,15 +240,15 @@ async def propose_callback(client, query: CallbackQuery):
     clicker_id = query.from_user.id
     
     if clicker_id != receiver_id:
-        return await query.answer(smallcaps("ye proposal tere liye nahi hai, side ho ja."), show_alert=True)
+        return await query.answer(smallcaps("this proposal is not for you, step aside."), show_alert=True)
     
     sender_user = (await client.get_users(sender_id)).mention
     receiver_user = query.from_user.mention
     
     if action == "yes":
-        final_text = f"🎉 **{smallcaps('Mubarakan')}** 🎉\n\n{receiver_user} {smallcaps('ne')} {sender_user} {smallcaps('ka proposal accept kar liya hai')}! 💖"
+        final_text = f"🎉 **{smallcaps('Congratulations')}** 🎉\n\n{receiver_user} {smallcaps('has accepted')} {sender_user}'s {smallcaps('proposal')}! 💖"
     else:
-        final_text = f"💔 **{smallcaps('Dil Toot Gaya')}** 💔\n\n{receiver_user} {smallcaps('ne')} {sender_user} {smallcaps('ka proposal reject kar diya')}. 🥀"
+        final_text = f"💔 **{smallcaps('Heartbroken')}** 💔\n\n{receiver_user} {smallcaps('has rejected')} {sender_user}'s {smallcaps('proposal')}. 🥀"
         
     await query.message.edit_text(final_text)
-      
+    
