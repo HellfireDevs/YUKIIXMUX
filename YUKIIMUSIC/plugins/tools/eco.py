@@ -209,7 +209,7 @@ async def rob_or_kill_user(client, message: Message):
     last_daily = robber_data.get("last_daily", 0) if robber_data else 0
     if time.time() - last_daily >= 86400:
         # Prompt to claim daily bonus
-        claim_msg = f"⚠️ {smallcaps('You haven\'t claimed your daily bonus yet! First claim it to perform an attack.')}"
+        claim_msg = "⚠️ " + smallcaps("You haven't claimed your daily bonus yet! First claim it to perform an attack.")
         markup = InlineKeyboardMarkup([
             [InlineKeyboardButton(f"🎁 {smallcaps('Claim Daily Bonus')}", url=f"https://t.me/{app.username}?start=claimx")]
         ])
