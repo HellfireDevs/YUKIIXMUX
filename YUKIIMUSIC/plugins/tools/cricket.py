@@ -14,9 +14,7 @@ from YUKIIMUSIC import app
 # ==========================================
 #              API CONFIGURATION
 # ==========================================
-# Using the API key from your screenshot
 CRIC_API_KEY = "fa92b378-81de-4976-8204-b5ebe9f56835"
-# currentMatches endpoint is best for fetching live scores
 CRIC_API_URL = f"https://api.cricapi.com/v1/currentMatches?apikey={CRIC_API_KEY}&offset=0"
 
 
@@ -38,65 +36,93 @@ def smallcaps(text):
 #              LIVE API DATA MATCHER
 # ==========================================
 
-async def fetch_live_score():
-    """Fetches real live score data from CricAPI"""
+async def get_all_matches():
+    """Fetches raw list of all current matches from CricAPI"""
     try:
         async with aiohttp.ClientSession() as session:
             async with session.get(CRIC_API_URL) as response:
                 if response.status != 200:
-                    return None
-                
+                    return []
                 data = await response.json()
-                
-                # Check if we got valid data
-                if "data" not in data or not data["data"]:
-                    return None
-                
-                # Get the first match from the list (you can later add logic to filter by specific teams)
-                match = data["data"][0] 
-                
-                match_name = match.get("name", "Unknown Match")
-                status = match.get("status", "Match info unavailable")
-                
-                teams = match.get("teams", ["Team 1", "Team 2"])
-                team1 = teams[0] if len(teams) > 0 else "Team 1"
-                team2 = teams[1] if len(teams) > 1 else "Team 2"
-                
-                team1_score, team1_overs = "0/0", "(0.0)"
-                team2_score, team2_overs = "0/0", "(0.0)"
-                
-                # Extract scores if available in the API response
-                scores = match.get("score", [])
-                if len(scores) > 0:
-                    team1_score = f"{scores[0].get('r', 0)}/{scores[0].get('w', 0)}"
-                    team1_overs = f"({scores[0].get('o', 0)})"
-                if len(scores) > 1:
-                    team2_score = f"{scores[1].get('r', 0)}/{scores[1].get('w', 0)}"
-                    team2_overs = f"({scores[1].get('o', 0)})"
-
-                return {
-                    "match": match_name,
-                    "status": status,
-                    "team1": team1,
-                    "team1_score": team1_score,
-                    "team1_overs": team1_overs,
-                    "team2": team2,
-                    "team2_score": team2_score,
-                    "team2_overs": team2_overs,
-                    "pom": "N/A", # POM and RR are not directly provided in the basic /matches endpoint
-                    "req_rr": "-",
-                    "curr_rr": "-"
-                }
+                if "data" in data and data["data"]:
+                    return data["data"]
+                return []
     except Exception as e:
-        print(f"Error fetching live score: {e}")
+        print(f"Error fetching matches list: {e}")
+        return []
+
+async def fetch_live_score(target_match_id=None):
+    """Fetches real live score data, optionally for a specific match ID"""
+    try:
+        matches = await get_all_matches()
+        if not matches:
+            return None
+
+        selected_match = None
+
+        if target_match_id:
+            # Find the specific match requested
+            for m in matches:
+                if str(m.get("id")) == str(target_match_id):
+                    selected_match = m
+                    break
+        else:
+            # Default logic: Try to find an IPL match, else return the first one
+            selected_match = matches[0]
+            for m in matches:
+                name = m.get("name", "").upper()
+                if "IPL" in name or "INDIAN PREMIER LEAGUE" in name or "RCB" in name or "SRH" in name:
+                    selected_match = m
+                    break
+
+        if not selected_match:
+            return None
+
+        match = selected_match
+        match_id = match.get("id")
+        match_name = match.get("name", "Unknown Match")
+        status = match.get("status", "Match info unavailable")
+        
+        teams = match.get("teamInfo", [])
+        if len(teams) >= 2:
+            team1 = teams[0].get("shortname", teams[0].get("name", "Team 1"))
+            team2 = teams[1].get("shortname", teams[1].get("name", "Team 2"))
+        else:
+            team1 = "Team 1"
+            team2 = "Team 2"
+        
+        team1_score, team1_overs = "0/0", "(0.0)"
+        team2_score, team2_overs = "0/0", "(0.0)"
+        
+        scores = match.get("score", [])
+        if len(scores) > 0:
+            team1_score = f"{scores[0].get('r', 0)}/{scores[0].get('w', 0)}"
+            team1_overs = f"({scores[0].get('o', 0)})"
+        if len(scores) > 1:
+            team2_score = f"{scores[1].get('r', 0)}/{scores[1].get('w', 0)}"
+            team2_overs = f"({scores[1].get('o', 0)})"
+
+        return {
+            "id": match_id,
+            "match": match_name,
+            "status": status,
+            "team1": team1,
+            "team1_score": team1_score,
+            "team1_overs": team1_overs,
+            "team2": team2,
+            "team2_score": team2_score,
+            "team2_overs": team2_overs,
+            "pom": "N/A", 
+            "req_rr": "-",
+            "curr_rr": "-"
+        }
+    except Exception as e:
+        print(f"Error fetching live score data: {e}")
         return None
 
-
 # ==========================================
-#              GRAPH GENERATOR (WORM GRAPH)
+#              GRAPH GENERATOR 
 # ==========================================
-# Note: Keeping this with visual mock data because generating real worm graphs 
-# requires the ball-by-ball premium API endpoint.
 
 def generate_worm_graph():
     """Generates a Google-style Scoring Comparison Graph"""
@@ -109,11 +135,11 @@ def generate_worm_graph():
 
     # Dummy progression data
     overs = list(range(1, 21))
-    kkr_runs = [8, 15, 25, 40, 60, 68, 80, 95, 105, 110, 125, 135, 145, 160, 175, 186, 200, 205, 215, 220]
-    mi_runs = [10, 18, 22, 38, 55, 65, 82, 90, 102, 115, 130, 148, 150, 165, 180, 195, 202, 210, 218, 224]
+    t1_runs = [8, 15, 25, 40, 60, 68, 80, 95, 105, 110, 125, 135, 145, 160, 175, 186, 200, 205, 215, 220]
+    t2_runs = [10, 18, 22, 38, 55, 65, 82, 90, 102, 115, 130, 148, 150, 165, 180, 195, 202, 210, 218, 224]
 
-    ax.plot(overs, kkr_runs, color='#808080', label='Team 1', linewidth=2.5, marker='o', markersize=5)
-    ax.plot(overs[:20], mi_runs[:20], color='#4da6ff', label='Team 2', linewidth=2.5, marker='o', markersize=5)
+    ax.plot(overs, t1_runs, color='#808080', label='Team 1', linewidth=2.5, marker='o', markersize=5)
+    ax.plot(overs[:20], t2_runs[:20], color='#4da6ff', label='Team 2', linewidth=2.5, marker='o', markersize=5)
 
     ax.set_title('Scoring Comparison', fontsize=14, color='white', loc='left', pad=15)
     ax.set_xlabel('Overs', fontsize=12, color='#a0a0a0')
@@ -137,19 +163,64 @@ def generate_worm_graph():
     return buf
 
 # ==========================================
+#              COMMAND: /match Search
+# ==========================================
+
+@app.on_message(filters.command("match") & filters.group)
+async def search_match_cmd(client, message: Message):
+    if len(message.command) < 2:
+        return await message.reply_text(f"Please provide a team or match name.\nExample: `/match rr` or `/match india`")
+    
+    query = " ".join(message.command[1:]).lower()
+    processing_msg = await message.reply_text(f"🔍 {smallcaps('Searching matches for')} '{query}'...")
+    
+    matches = await get_all_matches()
+    results = []
+    
+    for m in matches:
+        name = m.get("name", "").lower()
+        shortname1 = ""
+        shortname2 = ""
+        
+        teams = m.get("teamInfo", [])
+        if len(teams) >= 2:
+            shortname1 = teams[0].get("shortname", "").lower()
+            shortname2 = teams[1].get("shortname", "").lower()
+            
+        if query in name or query in shortname1 or query in shortname2:
+            results.append(m)
+            
+    if not results:
+        return await processing_msg.edit_text(f"❌ No live/recent matches found matching '{query}'.")
+        
+    keyboard = []
+    # Show max 5 matches to avoid huge keyboards
+    for m in results[:5]:
+        match_title = m.get('name', 'Unknown Match')
+        # Format: setmatch_ID
+        keyboard.append([InlineKeyboardButton(match_title, callback_data=f"setmatch_{m['id']}")])
+        
+    keyboard.append([InlineKeyboardButton("❌ Close", callback_data="cric_close")])
+    
+    await processing_msg.edit_text(
+        f"🏏 **{smallcaps('Select a Match to Track:')}**",
+        reply_markup=InlineKeyboardMarkup(keyboard)
+    )
+
+# ==========================================
 #              KEYWORD TRIGGER
 # ==========================================
 
-CRICKET_REGEX = r"(?i)\b(cricket|ipl|rcb|csk|mi|kkr|srh|dc|pbks|rr|gt|lsg|score|match)\b"
+CRICKET_REGEX = r"(?i)\b(cricket|ipl|rcb|csk|mi|kkr|srh|dc|pbks|rr|gt|lsg|score)\b"
 
 @app.on_message(filters.regex(CRICKET_REGEX) & filters.group)
 async def auto_cricket_score(client, message: Message):
     data = await fetch_live_score()
     
     if not data:
-        await message.reply_text(f"🏏 **{smallcaps('Live Cricket Match')}**\n\nAbhi koi data fetch nahi ho paaya. Please try again later.")
         return
-
+        
+    match_id = data["id"]
     text = f"🏏 **{smallcaps('Live Cricket Match')}** 🏏\n\n"
     text += f"🏟 **{smallcaps(data['match'])}**\n"
     text += f"📢 {data['status']}\n\n"
@@ -159,62 +230,106 @@ async def auto_cricket_score(client, message: Message):
     text += f"🏆 **{smallcaps('POM')}:** {data['pom']}"
 
     markup = InlineKeyboardMarkup([
-        [InlineKeyboardButton(f"🔄 {smallcaps('Refresh Score')}", callback_data="cric_refresh")],
+        [InlineKeyboardButton(f"🔄 {smallcaps('Refresh Score')}", callback_data=f"cric_ref_{match_id}")],
         [
-            InlineKeyboardButton(f"📈 {smallcaps('Worm Graph')}", callback_data="cric_graph"),
-            InlineKeyboardButton(f"📋 {smallcaps('Summary')}", callback_data="cric_summary")
+            InlineKeyboardButton(f"📈 {smallcaps('Worm Graph')}", callback_data=f"cric_grp_{match_id}"),
+            InlineKeyboardButton(f"📋 {smallcaps('Summary')}", callback_data=f"cric_sum_{match_id}")
         ],
         [InlineKeyboardButton("❌", callback_data="cric_close")]
     ])
 
     await message.reply_text(text, reply_markup=markup)
 
+
 # ==========================================
 #              CALLBACK HANDLERS
 # ==========================================
 
-@app.on_callback_query(filters.regex(r"^cric_"))
+@app.on_callback_query(filters.regex(r"^(cric_|setmatch_)"))
 async def cricket_callbacks(client, query):
-    action = query.data.split("_")[1]
+    data = query.data
     
-    if action == "close":
+    if data == "cric_close":
         try:
             await query.message.delete()
         except:
             await query.answer("Failed to close.", show_alert=True)
         return
 
-    if action == "refresh":
-        await query.answer("Fetching latest score...", show_alert=False)
-        data = await fetch_live_score() 
+    # Handle Match Setting from /match command
+    if data.startswith("setmatch_"):
+        match_id = data.split("setmatch_")[1]
+        await query.answer("Fetching selected match...", show_alert=False)
         
-        if not data:
+        match_data = await fetch_live_score(target_match_id=match_id)
+        if not match_data:
+            return await query.edit_message_text("Match data no longer available.")
+            
+        text = f"🏏 **{smallcaps('Live Cricket Match')}** 🏏\n\n"
+        text += f"🏟 **{smallcaps(match_data['match'])}**\n"
+        text += f"📢 {match_data['status']}\n\n"
+        text += f"🔴 **{match_data['team1']}:** `{match_data['team1_score']}` {match_data['team1_overs']}\n"
+        text += f"🔵 **{match_data['team2']}:** `{match_data['team2_score']}` {match_data['team2_overs']}\n\n"
+        text += f"⚡ **{smallcaps('CRR')}:** {match_data['curr_rr']} | **{smallcaps('REQ')}:** {match_data['req_rr']}\n"
+        text += f"🏆 **{smallcaps('POM')}:** {match_data['pom']}\n"
+        text += f"\n⏳ *{smallcaps('Last updated')}: {time.strftime('%H:%M:%S')}*"
+        
+        markup = InlineKeyboardMarkup([
+            [InlineKeyboardButton(f"🔄 {smallcaps('Refresh Score')}", callback_data=f"cric_ref_{match_id}")],
+            [
+                InlineKeyboardButton(f"📈 {smallcaps('Worm Graph')}", callback_data=f"cric_grp_{match_id}"),
+                InlineKeyboardButton(f"📋 {smallcaps('Summary')}", callback_data=f"cric_sum_{match_id}")
+            ],
+            [InlineKeyboardButton("❌", callback_data="cric_close")]
+        ])
+        
+        await query.edit_message_text(text, reply_markup=markup)
+        return
+
+    # Extract action and match_id from cric_ format (e.g., cric_ref_8602ad9d-...)
+    parts = data.split("_", 2)
+    if len(parts) < 3:
+        return # invalid format
+        
+    action = parts[1]
+    match_id = parts[2]
+
+    if action == "ref":
+        await query.answer("Fetching latest score...", show_alert=False)
+        match_data = await fetch_live_score(target_match_id=match_id) 
+        
+        if not match_data:
             await query.answer("Could not fetch latest updates API se.", show_alert=True)
             return
 
         text = f"🏏 **{smallcaps('Live Cricket Match')}** 🏏\n\n"
-        text += f"🏟 **{smallcaps(data['match'])}**\n"
-        text += f"📢 {data['status']}\n\n"
-        text += f"🔴 **{data['team1']}:** `{data['team1_score']}` {data['team1_overs']}\n"
-        text += f"🔵 **{data['team2']}:** `{data['team2_score']}` {data['team2_overs']}\n\n"
-        text += f"⚡ **{smallcaps('CRR')}:** {data['curr_rr']} | **{smallcaps('REQ')}:** {data['req_rr']}\n"
-        text += f"🏆 **{smallcaps('POM')}:** {data['pom']}\n"
+        text += f"🏟 **{smallcaps(match_data['match'])}**\n"
+        text += f"📢 {match_data['status']}\n\n"
+        text += f"🔴 **{match_data['team1']}:** `{match_data['team1_score']}` {match_data['team1_overs']}\n"
+        text += f"🔵 **{match_data['team2']}:** `{match_data['team2_score']}` {match_data['team2_overs']}\n\n"
+        text += f"⚡ **{smallcaps('CRR')}:** {match_data['curr_rr']} | **{smallcaps('REQ')}:** {match_data['req_rr']}\n"
+        text += f"🏆 **{smallcaps('POM')}:** {match_data['pom']}\n"
         text += f"\n⏳ *{smallcaps('Last updated')}: {time.strftime('%H:%M:%S')}*"
+        
+        markup = InlineKeyboardMarkup([
+            [InlineKeyboardButton(f"🔄 {smallcaps('Refresh Score')}", callback_data=f"cric_ref_{match_id}")],
+            [
+                InlineKeyboardButton(f"📈 {smallcaps('Worm Graph')}", callback_data=f"cric_grp_{match_id}"),
+                InlineKeyboardButton(f"📋 {smallcaps('Summary')}", callback_data=f"cric_sum_{match_id}")
+            ],
+            [InlineKeyboardButton("❌", callback_data="cric_close")]
+        ])
         
         try:
             if query.message.photo:
                 await query.message.delete()
-                await app.send_message(
-                    query.message.chat.id, 
-                    text, 
-                    reply_markup=query.message.reply_markup
-                )
+                await app.send_message(query.message.chat.id, text, reply_markup=markup)
             else:
-                await query.edit_message_text(text, reply_markup=query.message.reply_markup)
+                await query.edit_message_text(text, reply_markup=markup)
         except Exception as e:
             pass
 
-    elif action == "graph":
+    elif action == "grp":
         await query.answer("Generating Worm Graph...", show_alert=False)
         
         graph_stream = generate_worm_graph()
@@ -224,7 +339,7 @@ async def cricket_callbacks(client, query):
         caption += "Click 'Refresh Score' to return to scorecard."
         
         markup = InlineKeyboardMarkup([
-            [InlineKeyboardButton(f"🔙 {smallcaps('Back to Score')}", callback_data="cric_refresh")],
+            [InlineKeyboardButton(f"🔙 {smallcaps('Back to Score')}", callback_data=f"cric_ref_{match_id}")],
             [InlineKeyboardButton("❌", callback_data="cric_close")]
         ])
         
@@ -245,11 +360,9 @@ async def cricket_callbacks(client, query):
         except Exception as e:
             await query.answer("Failed to load graph.", show_alert=True)
 
-    elif action == "summary":
+    elif action == "sum":
         await query.answer("Loading match summary...", show_alert=False)
         
-        # Real player stats are usually in the Fantasy API or Match Info API.
-        # Keeping UI structural format.
         summary_text = (
             f"📋 **{smallcaps('Match Summary')}**\n\n"
             f"*(Detailed innings summary requires extended API call. Check live match status for winner)*\n\n"
@@ -257,7 +370,7 @@ async def cricket_callbacks(client, query):
         )
         
         markup = InlineKeyboardMarkup([
-            [InlineKeyboardButton(f"🔙 {smallcaps('Back to Score')}", callback_data="cric_refresh")],
+            [InlineKeyboardButton(f"🔙 {smallcaps('Back to Score')}", callback_data=f"cric_ref_{match_id}")],
             [InlineKeyboardButton("❌", callback_data="cric_close")]
         ])
         
@@ -269,3 +382,4 @@ async def cricket_callbacks(client, query):
                 await query.edit_message_text(summary_text, reply_markup=markup)
         except Exception as e:
             pass
+    
