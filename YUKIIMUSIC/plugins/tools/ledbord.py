@@ -18,6 +18,19 @@ message_collection = db.message_counts
 LEADERBOARD_CACHE = {}
 CACHE_TIME = 300 # 5 minutes cache
 
+# ----------------- ANTI-SPAM LOGIC DICTIONARIES -----------------
+# Stores temporary message history for spam detection
+# Format: {user_id: [timestamp1, timestamp2, ...]}
+USER_MESSAGE_HISTORY = {} 
+
+# Stores users who are currently blocked from increasing their rank
+# Format: {user_id: unblock_timestamp}
+BLOCKED_USERS = {}
+
+SPAM_THRESHOLD = 7 # Number of messages allowed
+SPAM_WINDOW = 5 # Time window in seconds (e.g. 7 messages in 5 seconds)
+BLOCK_DURATION = 1200 # Block duration in seconds (20 minutes = 1200 seconds)
+
 # ----------------- DB FUNCTIONS -----------------
 async def update_message_count(chat_id: int, user_id: int, name: str):
     today = datetime.utcnow().strftime("%Y-%m-%d")
@@ -127,11 +140,47 @@ def lb_buttons(current_timeframe="overall"):
 
 # ----------------- HANDLERS -----------------
 
-# 1. Message Counter Listener
+# 1. Message Counter Listener & Spam Checker
 @app.on_message(filters.group & ~filters.bot, group=10)
 async def count_messages(client, message: Message):
     if not message.from_user:
         return
+        
+    user_id = message.from_user.id
+    current_time = time.time()
+    
+    # 1. Check if user is currently blocked from leaderboard updates
+    if user_id in BLOCKED_USERS:
+        if current_time < BLOCKED_USERS[user_id]:
+            return # Blocked, so ignore message for counting
+        else:
+            del BLOCKED_USERS[user_id] # Block expired, remove from list
+
+    # 2. Anti-Spam Logic
+    if user_id not in USER_MESSAGE_HISTORY:
+        USER_MESSAGE_HISTORY[user_id] = []
+        
+    USER_MESSAGE_HISTORY[user_id].append(current_time)
+    
+    # Keep only messages within the spam window
+    USER_MESSAGE_HISTORY[user_id] = [msg_time for msg_time in USER_MESSAGE_HISTORY[user_id] if current_time - msg_time <= SPAM_WINDOW]
+    
+    if len(USER_MESSAGE_HISTORY[user_id]) >= SPAM_THRESHOLD:
+        # User has spammed! Block them from leaderboard.
+        BLOCKED_USERS[user_id] = current_time + BLOCK_DURATION
+        USER_MESSAGE_HISTORY[user_id] = [] # Clear history to prevent instant re-trigger
+        
+        try:
+            # Send warning message to group
+            warning_msg = await message.reply_text(f"⛔️ {message.from_user.mention} is flooding: blocked for 20 minutes from the leaderboard.")
+            # Auto delete warning after 10 seconds to keep chat clean (optional)
+            await asyncio.sleep(10)
+            await warning_msg.delete()
+        except:
+            pass
+        return # Do not increment count this time
+        
+    # If not spamming and not blocked, update DB
     asyncio.create_task(update_message_count(message.chat.id, message.from_user.id, message.from_user.first_name))
 
 # 2. Main Command Handler
@@ -179,7 +228,7 @@ async def leaderboard_cmd(client, message: Message):
             "expiry": time.time() + CACHE_TIME
         }
     else:
-        await app.send_message(chat_id, "❌ Template image not found in assets folder!")
+        await app.send_message(chat_id, "❌ Template image not found in YUKIIMUSIC/assets folder!")
 
 # 3. Timeframe Buttons Handler
 @app.on_callback_query(filters.regex(r"^lb_(overall|today|week)$"))
@@ -233,4 +282,4 @@ async def close_leaderboard_callback(client, query):
         await query.message.delete()
     except:
         await query.answer("❌ Failed to delete message.", show_alert=True)
-
+    
