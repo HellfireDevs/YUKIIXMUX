@@ -6,7 +6,7 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from pyrogram.enums import ChatType
 
 #BOT FILE NAME
-from SHUKLAMUSIC import app
+from YUKIIMUSIC import app
 
 POLICE = [
     [
@@ -94,3 +94,4 @@ __mod__ = "COUPLES"
 __help__ = """
 **» /couples** - Get Todays Couples Of The Group In Interactive View
 """
+
