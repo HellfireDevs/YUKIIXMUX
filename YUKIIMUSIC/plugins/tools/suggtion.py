@@ -9,7 +9,6 @@ from YUKIIMUSIC.misc import mongodb
 # ─────────────────────────────
 # MONGODB DATABASE SETUP
 # ─────────────────────────────
-# Automatically creates a new collection in your existing MongoDB
 namesdb = mongodb.name_tracker
 
 async def get_user_history(user_id: int):
@@ -93,7 +92,8 @@ async def check_user_profile(client, chat_id, user):
 
     # If any changes found, update MongoDB and alert the group
     if updated:
-        await update_user_history(user_id, names_list, usernames_list)
+        # Keep only the last 15 records so database doesn't get bloated
+        await update_user_history(user_id, names_list[-15:], usernames_list[-15:])
         alert_text = f"👀 **{smallcaps('Profile Update Detected')}** 👀\n\n{user.mention} {smallcaps('has changed their')} " + f" {smallcaps('and')} ".join(changes) + "!"
         
         try:
@@ -102,17 +102,17 @@ async def check_user_profile(client, chat_id, user):
             pass 
 
 # ─────────────────────────────
-# EVENT HANDLERS
+# EVENT HANDLERS (Negative Groups for Highest Priority)
 # ─────────────────────────────
 
-# 1. Listen to all normal messages in the group
-@app.on_message(filters.group & ~filters.bot, group=10)
+# 1. Listen to all normal messages in the group BEFORE other plugins block them
+@app.on_message(filters.group & ~filters.bot, group=-10)
 async def on_user_message(client, message: Message):
     if message.from_user:
         await check_user_profile(client, message.chat.id, message.from_user)
 
-# 2. Listen to Chat Member Updates (When someone joins, gets promoted, etc.)
-@app.on_chat_member_updated(filters.group, group=11)
+# 2. Listen to Chat Member Updates
+@app.on_chat_member_updated(filters.group, group=-11)
 async def on_user_join_or_update(client, update: ChatMemberUpdated):
     if update.new_chat_member and update.new_chat_member.user:
         await check_user_profile(client, update.chat.id, update.new_chat_member.user)
@@ -128,7 +128,6 @@ async def name_history(client, message: Message):
     except:
         pass
     
-    # Check history of the replied user, or the sender if no reply
     target_user = message.reply_to_message.from_user if message.reply_to_message else message.from_user
     user_id = target_user.id
     
@@ -163,7 +162,6 @@ async def test_name(client, message: Message):
     user_data = await get_user_history(user_id)
     
     if not user_data:
-        # If they use /testname before sending any normal message, add them now
         await check_user_profile(client, message.chat.id, message.from_user)
         return await message.reply_text(smallcaps("you were not in the database. i just added you! change your name now and send a message to test."))
         
@@ -176,6 +174,7 @@ async def test_name(client, message: Message):
     text = f"🛠 **{smallcaps('Test Tracker Data')}**\n\n"
     text += f"📝 {smallcaps('Saved Name in Bot')}: **{current_saved_name}**\n"
     text += f"🔗 {smallcaps('Saved Username in Bot')}: **{current_saved_username}**\n\n"
+    text += f"👤 {smallcaps('Your Current Name')}: **{get_full_name(message.from_user)}**\n\n"
     text += smallcaps("if you change your name in telegram now and send a message, i will detect the change!")
     
     await message.reply_text(text)
