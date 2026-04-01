@@ -1,3 +1,4 @@
+import os
 import time
 import random
 import asyncio
@@ -29,6 +30,10 @@ from YUKIIMUSIC.utils.formatters import get_readable_time
 from YUKIIMUSIC.utils.inline import help_pannel, private_panel, start_panel
 from config import BANNED_USERS
 from strings import get_string
+from YUKIIMUSIC.misc import mongodb
+
+# --- RPG DATABASE ---
+game_db = mongodb["wordgame_leaderboard"]
 
 YUMI_PICS = [
     "https://files.catbox.moe/eje8y8.jpeg",
@@ -41,7 +46,7 @@ PROMO =  "───────────────────────\
 
 GREET = ["💞", "🥂", "🔍", "🧪", "🥂", "⚡️", "🔥"]
 
-# 🔥 SAFETY HELPER: Agar panel InlineKeyboardMarkup deta hai, toh usko list mein badal dega taaki hack kaam kare
+# 🔥 SAFETY HELPER
 def get_raw_markup(markup):
     if hasattr(markup, 'inline_keyboard'):
         raw_kb = []
@@ -68,7 +73,7 @@ async def inject_premium_markup(chat_id, message_id, markup):
     except Exception as e:
         pass
 
-# 🔥 THE MAGIC START FUNCTION (100% PERFECTED)
+# 🔥 THE MAGIC START FUNCTION
 async def send_magic_start(chat_id, photo_url, caption, markup, reply_to_id=None):
     markup = get_raw_markup(markup)
     try:
@@ -91,7 +96,6 @@ async def send_magic_start(chat_id, photo_url, caption, markup, reply_to_id=None
             async with session.post(url, json=payload) as resp:
                 res = await resp.json()
                 
-                # Agar Telegram ne request reject ki (Network error), toh fallback normal bhejo
                 if not res.get("ok"):
                     run = await app.send_photo(chat_id, photo=photo_url, caption=caption, has_spoiler=True) 
                     await inject_premium_markup(chat_id, run.id, markup)
@@ -105,19 +109,16 @@ async def send_magic_start(chat_id, photo_url, caption, markup, reply_to_id=None
 @LanguageStart
 async def start_pm(client, message: Message, _):
     
-    # 🔥 STEP 1: MESSAGE PE REACTION (❤️)
     try:
         await client.send_reaction(chat_id=message.chat.id, message_id=message.id, emoji="❤️")
     except: pass
         
-    # 🔥 STEP 2: STICKER BHEJNA + WAIT + DELETE
     try:
         stk = await message.reply_sticker("CAACAgUAAxkBAAFD0UBpqDbTjoP_CXF7Ce6oZykP4r64jQACxAcAArligFU4dyG-LQJBjDoE")
         await asyncio.sleep(2) 
         await stk.delete()     
     except: pass
 
-    # 🔥 STEP 3: LOADING ANIMATION
     loading_1 = await message.reply_text(random.choice(GREET))
     await add_served_user(message.from_user.id)
     
@@ -134,25 +135,61 @@ async def start_pm(client, message: Message, _):
     await asyncio.sleep(0.5)
     await loading_1.delete()
     
-    # 🔥 STEP 4: FINAL START MESSAGE HANDLING
     if len(message.text.split()) > 1:
         name = message.text.split(None, 1)[1]
         
-        # --- CLAIM REWARD (NEW UPDATE) ---
-        if name.startswith("claim"):
-            claim_text = "🎉 **Welcome to the DM!**\n\n<emoji id='6334471179801200139'>🎉</emoji> You've successfully connected. Your mini-game profile is active and your points are safe!"
+        # 🔥 CLAIMX REWARD HANDLER (DM ECO LOGIC)
+        if name == "claimx":
+            user_id = message.from_user.id
+            user_data = await game_db.find_one({"user_id": user_id})
+            
+            current_time = time.time()
+            last_daily = user_data.get("last_daily", 0) if user_data else 0
+            
+            if current_time - last_daily < 86400:
+                remaining = int(86400 - (current_time - last_daily))
+                hours = remaining // 3600
+                mins = (remaining % 3600) // 60
+                claim_text = (
+                    f"⏳ **Dᴀɪʟʏ Aʟʀᴇᴀᴅʏ Cʟᴀɪᴍᴇᴅ!**\n\n"
+                    f"You already claimed your daily reward! Come back in **{hours}h {mins}m**.\n\n"
+                    f"*(You are ready to attack in groups!)*"
+                )
+            else:
+                await game_db.update_one(
+                    {"user_id": user_id}, 
+                    {"$inc": {"points": 1000}, "$set": {"last_daily": current_time, "name": message.from_user.first_name}}, 
+                    upsert=True
+                )
+                claim_text = (
+                    "🎁 **Pʀᴏғɪʟᴇ Vᴇʀɪғɪᴇᴅ & Rᴇᴡᴀʀᴅ Cʟᴀɪᴍᴇᴅ!**\n\n"
+                    "<emoji id='6334471179801200139'>🎉</emoji> You have successfully claimed your daily **$1000** bonus!\n\n"
+                    "<emoji id='6071252777625981483'>🚀</emoji> **Go back to the group and use `/kill` or `/rob` to dominate!**"
+                )
+                
             await client.send_message(message.chat.id, claim_text)
             
-            # Show normal start panel after claim
+            # Show normal start panel after claim status
             out = private_panel(_)
             UP, CPU, RAM, DISK = await bot_sys_stats()
             served_chats, served_users = len(await get_served_chats()), len(await get_served_users())
             caption_text = _["start_2"].format(message.from_user.mention, app.mention, UP, DISK, CPU, RAM, served_users, served_chats)
             return await send_magic_start(message.chat.id, random.choice(YUMI_PICS), caption_text, out)
 
-        # --- HELP COMMAND (FIXED) ---
+        # --- NORMAL CLAIM REWARD ---
+        elif name.startswith("claim"):
+            claim_text = "🎉 **Welcome to the DM!**\n\n<emoji id='6334471179801200139'>🎉</emoji> You've successfully connected. Your mini-game profile is active and your points are safe!"
+            await client.send_message(message.chat.id, claim_text)
+            
+            out = private_panel(_)
+            UP, CPU, RAM, DISK = await bot_sys_stats()
+            served_chats, served_users = len(await get_served_chats()), len(await get_served_users())
+            caption_text = _["start_2"].format(message.from_user.mention, app.mention, UP, DISK, CPU, RAM, served_users, served_chats)
+            return await send_magic_start(message.chat.id, random.choice(YUMI_PICS), caption_text, out)
+
+        # --- HELP COMMAND ---
         if name[0:4] == "help":
-            keyboard = help_pannel(_, True) # 🔥 TRUE LAGAYA TAARI BUTTONS AAYEIN
+            keyboard = help_pannel(_, True) 
             return await send_magic_start(
                 chat_id=message.chat.id, 
                 photo_url=random.choice(YUMI_PICS), 
@@ -192,7 +229,7 @@ async def start_pm(client, message: Message, _):
             return await send_magic_start(message.chat.id, safe_thumbnail, searched_text, key)
 
     else:
-        # --- NORMAL START (FIXED ANIMATION) ---
+        # --- NORMAL START ---
         out = private_panel(_)
         served_chats, served_users = len(await get_served_chats()), len(await get_served_users())
         UP, CPU, RAM, DISK = await bot_sys_stats()
@@ -218,7 +255,6 @@ async def start_gp(client, message: Message, _):
     uptime = int(time.time() - _boot_)
     caption = _["start_1"].format(app.mention, get_readable_time(uptime))
     
-    # 🔥 Group start mein bhi magic effect aur colors ayenge ab
     await send_magic_start(message.chat.id, random.choice(YUMI_PICS), caption, out, reply_to_id=message.id)
 
 @app.on_message(filters.command("promo") & filters.private)
@@ -274,4 +310,4 @@ async def welcome(client, message: Message):
 
         except Exception as ex:
             pass
-                
+        
