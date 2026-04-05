@@ -4,7 +4,7 @@ import random
 import requests
 from YUKIIMUSIC import app 
 
-SUPPORT_CHAT = "SKM_CHATTING2025"
+SUPPORT_CHAT = "heartstealer_x"
 
 @app.on_message(filters.command("wish"))
 async def wish(_, m):
