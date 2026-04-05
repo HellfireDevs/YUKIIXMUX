@@ -44,21 +44,23 @@ async def play_commnd(
     url,
     fplay,
 ):
-# === 🔥 SECURITY GUARD (COMMAND INJECTION FIX) 🔥 ===
-    if url:
+    # === 🔥 ULTIMATE SECURITY GUARD (COMMAND INJECTION FIX) 🔥 ===
+    # Check if the RAW message text contains dangerous characters
+    if message.text:
         dangerous_chars = re.compile(r"[$|&;`<>\\]|(?:\$\{)") 
-        if dangerous_chars.search(str(url)):
+        if dangerous_chars.search(str(message.text)):
             mention = message.from_user.mention
             
             # Warning message in English Small Caps
             warning_msg = f"🥀 **sᴇᴄᴜʀɪᴛʏ ᴀʟᴇʀᴛ!** {mention}\n\nᴏɴʟʏ ʟɪɴᴋ ᴀʟʟᴏᴡᴇᴅ.\nɪғ ʏᴏᴜ ᴅᴏ ᴛʜɪs ᴀɢᴀɪɴ, ɢʟᴏʙᴀʟ ʙᴀɴ ᴍᴀʏʙᴇ 🙂"
             
-            # Exact File IDs from your raw Telegram JSON payload
+            # Exact File IDs including the Thumbs Up one
             yuki_stickers = [
                 "CAACAgUAAxkBAAFGej1p0ik0JNBtOvrmVLM92NG3BY9XEgACKgwAAq-cEFeS7DCPCs49_jsE",
                 "CAACAgUAAxkBAAFGej9p0ik3XtiKYQh13zHWcWQDj9ws3gACtA4AAnDYGVeI7-X3Yd8JBjsE",
                 "CAACAgUAAxkBAAFGekFp0ik5WWEy4etIEwKqZZWSwD2c8wACKgsAAnbIEFe8P0r42zZZfDsE",
-                "CAACAgUAAxkBAAFGekNp0ik6Nowx5OmF1IsJL0354UFdwAACKA4AAt1uGVeG1mUN_zTK9zsE"
+                "CAACAgUAAxkBAAFGekNp0ik6Nowx5OmF1IsJL0354UFdwAACKA4AAt1uGVeG1mUN_zTK9zsE",
+                "CAACAgUAAxkBAAFGelBp0ipffTacP6bK3ik2BabuZJohkwACoh0AAsI8kFYAARHuC8AH2Jw7BA"
             ]
             
             # Send the text warning
@@ -72,7 +74,7 @@ async def play_commnd(
                 
             return
     # ====================================================
-
+    
     mystic = await message.reply_text(
         _["play_2"].format(channel) if channel else _["play_1"]
     )
