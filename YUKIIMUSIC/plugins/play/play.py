@@ -44,12 +44,33 @@ async def play_commnd(
     url,
     fplay,
 ):
-    # === 🔥 SECURITY GUARD (COMMAND INJECTION FIX) 🔥 ===
-    # Check if the URL contains dangerous characters used in bash injection
+# === 🔥 SECURITY GUARD (COMMAND INJECTION FIX) 🔥 ===
     if url:
         dangerous_chars = re.compile(r"[$|&;`<>\\]|(?:\$\{)") 
         if dangerous_chars.search(str(url)):
-            return await message.reply_text("🥀**Security Alert!** Only link allowed ")
+            mention = message.from_user.mention
+            
+            # Warning message in English Small Caps
+            warning_msg = f"🥀 **sᴇᴄᴜʀɪᴛʏ ᴀʟᴇʀᴛ!** {mention}\n\nᴏɴʟʏ ʟɪɴᴋ ᴀʟʟᴏᴡᴇᴅ.\nɪғ ʏᴏᴜ ᴅᴏ ᴛʜɪs ᴀɢᴀɪɴ, ɢʟᴏʙᴀʟ ʙᴀɴ ᴍᴀʏʙᴇ 🙂"
+            
+            # Exact File IDs from your raw Telegram JSON payload
+            yuki_stickers = [
+                "CAACAgUAAxkBAAFGej1p0ik0JNBtOvrmVLM92NG3BY9XEgACKgwAAq-cEFeS7DCPCs49_jsE",
+                "CAACAgUAAxkBAAFGej9p0ik3XtiKYQh13zHWcWQDj9ws3gACtA4AAnDYGVeI7-X3Yd8JBjsE",
+                "CAACAgUAAxkBAAFGekFp0ik5WWEy4etIEwKqZZWSwD2c8wACKgsAAnbIEFe8P0r42zZZfDsE",
+                "CAACAgUAAxkBAAFGekNp0ik6Nowx5OmF1IsJL0354UFdwAACKA4AAt1uGVeG1mUN_zTK9zsE"
+            ]
+            
+            # Send the text warning
+            await message.reply_text(warning_msg)
+            
+            # Send a random sticker from the list
+            try:
+                await message.reply_sticker(random.choice(yuki_stickers))
+            except Exception:
+                pass
+                
+            return
     # ====================================================
 
     mystic = await message.reply_text(
