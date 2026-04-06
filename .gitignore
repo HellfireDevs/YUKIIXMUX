@@ -7,3 +7,4 @@ cache/
 *.session
 *.session-journal
 log.txt
+node_modules/
