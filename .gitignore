@@ -1,9 +1,9 @@
-.env
-venv/
 __pycache__/
+venv/
+.env
+database/
+downloads/
+cache/
 *.session
 *.session-journal
-downloads/
-*.mp3
-*.mp4
-rename_yukii.py
+log.txt
