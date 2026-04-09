@@ -13,12 +13,11 @@ from config import BANNED_USERS
 # 🔥 PLAYER DATABASE SETUP
 playerdb = mongodb.player_settings
 
+# --- PLAYER STYLE DB ---
 async def get_player_style(chat_id):
-    # Pehle group ka custom check karega
     user = await playerdb.find_one({"chat_id": chat_id})
     if user and "style" in user:
         return user["style"]
-    # Agar group ka nahi hai, toh GLOBAL check karega
     if chat_id != "GLOBAL":
         global_user = await playerdb.find_one({"chat_id": "GLOBAL"})
         if global_user and "style" in global_user:
@@ -28,6 +27,7 @@ async def get_player_style(chat_id):
 async def set_player_style(chat_id, style: int):
     await playerdb.update_one({"chat_id": chat_id}, {"$set": {"style": style}}, upsert=True)
 
+# --- PLAYER ON/OFF DB ---
 async def is_player_on(chat_id):
     user = await playerdb.find_one({"chat_id": chat_id})
     if user and "is_on" in user:
@@ -41,10 +41,25 @@ async def is_player_on(chat_id):
 async def set_player_on(chat_id, is_on: bool):
     await playerdb.update_one({"chat_id": chat_id}, {"$set": {"is_on": is_on}}, upsert=True)
 
+# --- MUSIC ON/OFF DB (NEW) ---
+async def is_music_on(chat_id):
+    user = await playerdb.find_one({"chat_id": chat_id})
+    if user and "music_on" in user:
+        return user["music_on"]
+    if chat_id != "GLOBAL":
+        global_user = await playerdb.find_one({"chat_id": "GLOBAL"})
+        if global_user and "music_on" in global_user:
+            return global_user["music_on"]
+    return True
 
-# 🔥 KEYBOARD GENERATOR
-def player_markup(style: int, is_on: bool, target_id):
+async def set_music_on(chat_id, is_on: bool):
+    await playerdb.update_one({"chat_id": chat_id}, {"$set": {"music_on": is_on}}, upsert=True)
+
+
+# 🔥 KEYBOARD GENERATOR (UPDATED WITH MUSIC TOGGLE)
+def player_markup(style: int, is_on: bool, is_music: bool, target_id):
     status = "✅ ᴏɴ" if is_on else "❌ ᴏғғ"
+    music_status = "✅ ᴏɴ" if is_music else "❌ ᴏғғ"
     return InlineKeyboardMarkup(
         [
             [
@@ -57,6 +72,7 @@ def player_markup(style: int, is_on: bool, target_id):
             ],
             [
                 InlineKeyboardButton(f"ᴘʟᴀʏᴇʀ sᴛᴀᴛᴜs : {status}", callback_data=f"toggle_player_{target_id}"),
+                InlineKeyboardButton(f"ᴍᴜsɪᴄ sᴛᴀᴛᴜs : {music_status}", callback_data=f"toggle_music_{target_id}"),
             ],
             [
                 InlineKeyboardButton("🗑 ᴄʟᴏsᴇ", callback_data="close_player_panel"),
@@ -76,7 +92,44 @@ def get_digan_image(style: int):
     return config.STATS_IMG_URL
 
 
-# 🔥 COMMAND HANDLER
+# 🔥 MUSIC ENABLE/DISABLE COMMAND HANDLER (NEW)
+@app.on_message(filters.command(["music", "song"], prefixes=["/", ".", "!"]) & ~BANNED_USERS)
+async def music_on_off_cmd(client, message: Message):
+    if len(message.command) < 2:
+        return await message.reply_text("❌ <b>ᴜsᴀɢᴇ:</b> `/music on` ᴏʀ `/music off`")
+    
+    state = message.command[1].lower()
+    if state not in ["on", "off", "enable", "disable"]:
+        return await message.reply_text("❌ <b>ɪɴᴠᴀʟɪᴅ sᴛᴀᴛᴇ. ᴜsᴇ `on` ᴏʀ `off`.</b>")
+
+    if message.sender_chat:
+        return await message.reply_text("❌ ᴘʟᴇᴀsᴇ ᴅɪsᴀʙʟᴇ ᴀɴᴏɴʏᴍᴏᴜs ᴀᴅᴍɪɴ ғɪʀsᴛ!")
+
+    if message.chat.type == ChatType.PRIVATE:
+        if message.from_user.id in SUDOERS:
+            target_id = "GLOBAL"
+        else:
+            return await message.reply_text("❌ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ ɪs ᴏɴʟʏ ғᴏʀ ɢʀᴏᴜᴘs!")
+    else:
+        if message.from_user.id not in SUDOERS:
+            member = await client.get_chat_member(message.chat.id, message.from_user.id)
+            if member.status not in [ChatMemberStatus.OWNER, ChatMemberStatus.ADMINISTRATOR]:
+                return await message.reply_text("❌ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ ɪs ᴏɴʟʏ ғᴏʀ ɢʀᴏᴜᴘ ᴀᴅᴍɪɴs ᴀɴᴅ ᴏᴡɴᴇʀs!")
+        target_id = message.chat.id
+
+    is_turning_on = state in ["on", "enable"]
+    await set_music_on(target_id, is_turning_on)
+    
+    status_text = "ᴇɴᴀʙʟᴇᴅ ✅" if is_turning_on else "ᴅɪsᴀʙʟᴇᴅ ❌"
+    panel_type = "ɢʟᴏʙᴀʟ" if target_id == "GLOBAL" else "ɢʀᴏᴜᴘ"
+    
+    await message.reply_text(
+        f"<blockquote><b>✨ {panel_type} ᴍᴜsɪᴄ sᴛᴀᴛᴜs ✨</b>\n\n"
+        f"ᴍᴜsɪᴄ ᴘʟᴀʏ sʏsᴛᴇᴍ ʜᴀs ʙᴇᴇɴ <b>{status_text}</b> ғᴏʀ ᴛʜɪs {panel_type.lower()}!</blockquote>"
+    )
+
+
+# 🔥 PLAYER COMMAND HANDLER
 @app.on_message(filters.command(["player", "gcplayer", "songplayer", "globalplayer"]) & ~BANNED_USERS)
 @language
 async def player_command(client, message: Message, _):
@@ -100,26 +153,28 @@ async def player_command(client, message: Message, _):
 
     style = await get_player_style(target_id)
     is_on = await is_player_on(target_id)
+    is_music = await is_music_on(target_id)
     img = get_digan_image(style)
     
     panel_type = "ɢʟᴏʙᴀʟ" if target_id == "GLOBAL" else "ɢʀᴏᴜᴘ"
     
+    # 🔥 UPDATED CAPTION WITH BLOCKQUOTE
     caption = (
-        f"**✨ {panel_type} ᴘʟᴀʏᴇʀ sᴇᴛᴛɪɴɢs ✨**\n\n"
+        f"<blockquote><b>✨ {panel_type} ᴘʟᴀʏᴇʀ sᴇᴛᴛɪɴɢs ✨</b>\n\n"
         "ғʀᴏᴍ ʜᴇʀᴇ ʏᴏᴜ ᴄᴀɴ ᴄʜᴀɴɢᴇ ᴛʜᴇ ᴍᴜsɪᴄ ᴘʟᴀʏᴇʀ ᴅᴇsɪɢɴ. "
-        "sᴇʟᴇᴄᴛ ʏᴏᴜʀ ғᴀᴠᴏʀɪᴛᴇ ᴅᴇsɪɢɴ ғʀᴏᴍ ᴛʜᴇ ʙᴜᴛᴛᴏɴs ʙᴇʟᴏᴡ!\n\n"
-        f"**ᴄᴜʀʀᴇɴᴛ sᴛʏʟᴇ:** ᴅᴇsɪɢɴ {style}"
+        "sᴇʟᴇᴄᴛ ʏᴏᴜʀ ғᴀᴠᴏʀɪᴛᴇ ᴅᴇsɪɢɴ ғʀᴏᴍ ᴛʜᴇ ʙᴜᴛᴛᴏɴs ʙᴇʟᴏᴡ!</blockquote>\n\n"
+        f"<blockquote><b>🔘 ᴄᴜʀʀᴇɴᴛ sᴛʏʟᴇ:</b> ᴅᴇsɪɢɴ {style}</blockquote>"
     )
 
     await message.reply_photo(
         photo=img,
         caption=caption,
-        reply_markup=player_markup(style, is_on, target_id)
+        reply_markup=player_markup(style, is_on, is_music, target_id)
     )
 
 
 # 🔥 CALLBACK HANDLERS
-@app.on_callback_query(filters.regex(r"^(set_player_|toggle_player_)") & ~BANNED_USERS)
+@app.on_callback_query(filters.regex(r"^(set_player_|toggle_player_|toggle_music_)") & ~BANNED_USERS)
 async def player_callbacks(client, CallbackQuery: CallbackQuery):
     data = CallbackQuery.data.split("_")
     action = data[0]
@@ -129,6 +184,7 @@ async def player_callbacks(client, CallbackQuery: CallbackQuery):
         new_style = int(data[2])
         target_id = data[3]
     else: # toggle
+        sub_action = data[1] # 'player' or 'music'
         target_id = data[2]
 
     if target_id != "GLOBAL":
@@ -147,6 +203,7 @@ async def player_callbacks(client, CallbackQuery: CallbackQuery):
     # Execute Actions
     current_style = await get_player_style(target_id)
     is_on = await is_player_on(target_id)
+    is_music = await is_music_on(target_id)
     panel_type = "ɢʟᴏʙᴀʟ" if target_id == "GLOBAL" else "ɢʀᴏᴜᴘ"
 
     if action == "set":
@@ -157,35 +214,50 @@ async def player_callbacks(client, CallbackQuery: CallbackQuery):
         await CallbackQuery.answer(f"✅ sᴜᴄᴄᴇssғᴜʟʟʏ sᴇᴛ ᴛᴏ ᴅᴇsɪɢɴ {new_style}!")
         
         img = get_digan_image(new_style)
+        
+        # 🔥 UPDATED CAPTION WITH BLOCKQUOTE
         caption = (
-            f"**✨ {panel_type} ᴘʟᴀʏᴇʀ sᴇᴛᴛɪɴɢs ✨**\n\n"
+            f"<blockquote><b>✨ {panel_type} ᴘʟᴀʏᴇʀ sᴇᴛᴛɪɴɢs ✨</b>\n\n"
             "ғʀᴏᴍ ʜᴇʀᴇ ʏᴏᴜ ᴄᴀɴ ᴄʜᴀɴɢᴇ ᴛʜᴇ ᴍᴜsɪᴄ ᴘʟᴀʏᴇʀ ᴅᴇsɪɢɴ. "
-            "sᴇʟᴇᴄᴛ ʏᴏᴜʀ ғᴀᴠᴏʀɪᴛᴇ ᴅᴇsɪɢɴ ғʀᴏᴍ ᴛʜᴇ ʙᴜᴛᴛᴏɴs ʙᴇʟᴏᴡ!\n\n"
-            f"**ᴄᴜʀʀᴇɴᴛ sᴛʏʟᴇ:** ᴅᴇsɪɢɴ {new_style}"
+            "sᴇʟᴇᴄᴛ ʏᴏᴜʀ ғᴀᴠᴏʀɪᴛᴇ ᴅᴇsɪɢɴ ғʀᴏᴍ ᴛʜᴇ ʙᴜᴛᴛᴏɴs ʙᴇʟᴏᴡ!</blockquote>\n\n"
+            f"<blockquote><b>🔘 ᴄᴜʀʀᴇɴᴛ sᴛʏʟᴇ:</b> ᴅᴇsɪɢɴ {new_style}</blockquote>"
         )
         
         med = InputMediaPhoto(media=img, caption=caption)
         try:
-            await CallbackQuery.edit_message_media(media=med, reply_markup=player_markup(new_style, is_on, target_id))
+            await CallbackQuery.edit_message_media(media=med, reply_markup=player_markup(new_style, is_on, is_music, target_id))
         except MessageIdInvalid:
             pass
 
     elif action == "toggle":
-        new_status = not is_on
-        await set_player_on(target_id, new_status)
-        
-        status_text = "ᴏɴ ✅" if new_status else "ᴏғғ ❌"
-        await CallbackQuery.answer(f"✅ {panel_type} ᴘʟᴀʏᴇʀ sᴛᴀᴛᴜs ɪs ɴᴏᴡ {status_text}!")
-        
-        try:
-            await CallbackQuery.edit_message_reply_markup(reply_markup=player_markup(current_style, new_status, target_id))
-        except MessageIdInvalid:
-            pass
+        if sub_action == "player":
+            new_status = not is_on
+            await set_player_on(target_id, new_status)
+            
+            status_text = "ᴏɴ ✅" if new_status else "ᴏғғ ❌"
+            await CallbackQuery.answer(f"✅ {panel_type} ᴘʟᴀʏᴇʀ sᴛᴀᴛᴜs ɪs ɴᴏᴡ {status_text}!")
+            
+            try:
+                await CallbackQuery.edit_message_reply_markup(reply_markup=player_markup(current_style, new_status, is_music, target_id))
+            except MessageIdInvalid:
+                pass
+                
+        elif sub_action == "music":
+            new_music_status = not is_music
+            await set_music_on(target_id, new_music_status)
+            
+            status_text = "ᴏɴ ✅" if new_music_status else "ᴏғғ ❌"
+            await CallbackQuery.answer(f"✅ {panel_type} ᴍᴜsɪᴄ sᴛᴀᴛᴜs ɪs ɴᴏᴡ {status_text}!")
+            
+            try:
+                await CallbackQuery.edit_message_reply_markup(reply_markup=player_markup(current_style, is_on, new_music_status, target_id))
+            except MessageIdInvalid:
+                pass
 
 @app.on_callback_query(filters.regex("close_player_panel") & ~BANNED_USERS)
 async def close_player_cb(client, CallbackQuery: CallbackQuery):
-    if CallbackQuery.message.chat.type != ChatType.PRIVATE and CallbackQuery.from_user.id not in SUDOERS:
-        member = await client.get_chat_member(CallbackQuery.message.chat.id, CallbackQuery.from_user.id)
+    if CallbackQuery.message.chat.type != ChatType.PRIVATE and CallbackQuery.fromuser.id not in SUDOERS:
+        member = await client.get_chat_member(CallbackQuery.message.chat.id, CallbackQuery.fromuser.id)
         if member.status not in [ChatMemberStatus.OWNER, ChatMemberStatus.ADMINISTRATOR]:
             return await CallbackQuery.answer("❌ ʏᴏᴜ ᴄᴀɴɴᴏᴛ ᴄʟᴏsᴇ ᴛʜɪs!", show_alert=True)
 
@@ -193,3 +265,4 @@ async def close_player_cb(client, CallbackQuery: CallbackQuery):
         await CallbackQuery.message.delete()
     except:
         pass
+        
