@@ -66,15 +66,15 @@ def stream_markup_timer(_, chat_id, played, dur):
         ],
         [
             # 4 Premium Emoji Buttons (Play, Pause, Skip, Stop) - NORMAL COLOR NOW
-            api_btn(text=" ", callback_data=f"ADMIN Resume|{chat_id}", custom_emoji_id="5343597635926245720"), 
+            api_btn(text=" ", callback_data=f"ADMIN Resume|{chat_id}", custom_emoji_id="5238162283368035495"), 
             api_btn(text=" ", callback_data=f"ADMIN Pause|{chat_id}", custom_emoji_id="5408916593780470262"), 
             api_btn(text=" ", callback_data=f"ADMIN Skip|{chat_id}", custom_emoji_id="5409262351532701571"), 
             api_btn(text=" ", callback_data=f"ADMIN Stop|{chat_id}", custom_emoji_id="5409042015415448331"), 
         ],
         [
             # Mimi Tunes & Home
-            api_btn(text="  ᴛᴜɴᴇs˼♪", url="http://t.me/IAM_MIMBOT", style="primary", custom_emoji_id="6334333036473091884"),
-            api_btn(text="ʜᴏᴍᴇ", url=config.SUPPORT_CHAT, style="primary", custom_emoji_id="6334648089504122382"),
+            api_btn(text="  ᴛᴜɴᴇs˼♪", url="http://nex0-1.vercel.app", style="success", custom_emoji_id="6294287714887933094"),
+            api_btn(text="ʜᴏᴍᴇ", url=config.SUPPORT_CHAT, style="primary", custom_emoji_id="6291837599254322363"),
         ],
         [
             # Close Red
@@ -87,17 +87,17 @@ def stream_markup(_, chat_id):
     buttons = [
         [
             # 4 Premium Emoji Buttons - NORMAL COLOR NOW
-            api_btn(text=" ", callback_data=f"ADMIN Resume|{chat_id}", custom_emoji_id="5343597635926245720"), 
+            api_btn(text=" ", callback_data=f"ADMIN Resume|{chat_id}", custom_emoji_id="5238162283368035495"), 
             api_btn(text=" ", callback_data=f"ADMIN Pause|{chat_id}", custom_emoji_id="5408916593780470262"), 
             api_btn(text=" ", callback_data=f"ADMIN Skip|{chat_id}", custom_emoji_id="5409262351532701571"), 
             api_btn(text=" ", callback_data=f"ADMIN Stop|{chat_id}", custom_emoji_id="5409042015415448331"), 
         ],
         [
-            api_btn(text="˹  ᴛᴜɴᴇs˼♪", url="http://t.me/IAM_MIMBOT", style="primary", custom_emoji_id="6334333036473091884"),
-            api_btn(text="ʜᴏᴍᴇ", url=config.SUPPORT_CHAT, style="primary", custom_emoji_id="6334648089504122382"),
+            api_btn(text="˹  ᴛᴜɴᴇs˼♪", url="https://nex0-1.vercel.app", style="success", custom_emoji_id="6294118750874508525"),
+            api_btn(text="ʜᴏᴍᴇ", url=config.SUPPORT_CHAT, style="primary", custom_emoji_id="6294287714887933094"),
         ],
         [
-            api_btn(text=str(_["CLOSE_BUTTON"]).strip(), callback_data="close", style="danger", custom_emoji_id="6334598469746952256")
+            api_btn(text=str(_["CLOSE_BUTTON"]).strip(), callback_data="close", style="danger", custom_emoji_id="6291837599254322363")
         ],
     ]
     return buttons
