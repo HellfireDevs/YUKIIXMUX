@@ -44,7 +44,7 @@ LOGGER_ID = int(getenv("LOGGER_ID", -1003639584506))
 OWNER_ID = int(getenv("OWNER_ID", 6356015122))
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
-PLAYER_VIDEO = "BAACAgUAAxkBAAM1addy_rfWz_JWSPeCnJG3pazYI5YAAlodAAKl1blWdsH78Re-pJceBA"
+PLAYER_VIDEO = "YUKIIMUSIC/assets/player_bg.mp4"
 
 
 # ----------------------------------------------------------------
