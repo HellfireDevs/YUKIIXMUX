@@ -176,7 +176,7 @@ async def stream(
                             run = await app.send_message(
                                 original_chat_id, 
                                 text=caption_text, 
-                                link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True)
+                                link_preview_options=LinkPreviewOptions(is_disabled=False, show_above_text=True)
                             )
                         else:
                             run = await app.send_message(original_chat_id, text=caption_text, disable_web_page_preview=False)
@@ -256,7 +256,7 @@ async def stream(
                         run = await app.send_message(
                             original_chat_id, 
                             text=caption_text, 
-                            link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True)
+                            link_preview_options=LinkPreviewOptions(is_disabled=False, show_above_text=True)
                         )
                     else:
                         run = await app.send_message(original_chat_id, text=caption_text, disable_web_page_preview=False)
@@ -305,7 +305,7 @@ async def stream(
                         run = await app.send_message(
                             original_chat_id, 
                             text=caption_text, 
-                            link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True)
+                            link_preview_options=LinkPreviewOptions(is_disabled=False, show_above_text=True)
                         )
                     else:
                         run = await app.send_message(original_chat_id, text=caption_text, disable_web_page_preview=False)
@@ -358,7 +358,7 @@ async def stream(
                         run = await app.send_message(
                             original_chat_id, 
                             text=caption_text, 
-                            link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True)
+                            link_preview_options=LinkPreviewOptions(is_disabled=False, show_above_text=True)
                         )
                     else:
                         run = await app.send_message(original_chat_id, text=caption_text, disable_web_page_preview=False)
@@ -404,6 +404,53 @@ async def stream(
             is_on = await is_player_on(chat_id)
             
             if not is_on:
+                run = await app.send_message(original_chat_id, text=f"<b><emoji id='5999063078983964465'>🎧</emoji> Sᴛᴀʀᴛᴇᴅ ʟɪᴠᴇ sᴛʀᴇᴀᴍ:</b> {title[:30]}\n<b><emoji id='6001522720855037558'>👤</emoji> ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ:</b> {user_name}")
+            else:
+                video_file = getattr(config, "PLAYER_VIDEO", "https://files.catbox.moe/qxj5y2.mp4")
+                caption_text = _[f"livestream_{theme}"].format(f"https://t.me/{app.username}?start=info_{vidid}", title[:23], duration_min, user_name, video_file)
+                
+                if theme == 2:
+                    if HAS_PREVIEW_OPTIONS:
+                        run = await app.send_message(
+                            original_chat_id, 
+                            text=caption_text, 
+                            link_preview_options=LinkPreviewOptions(is_disabled=False, show_above_text=True)
+                        )
+                    else:
+                        run = await app.send_message(original_chat_id, text=caption_text, disable_web_page_preview=False)
+                else:
+                    run = await app.send_photo(original_chat_id, photo=img, caption=caption_text, has_spoiler=True)
+                    
+            await inject_premium_markup(original_chat_id, run.id, button)
+            
+            db[chat_id][0]["mystic"] = run
+            db[chat_id][0]["markup"] = "tg"
+
+    # --- 6. INDEX LOGIC ---
+    elif streamtype == "index":
+        link = result
+        title = "ɪɴᴅᴇx ᴏʀ ᴍ3ᴜ8 ʟɪɴᴋ"
+        duration_min = "00:00"
+        if await is_active_chat(chat_id):
+            await put_queue_index(chat_id, original_chat_id, "index_url", title, duration_min, user_name, link, "video" if video else "audio")
+            position = len(db.get(chat_id)) - 1
+            button = aq_markup(_, chat_id)
+            
+            await mystic.edit_text(text=_["queue_4"].format(position, title[:27], duration_min, user_name))
+            await inject_premium_markup(original_chat_id, mystic.id, button)
+        else:
+            if not forceplay:
+                db[chat_id] = []
+            await YUKII.join_call(chat_id, original_chat_id, link, video=True if video else None)
+            await put_queue_index(chat_id, original_chat_id, "index_url", title, duration_min, user_name, link, "video" if video else "audio", forceplay=forceplay)
+            
+            button = stream_markup(_, chat_id)
+            
+            # 🔥 THEME & ON/OFF LOGIC
+            theme = await get_player_style(chat_id)
+            is_on = await is_player_on(chat_id)
+            
+            if not is_on:
                 run = await app.send_message(original_chat_id, text=f"<b><emoji id='5999063078983964465'>🎧</emoji> Sᴛᴀʀᴛᴇᴅ ᴘʟᴀʏɪɴɢ:</b> {title[:30]}\n<b><emoji id='6001522720855037558'>👤</emoji> ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ:</b> {user_name}")
             else:
                 video_file = getattr(config, "PLAYER_VIDEO", "https://files.catbox.moe/qxj5y2.mp4")
@@ -414,7 +461,7 @@ async def stream(
                         run = await app.send_message(
                             original_chat_id, 
                             text=caption_text, 
-                            link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True)
+                            link_preview_options=LinkPreviewOptions(is_disabled=False, show_above_text=True)
                         )
                     else:
                         run = await app.send_message(original_chat_id, text=caption_text, disable_web_page_preview=False)
