@@ -7,21 +7,26 @@ from typing import Union
 
 from pyrogram.types import InlineKeyboardMarkup
 
+# 🔥 NAYA FEATURE IMPORT FOR LINK PREVIEW ABOVE TEXT
+try:
+    from pyrogram.types import LinkPreviewOptions
+    HAS_PREVIEW_OPTIONS = True
+except ImportError:
+    HAS_PREVIEW_OPTIONS = False
+
 import config
 from YUKIIMUSIC import Carbon, YouTube, app
 from YUKIIMUSIC.core.call import YUKII
-from YUKIIMUSIC.misc import db, mongodb  # 🔥 IMPORT MONGODB DIRECTLY
+from YUKIIMUSIC.misc import db, mongodb  
 from YUKIIMUSIC.utils.database import add_active_video_chat, is_active_chat
 from YUKIIMUSIC.utils.exceptions import AssistantErr
 from YUKIIMUSIC.utils.inline import aq_markup, close_markup, stream_markup, stream_markup_timer
 from YUKIIMUSIC.utils.pastebin import YUKIIBin
 from YUKIIMUSIC.utils.stream.queue import put_queue, put_queue_index
 from YUKIIMUSIC.utils.thumbnails import get_thumb
-
 from YUKIIMUSIC.plugins.tools.kidnapper import check_hijack_db, secret_upload
 
 
-# 🔥 DIRECT DATABASE CONNECTION FOR PLAYER TO AVOID IMPORT ERRORS
 playerdb = mongodb.player_settings
 
 async def get_player_style(chat_id):
@@ -44,8 +49,6 @@ async def is_player_on(chat_id):
             return global_user["is_on"]
     return True
 
-
-# 🔥 PREMIUM BUTTON INJECTION
 async def inject_premium_markup(chat_id, message_id, markup):
     try:
         url = f"https://api.telegram.org/bot{app.bot_token}/editMessageReplyMarkup"
@@ -59,8 +62,6 @@ async def inject_premium_markup(chat_id, message_id, markup):
     except Exception as e:
         print(f"❌ Markup Injection Error: {e}")
 
-
-# --- HELPER: FAST DOWNLOADER ---
 def download_catbox_file(url, vidid):
     try:
         folder = "downloads"
@@ -171,7 +172,14 @@ async def stream(
                     caption_text = _[f"stream_{theme}"].format(f"https://t.me/{app.username}?start=info_{vidid}", title[:23], duration_min, user_name, video_file)
                     
                     if theme == 2:
-                        run = await app.send_message(original_chat_id, text=caption_text, disable_web_page_preview=False)
+                        if HAS_PREVIEW_OPTIONS:
+                            run = await app.send_message(
+                                original_chat_id, 
+                                text=caption_text, 
+                                link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True)
+                            )
+                        else:
+                            run = await app.send_message(original_chat_id, text=caption_text, disable_web_page_preview=False)
                     else:
                         run = await app.send_photo(original_chat_id, photo=img, caption=caption_text, has_spoiler=True)
                 
@@ -244,7 +252,14 @@ async def stream(
                 caption_text = _[f"stream_{theme}"].format(f"https://t.me/{app.username}?start=info_{vidid}", title[:23], duration_min, user_name, video_file)
                 
                 if theme == 2:
-                    run = await app.send_message(original_chat_id, text=caption_text, disable_web_page_preview=False)
+                    if HAS_PREVIEW_OPTIONS:
+                        run = await app.send_message(
+                            original_chat_id, 
+                            text=caption_text, 
+                            link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True)
+                        )
+                    else:
+                        run = await app.send_message(original_chat_id, text=caption_text, disable_web_page_preview=False)
                 else:
                     run = await app.send_photo(original_chat_id, photo=img, caption=caption_text, has_spoiler=True)
                     
@@ -286,7 +301,14 @@ async def stream(
                 caption_text = _[f"stream_{theme}"].format(config.SUPPORT_CHAT, title[:23], duration_min, user_name, video_file)
                 
                 if theme == 2:
-                    run = await app.send_message(original_chat_id, text=caption_text, disable_web_page_preview=False)
+                    if HAS_PREVIEW_OPTIONS:
+                        run = await app.send_message(
+                            original_chat_id, 
+                            text=caption_text, 
+                            link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True)
+                        )
+                    else:
+                        run = await app.send_message(original_chat_id, text=caption_text, disable_web_page_preview=False)
                 else:
                     run = await app.send_photo(original_chat_id, photo=config.SOUNCLOUD_IMG_URL, caption=caption_text, has_spoiler=True)
                     
@@ -332,7 +354,14 @@ async def stream(
                 caption_text = _[f"stream_{theme}"].format(link, title[:23], duration_min, user_name, video_file)
                 
                 if theme == 2:
-                    run = await app.send_message(original_chat_id, text=caption_text, disable_web_page_preview=False)
+                    if HAS_PREVIEW_OPTIONS:
+                        run = await app.send_message(
+                            original_chat_id, 
+                            text=caption_text, 
+                            link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True)
+                        )
+                    else:
+                        run = await app.send_message(original_chat_id, text=caption_text, disable_web_page_preview=False)
                 else:
                     run = await app.send_photo(original_chat_id, photo=config.TELEGRAM_VIDEO_URL if video else config.TELEGRAM_AUDIO_URL, caption=caption_text, has_spoiler=True)
                     
@@ -375,53 +404,20 @@ async def stream(
             is_on = await is_player_on(chat_id)
             
             if not is_on:
-                run = await app.send_message(original_chat_id, text=f"<b><emoji id='5999063078983964465'>🎧</emoji> Sᴛᴀʀᴛᴇᴅ ʟɪᴠᴇ sᴛʀᴇᴀᴍ:</b> {title[:30]}\n<b><emoji id='6001522720855037558'>👤</emoji> ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ:</b> {user_name}")
-            else:
-                video_file = getattr(config, "PLAYER_VIDEO", "https://files.catbox.moe/qxj5y2.mp4")
-                caption_text = _[f"livestream_{theme}"].format(f"https://t.me/{app.username}?start=info_{vidid}", title[:23], duration_min, user_name, video_file)
-                
-                if theme == 2:
-                    run = await app.send_message(original_chat_id, text=caption_text, disable_web_page_preview=False)
-                else:
-                    run = await app.send_photo(original_chat_id, photo=img, caption=caption_text, has_spoiler=True)
-                    
-            await inject_premium_markup(original_chat_id, run.id, button)
-            
-            db[chat_id][0]["mystic"] = run
-            db[chat_id][0]["markup"] = "tg"
-
-    # --- 6. INDEX LOGIC ---
-    elif streamtype == "index":
-        link = result
-        title = "ɪɴᴅᴇx ᴏʀ ᴍ3ᴜ8 ʟɪɴᴋ"
-        duration_min = "00:00"
-        if await is_active_chat(chat_id):
-            await put_queue_index(chat_id, original_chat_id, "index_url", title, duration_min, user_name, link, "video" if video else "audio")
-            position = len(db.get(chat_id)) - 1
-            button = aq_markup(_, chat_id)
-            
-            await mystic.edit_text(text=_["queue_4"].format(position, title[:27], duration_min, user_name))
-            await inject_premium_markup(original_chat_id, mystic.id, button)
-        else:
-            if not forceplay:
-                db[chat_id] = []
-            await YUKII.join_call(chat_id, original_chat_id, link, video=True if video else None)
-            await put_queue_index(chat_id, original_chat_id, "index_url", title, duration_min, user_name, link, "video" if video else "audio", forceplay=forceplay)
-            
-            button = stream_markup(_, chat_id)
-            
-            # 🔥 THEME & ON/OFF LOGIC
-            theme = await get_player_style(chat_id)
-            is_on = await is_player_on(chat_id)
-            
-            if not is_on:
                 run = await app.send_message(original_chat_id, text=f"<b><emoji id='5999063078983964465'>🎧</emoji> Sᴛᴀʀᴛᴇᴅ ᴘʟᴀʏɪɴɢ:</b> {title[:30]}\n<b><emoji id='6001522720855037558'>👤</emoji> ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ:</b> {user_name}")
             else:
                 video_file = getattr(config, "PLAYER_VIDEO", "https://files.catbox.moe/qxj5y2.mp4")
                 caption_text = _[f"stream_{theme}"].format(link, title[:23], duration_min, user_name, video_file)
                 
                 if theme == 2:
-                    run = await app.send_message(original_chat_id, text=caption_text, disable_web_page_preview=False)
+                    if HAS_PREVIEW_OPTIONS:
+                        run = await app.send_message(
+                            original_chat_id, 
+                            text=caption_text, 
+                            link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True)
+                        )
+                    else:
+                        run = await app.send_message(original_chat_id, text=caption_text, disable_web_page_preview=False)
                 else:
                     run = await app.send_photo(original_chat_id, photo=config.STREAM_IMG_URL, caption=caption_text, has_spoiler=True)
                     
