@@ -72,6 +72,8 @@ def player_markup(style: int, is_on: bool, is_music: bool, target_id):
             ],
             [
                 InlineKeyboardButton(f"ᴘʟᴀʏᴇʀ sᴛᴀᴛᴜs : {status}", callback_data=f"toggle_player_{target_id}"),
+            ],
+            [
                 InlineKeyboardButton(f"ᴍᴜsɪᴄ sᴛᴀᴛᴜs : {music_status}", callback_data=f"toggle_music_{target_id}"),
             ],
             [
@@ -256,8 +258,8 @@ async def player_callbacks(client, CallbackQuery: CallbackQuery):
 
 @app.on_callback_query(filters.regex("close_player_panel") & ~BANNED_USERS)
 async def close_player_cb(client, CallbackQuery: CallbackQuery):
-    if CallbackQuery.message.chat.type != ChatType.PRIVATE and CallbackQuery.fromuser.id not in SUDOERS:
-        member = await client.get_chat_member(CallbackQuery.message.chat.id, CallbackQuery.fromuser.id)
+    if CallbackQuery.message.chat.type != ChatType.PRIVATE and CallbackQuery.from_user.id not in SUDOERS:
+        member = await client.get_chat_member(CallbackQuery.message.chat.id, CallbackQuery.from_user.id)
         if member.status not in [ChatMemberStatus.OWNER, ChatMemberStatus.ADMINISTRATOR]:
             return await CallbackQuery.answer("❌ ʏᴏᴜ ᴄᴀɴɴᴏᴛ ᴄʟᴏsᴇ ᴛʜɪs!", show_alert=True)
 
@@ -265,4 +267,4 @@ async def close_player_cb(client, CallbackQuery: CallbackQuery):
         await CallbackQuery.message.delete()
     except:
         pass
-        
+                                               
