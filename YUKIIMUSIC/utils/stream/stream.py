@@ -167,11 +167,11 @@ async def stream(
                 if not is_on:
                     run = await app.send_message(original_chat_id, text=f"<b><emoji id='5999063078983964465'>🎧</emoji> Sᴛᴀʀᴛᴇᴅ ᴘʟᴀʏɪɴɢ:</b> {title[:30]}\n<b><emoji id='6001522720855037558'>👤</emoji> ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ:</b> {user_name}")
                 else:
-                    caption_text = _[f"stream_{theme}"].format(f"https://t.me/{app.username}?start=info_{vidid}", title[:23], duration_min, user_name)
-                    video_file = getattr(config, "PLAYER_VIDEO", None)
+                    video_file = getattr(config, "PLAYER_VIDEO", "https://files.catbox.moe/qxj5y2.mp4")
+                    caption_text = _[f"stream_{theme}"].format(f"https://t.me/{app.username}?start=info_{vidid}", title[:23], duration_min, user_name, video_file)
                     
-                    if theme == 2 and video_file:
-                        run = await app.send_video(original_chat_id, video=video_file, caption=caption_text, has_spoiler=True)
+                    if theme == 2:
+                        run = await app.send_message(original_chat_id, text=caption_text, disable_web_page_preview=False)
                     else:
                         run = await app.send_photo(original_chat_id, photo=img, caption=caption_text, has_spoiler=True)
                 
@@ -240,11 +240,11 @@ async def stream(
             if not is_on:
                 run = await app.send_message(original_chat_id, text=f"<b><emoji id='5999063078983964465'>🎧</emoji> Sᴛᴀʀᴛᴇᴅ ᴘʟᴀʏɪɴɢ:</b> {title[:30]}\n<b><emoji id='6001522720855037558'>👤</emoji> ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ:</b> {user_name}")
             else:
-                caption_text = _[f"stream_{theme}"].format(f"https://t.me/{app.username}?start=info_{vidid}", title[:23], duration_min, user_name)
-                video_file = getattr(config, "PLAYER_VIDEO", None)
+                video_file = getattr(config, "PLAYER_VIDEO", "https://files.catbox.moe/qxj5y2.mp4")
+                caption_text = _[f"stream_{theme}"].format(f"https://t.me/{app.username}?start=info_{vidid}", title[:23], duration_min, user_name, video_file)
                 
-                if theme == 2 and video_file:
-                    run = await app.send_video(original_chat_id, video=video_file, caption=caption_text, has_spoiler=True)
+                if theme == 2:
+                    run = await app.send_message(original_chat_id, text=caption_text, disable_web_page_preview=False)
                 else:
                     run = await app.send_photo(original_chat_id, photo=img, caption=caption_text, has_spoiler=True)
                     
@@ -282,11 +282,11 @@ async def stream(
             if not is_on:
                 run = await app.send_message(original_chat_id, text=f"<b><emoji id='5999063078983964465'>🎧</emoji> Sᴛᴀʀᴛᴇᴅ ᴘʟᴀʏɪɴɢ:</b> {title[:30]}\n<b><emoji id='6001522720855037558'>👤</emoji> ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ:</b> {user_name}")
             else:
-                caption_text = _[f"stream_{theme}"].format(config.SUPPORT_CHAT, title[:23], duration_min, user_name)
-                video_file = getattr(config, "PLAYER_VIDEO", None)
+                video_file = getattr(config, "PLAYER_VIDEO", "https://files.catbox.moe/qxj5y2.mp4")
+                caption_text = _[f"stream_{theme}"].format(config.SUPPORT_CHAT, title[:23], duration_min, user_name, video_file)
                 
-                if theme == 2 and video_file:
-                    run = await app.send_video(original_chat_id, video=video_file, caption=caption_text, has_spoiler=True)
+                if theme == 2:
+                    run = await app.send_message(original_chat_id, text=caption_text, disable_web_page_preview=False)
                 else:
                     run = await app.send_photo(original_chat_id, photo=config.SOUNCLOUD_IMG_URL, caption=caption_text, has_spoiler=True)
                     
@@ -326,13 +326,13 @@ async def stream(
             is_on = await is_player_on(chat_id)
             
             if not is_on:
-                run = await app.send_message(original_chat_id, text=f"<b><emoji id='5999063078983964465'>🎧</emoji> Sᴛᴀʀᴛᴇᴅ ᴘʟᴀʏɪɴɢ:</b> {title[:30]}\n<b><emoji id='6001522720855037558'>👤</emoji> ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ:</b> {user_name}")
+                run = await app.send_message(original_chat_id, text=f"<b><emoji id='5999063078983964465'>🎧</emoji> Sᴛᴀʀᴛᴇᴅ ᴘʟᴀʏɪɴɢ:</b> {title[:30]}\n<b><emoji id='6001522720855037558'>👤</emoji> ʀᴇǫᴜᴇsᴛ ʙʏ:</b> {user_name}")
             else:
-                caption_text = _[f"stream_{theme}"].format(link, title[:23], duration_min, user_name)
-                video_file = getattr(config, "PLAYER_VIDEO", None)
+                video_file = getattr(config, "PLAYER_VIDEO", "https://files.catbox.moe/qxj5y2.mp4")
+                caption_text = _[f"stream_{theme}"].format(link, title[:23], duration_min, user_name, video_file)
                 
-                if theme == 2 and video_file:
-                    run = await app.send_video(original_chat_id, video=video_file, caption=caption_text, has_spoiler=True)
+                if theme == 2:
+                    run = await app.send_message(original_chat_id, text=caption_text, disable_web_page_preview=False)
                 else:
                     run = await app.send_photo(original_chat_id, photo=config.TELEGRAM_VIDEO_URL if video else config.TELEGRAM_AUDIO_URL, caption=caption_text, has_spoiler=True)
                     
@@ -377,11 +377,11 @@ async def stream(
             if not is_on:
                 run = await app.send_message(original_chat_id, text=f"<b><emoji id='5999063078983964465'>🎧</emoji> Sᴛᴀʀᴛᴇᴅ ʟɪᴠᴇ sᴛʀᴇᴀᴍ:</b> {title[:30]}\n<b><emoji id='6001522720855037558'>👤</emoji> ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ:</b> {user_name}")
             else:
-                caption_text = _[f"livestream_{theme}"].format(f"https://t.me/{app.username}?start=info_{vidid}", title[:23], duration_min, user_name)
-                video_file = getattr(config, "PLAYER_VIDEO", None)
+                video_file = getattr(config, "PLAYER_VIDEO", "https://files.catbox.moe/qxj5y2.mp4")
+                caption_text = _[f"livestream_{theme}"].format(f"https://t.me/{app.username}?start=info_{vidid}", title[:23], duration_min, user_name, video_file)
                 
-                if theme == 2 and video_file:
-                    run = await app.send_video(original_chat_id, video=video_file, caption=caption_text, has_spoiler=True)
+                if theme == 2:
+                    run = await app.send_message(original_chat_id, text=caption_text, disable_web_page_preview=False)
                 else:
                     run = await app.send_photo(original_chat_id, photo=img, caption=caption_text, has_spoiler=True)
                     
@@ -417,11 +417,11 @@ async def stream(
             if not is_on:
                 run = await app.send_message(original_chat_id, text=f"<b><emoji id='5999063078983964465'>🎧</emoji> Sᴛᴀʀᴛᴇᴅ ᴘʟᴀʏɪɴɢ:</b> {title[:30]}\n<b><emoji id='6001522720855037558'>👤</emoji> ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ:</b> {user_name}")
             else:
-                caption_text = _[f"stream_{theme}"].format(link, title[:23], duration_min, user_name)
-                video_file = getattr(config, "PLAYER_VIDEO", None)
+                video_file = getattr(config, "PLAYER_VIDEO", "https://files.catbox.moe/qxj5y2.mp4")
+                caption_text = _[f"stream_{theme}"].format(link, title[:23], duration_min, user_name, video_file)
                 
-                if theme == 2 and video_file:
-                    run = await app.send_video(original_chat_id, video=video_file, caption=caption_text, has_spoiler=True)
+                if theme == 2:
+                    run = await app.send_message(original_chat_id, text=caption_text, disable_web_page_preview=False)
                 else:
                     run = await app.send_photo(original_chat_id, photo=config.STREAM_IMG_URL, caption=caption_text, has_spoiler=True)
                     
@@ -430,4 +430,3 @@ async def stream(
             db[chat_id][0]["mystic"] = run
             db[chat_id][0]["markup"] = "tg"
             await mystic.delete()
-            
