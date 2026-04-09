@@ -24,7 +24,7 @@ FONTS = load_fonts()
 FALLBACK_IMAGE_PATH = "YUKIIMUSIC/assets/controller.png"
 
 # Teri fix ki hui default safe photo 🛡️
-YOUTUBE_IMG_URL = "https://i.ibb.co/nswdf199/9e78edd7-f3b5-4496-87ae-8b5ee0a76d3d.jpg"
+YOUTUBE_IMG_URL = "https://files.catbox.moe/k3kva3.jpeg"
 
 async def resize_youtube_thumbnail(img: Image.Image) -> Image.Image:
     target_width, target_height = 1280, 720
