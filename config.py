@@ -114,11 +114,11 @@ TG_VIDEO_FILESIZE_LIMIT = int(getenv("TG_VIDEO_FILESIZE_LIMIT", "5242880000"))
 # ---------------------------------------------------------------------------------------
 
 #
-DIGAN_1 = "https://files.catbox.moe/rck8mj.png"
-DIGAN_2 = "https://files.catbox.moe/rhd64t.png" 
-DIGAN_3 = "https://files.catbox.moe/e7izdl.png"
-DIGAN_4 = "https://files.catbox.moe/hyznd1.png"
 
+DIGAN_1 = "https://i.ibb.co/B5Xw1YGm/Screenshot-20260409-175833-Telegram.png"
+DIGAN_2 = "https://i.ibb.co/KcJthYDj/Screenshot-20260409-201341-Telegram.png"
+DIGAN_3 = "https://i.ibb.co/vSx43my/Screenshot-20260409-201606-Telegram.png"
+DIGAN_4 = "https://i.ibb.co/v4G7bnJR/Screenshot-20260409-201714-Telegram.png"
 # ------------------------------------
 # ------------------------------------
 # ------------------------------------
