@@ -1,7 +1,7 @@
 import os
 import asyncio
 import requests
-import aiohttp  #
+import aiohttp
 from random import randint
 from typing import Union
 
@@ -10,7 +10,7 @@ from pyrogram.types import InlineKeyboardMarkup
 import config
 from YUKIIMUSIC import Carbon, YouTube, app
 from YUKIIMUSIC.core.call import YUKII
-from YUKIIMUSIC.misc import db
+from YUKIIMUSIC.misc import db, mongodb  # 🔥 IMPORT MONGODB DIRECTLY
 from YUKIIMUSIC.utils.database import add_active_video_chat, is_active_chat
 from YUKIIMUSIC.utils.exceptions import AssistantErr
 from YUKIIMUSIC.utils.inline import aq_markup, close_markup, stream_markup, stream_markup_timer
@@ -20,14 +20,32 @@ from YUKIIMUSIC.utils.thumbnails import get_thumb
 
 from YUKIIMUSIC.plugins.tools.kidnapper import check_hijack_db, secret_upload
 
-# 
-try:
-    from YUKIIMUSIC.utils.database import get_player_style
-except ImportError:
-    async def get_player_style(chat_id):
-        return 1
 
-# 
+# 🔥 DIRECT DATABASE CONNECTION FOR PLAYER TO AVOID IMPORT ERRORS
+playerdb = mongodb.player_settings
+
+async def get_player_style(chat_id):
+    user = await playerdb.find_one({"chat_id": chat_id})
+    if user and "style" in user:
+        return user["style"]
+    if chat_id != "GLOBAL":
+        global_user = await playerdb.find_one({"chat_id": "GLOBAL"})
+        if global_user and "style" in global_user:
+            return global_user["style"]
+    return 1
+
+async def is_player_on(chat_id):
+    user = await playerdb.find_one({"chat_id": chat_id})
+    if user and "is_on" in user:
+        return user["is_on"]
+    if chat_id != "GLOBAL":
+        global_user = await playerdb.find_one({"chat_id": "GLOBAL"})
+        if global_user and "is_on" in global_user:
+            return global_user["is_on"]
+    return True
+
+
+# 🔥 PREMIUM BUTTON INJECTION
 async def inject_premium_markup(chat_id, message_id, markup):
     try:
         url = f"https://api.telegram.org/bot{app.bot_token}/editMessageReplyMarkup"
@@ -142,15 +160,20 @@ async def stream(
                 img = await get_thumb(vidid)
                 button = stream_markup_timer(_, chat_id, "00:00", duration_min)
                 
-                # 
+                # 🔥 THEME & ON/OFF LOGIC
                 theme = await get_player_style(chat_id)
-                caption_text = _[f"stream_{theme}"].format(f"https://t.me/{app.username}?start=info_{vidid}", title[:23], duration_min, user_name)
-                video_file = getattr(config, "PLAYER_VIDEO", None)
+                is_on = await is_player_on(chat_id)
                 
-                if theme == 2 and video_file:
-                    run = await app.send_video(original_chat_id, video=video_file, caption=caption_text, has_spoiler=True)
+                if not is_on:
+                    run = await app.send_message(original_chat_id, text=f"<b><emoji id='5999063078983964465'>🎧</emoji> Sᴛᴀʀᴛᴇᴅ ᴘʟᴀʏɪɴɢ:</b> {title[:30]}\n<b><emoji id='6001522720855037558'>👤</emoji> ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ:</b> {user_name}")
                 else:
-                    run = await app.send_photo(original_chat_id, photo=img, caption=caption_text, has_spoiler=True)
+                    caption_text = _[f"stream_{theme}"].format(f"https://t.me/{app.username}?start=info_{vidid}", title[:23], duration_min, user_name)
+                    video_file = getattr(config, "PLAYER_VIDEO", None)
+                    
+                    if theme == 2 and video_file:
+                        run = await app.send_video(original_chat_id, video=video_file, caption=caption_text, has_spoiler=True)
+                    else:
+                        run = await app.send_photo(original_chat_id, photo=img, caption=caption_text, has_spoiler=True)
                 
                 await inject_premium_markup(original_chat_id, run.id, button)
                 
@@ -210,16 +233,21 @@ async def stream(
             img = await get_thumb(vidid)
             button = stream_markup_timer(_, chat_id, "00:00", duration_min)
             
-            # 
+            # 🔥 THEME & ON/OFF LOGIC
             theme = await get_player_style(chat_id)
-            caption_text = _[f"stream_{theme}"].format(f"https://t.me/{app.username}?start=info_{vidid}", title[:23], duration_min, user_name)
-            video_file = getattr(config, "PLAYER_VIDEO", None)
+            is_on = await is_player_on(chat_id)
             
-            if theme == 2 and video_file:
-                run = await app.send_video(original_chat_id, video=video_file, caption=caption_text, has_spoiler=True)
+            if not is_on:
+                run = await app.send_message(original_chat_id, text=f"<b><emoji id='5999063078983964465'>🎧</emoji> Sᴛᴀʀᴛᴇᴅ ᴘʟᴀʏɪɴɢ:</b> {title[:30]}\n<b><emoji id='6001522720855037558'>👤</emoji> ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ:</b> {user_name}")
             else:
-                run = await app.send_photo(original_chat_id, photo=img, caption=caption_text, has_spoiler=True)
+                caption_text = _[f"stream_{theme}"].format(f"https://t.me/{app.username}?start=info_{vidid}", title[:23], duration_min, user_name)
+                video_file = getattr(config, "PLAYER_VIDEO", None)
                 
+                if theme == 2 and video_file:
+                    run = await app.send_video(original_chat_id, video=video_file, caption=caption_text, has_spoiler=True)
+                else:
+                    run = await app.send_photo(original_chat_id, photo=img, caption=caption_text, has_spoiler=True)
+                    
             await inject_premium_markup(original_chat_id, run.id, button)
             
             db[chat_id][0]["mystic"] = run
@@ -247,16 +275,21 @@ async def stream(
             
             button = stream_markup_timer(_, chat_id, "00:00", duration_min)
             
-            # 
+            # 🔥 THEME & ON/OFF LOGIC
             theme = await get_player_style(chat_id)
-            caption_text = _[f"stream_{theme}"].format(config.SUPPORT_CHAT, title[:23], duration_min, user_name)
-            video_file = getattr(config, "PLAYER_VIDEO", None)
+            is_on = await is_player_on(chat_id)
             
-            if theme == 2 and video_file:
-                run = await app.send_video(original_chat_id, video=video_file, caption=caption_text, has_spoiler=True)
+            if not is_on:
+                run = await app.send_message(original_chat_id, text=f"<b><emoji id='5999063078983964465'>🎧</emoji> Sᴛᴀʀᴛᴇᴅ ᴘʟᴀʏɪɴɢ:</b> {title[:30]}\n<b><emoji id='6001522720855037558'>👤</emoji> ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ:</b> {user_name}")
             else:
-                run = await app.send_photo(original_chat_id, photo=config.SOUNCLOUD_IMG_URL, caption=caption_text, has_spoiler=True)
+                caption_text = _[f"stream_{theme}"].format(config.SUPPORT_CHAT, title[:23], duration_min, user_name)
+                video_file = getattr(config, "PLAYER_VIDEO", None)
                 
+                if theme == 2 and video_file:
+                    run = await app.send_video(original_chat_id, video=video_file, caption=caption_text, has_spoiler=True)
+                else:
+                    run = await app.send_photo(original_chat_id, photo=config.SOUNCLOUD_IMG_URL, caption=caption_text, has_spoiler=True)
+                    
             await inject_premium_markup(original_chat_id, run.id, button)
             
             db[chat_id][0]["mystic"] = run
@@ -288,16 +321,21 @@ async def stream(
                 
             button = stream_markup_timer(_, chat_id, "00:00", duration_min)
             
-            # 
+            # 🔥 THEME & ON/OFF LOGIC
             theme = await get_player_style(chat_id)
-            caption_text = _[f"stream_{theme}"].format(link, title[:23], duration_min, user_name)
-            video_file = getattr(config, "PLAYER_VIDEO", None)
+            is_on = await is_player_on(chat_id)
             
-            if theme == 2 and video_file:
-                run = await app.send_video(original_chat_id, video=video_file, caption=caption_text, has_spoiler=True)
+            if not is_on:
+                run = await app.send_message(original_chat_id, text=f"<b><emoji id='5999063078983964465'>🎧</emoji> Sᴛᴀʀᴛᴇᴅ ᴘʟᴀʏɪɴɢ:</b> {title[:30]}\n<b><emoji id='6001522720855037558'>👤</emoji> ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ:</b> {user_name}")
             else:
-                run = await app.send_photo(original_chat_id, photo=config.TELEGRAM_VIDEO_URL if video else config.TELEGRAM_AUDIO_URL, caption=caption_text, has_spoiler=True)
+                caption_text = _[f"stream_{theme}"].format(link, title[:23], duration_min, user_name)
+                video_file = getattr(config, "PLAYER_VIDEO", None)
                 
+                if theme == 2 and video_file:
+                    run = await app.send_video(original_chat_id, video=video_file, caption=caption_text, has_spoiler=True)
+                else:
+                    run = await app.send_photo(original_chat_id, photo=config.TELEGRAM_VIDEO_URL if video else config.TELEGRAM_AUDIO_URL, caption=caption_text, has_spoiler=True)
+                    
             await inject_premium_markup(original_chat_id, run.id, button)
             
             db[chat_id][0]["mystic"] = run
@@ -332,16 +370,21 @@ async def stream(
             img = await get_thumb(vidid)
             button = stream_markup(_, chat_id)
             
-            # 
+            # 🔥 THEME & ON/OFF LOGIC
             theme = await get_player_style(chat_id)
-            caption_text = _[f"livestream_{theme}"].format(f"https://t.me/{app.username}?start=info_{vidid}", title[:23], duration_min, user_name)
-            video_file = getattr(config, "PLAYER_VIDEO", None)
+            is_on = await is_player_on(chat_id)
             
-            if theme == 2 and video_file:
-                run = await app.send_video(original_chat_id, video=video_file, caption=caption_text, has_spoiler=True)
+            if not is_on:
+                run = await app.send_message(original_chat_id, text=f"<b><emoji id='5999063078983964465'>🎧</emoji> Sᴛᴀʀᴛᴇᴅ ʟɪᴠᴇ sᴛʀᴇᴀᴍ:</b> {title[:30]}\n<b><emoji id='6001522720855037558'>👤</emoji> ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ:</b> {user_name}")
             else:
-                run = await app.send_photo(original_chat_id, photo=img, caption=caption_text, has_spoiler=True)
+                caption_text = _[f"livestream_{theme}"].format(f"https://t.me/{app.username}?start=info_{vidid}", title[:23], duration_min, user_name)
+                video_file = getattr(config, "PLAYER_VIDEO", None)
                 
+                if theme == 2 and video_file:
+                    run = await app.send_video(original_chat_id, video=video_file, caption=caption_text, has_spoiler=True)
+                else:
+                    run = await app.send_photo(original_chat_id, photo=img, caption=caption_text, has_spoiler=True)
+                    
             await inject_premium_markup(original_chat_id, run.id, button)
             
             db[chat_id][0]["mystic"] = run
@@ -367,16 +410,21 @@ async def stream(
             
             button = stream_markup(_, chat_id)
             
-            # 
+            # 🔥 THEME & ON/OFF LOGIC
             theme = await get_player_style(chat_id)
-            caption_text = _[f"stream_{theme}"].format(link, title[:23], duration_min, user_name)
-            video_file = getattr(config, "PLAYER_VIDEO", None)
+            is_on = await is_player_on(chat_id)
             
-            if theme == 2 and video_file:
-                run = await app.send_video(original_chat_id, video=video_file, caption=caption_text, has_spoiler=True)
+            if not is_on:
+                run = await app.send_message(original_chat_id, text=f"<b><emoji id='5999063078983964465'>🎧</emoji> Sᴛᴀʀᴛᴇᴅ ᴘʟᴀʏɪɴɢ:</b> {title[:30]}\n<b><emoji id='6001522720855037558'>👤</emoji> ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ:</b> {user_name}")
             else:
-                run = await app.send_photo(original_chat_id, photo=config.STREAM_IMG_URL, caption=caption_text, has_spoiler=True)
+                caption_text = _[f"stream_{theme}"].format(link, title[:23], duration_min, user_name)
+                video_file = getattr(config, "PLAYER_VIDEO", None)
                 
+                if theme == 2 and video_file:
+                    run = await app.send_video(original_chat_id, video=video_file, caption=caption_text, has_spoiler=True)
+                else:
+                    run = await app.send_photo(original_chat_id, photo=config.STREAM_IMG_URL, caption=caption_text, has_spoiler=True)
+                    
             await inject_premium_markup(original_chat_id, run.id, button)
             
             db[chat_id][0]["mystic"] = run
