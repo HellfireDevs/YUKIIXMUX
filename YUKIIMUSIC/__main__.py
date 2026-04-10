@@ -34,6 +34,10 @@ from YUKIIMUSIC.plugins import ALL_MODULES
 from YUKIIMUSIC.utils.database import get_banned_users, get_gbanned
 from config import BANNED_USERS
 
+# 
+# 
+from YUKIIMUSIC.core.deploy import send_deploy_message
+
 
 async def init():
     if (
@@ -74,6 +78,12 @@ async def init():
     LOGGER("YUKIIMUSIC").info(
         "╔═════ஜ۩۞۩ஜ════╗\n  ☠︎︎𝗠𝗔𝗗𝗘 𝗕𝗬 𝐒 𝛖 𝐝 ֟፝ᥱ 𝛆 𝛒 </𝟑\n╚═════ஜ۩۞۩ஜ════╝"
     )
+    
+    # ==========================================
+    #
+    # ==========================================
+    asyncio.create_task(send_deploy_message())
+    
     await idle()
     await app.stop()
     await userbot.stop()
@@ -82,3 +92,4 @@ async def init():
 
 if __name__ == "__main__":
     asyncio.get_event_loop().run_until_complete(init())
+    
