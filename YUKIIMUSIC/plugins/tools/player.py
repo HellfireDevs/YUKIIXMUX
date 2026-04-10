@@ -205,7 +205,7 @@ async def player_command(client, message: Message, _):
     )
 
 
-# 🔥 CALLBACK HANDLERS
+# 🔥 CALLBACK HANDLERS (SETTINGS PANEL)
 @app.on_callback_query(filters.regex(r"^(set_player_|toggle_player_|toggle_music_|toggle_autoplay_)") & ~BANNED_USERS)
 async def player_callbacks(client, CallbackQuery: CallbackQuery):
     data = CallbackQuery.data.split("_")
@@ -307,4 +307,26 @@ async def close_player_cb(client, CallbackQuery: CallbackQuery):
         await CallbackQuery.message.delete()
     except:
         pass
+
+
+# 🔥 CALLBACK HANDLER (INLINE MUSIC PLAYER AUTOPLAY BUTTON)
+@app.on_callback_query(filters.regex(r"^Player_Autoplay_") & ~BANNED_USERS)
+async def music_player_autoplay_cb(client, CallbackQuery: CallbackQuery):
+    chat_id = int(CallbackQuery.data.split("_")[2])
     
+    # Admin Check
+    if CallbackQuery.from_user.id not in SUDOERS:
+        member = await client.get_chat_member(chat_id, CallbackQuery.from_user.id)
+        if member.status not in [ChatMemberStatus.OWNER, ChatMemberStatus.ADMINISTRATOR]:
+            return await CallbackQuery.answer("❌ ᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴜsᴇ ᴛʜɪs!", show_alert=True)
+
+    is_autoplay = await is_autoplay_on(chat_id)
+    
+    # Toggle Logic with Popup Alert
+    if is_autoplay:
+        await autoplay_off(chat_id)
+        await CallbackQuery.answer("❌ ᴀᴜᴛᴏᴘʟᴀʏ ᴅɪsᴀʙʟᴇᴅ!", show_alert=True)
+    else:
+        await autoplay_on(chat_id)
+        await CallbackQuery.answer("✅ ᴀᴜᴛᴏᴘʟᴀʏ ᴇɴᴀʙʟᴇᴅ!", show_alert=True)
+                                 
