@@ -22,23 +22,24 @@
 import YUKIIMUSIC.yuki_guard
 import config
 from YUKIIMUSIC import app
+from pyrogram.types import InlineKeyboardButton
 
-# 🔥 HELLFIRE DEVS HACK: Raw API Button Generator
+# HELLFIRE DEVS HACK: Fixed for Pyrogram Objects
 def api_btn(text, callback_data=None, url=None, style=None, custom_emoji_id=None):
-    btn = {"text": text}
-    if callback_data:
-        btn["callback_data"] = callback_data
     if url:
         url_str = str(url)
         if not url_str.startswith("http") and not url_str.startswith("tg://"):
             url_str = f"https://t.me/{url_str.replace('@', '')}"
-        btn["url"] = url_str
+        btn = InlineKeyboardButton(text=text, url=url_str)
+    else:
+        btn = InlineKeyboardButton(text=text, callback_data=callback_data)
         
     if style in ["primary", "danger", "success"]:
-        btn["style"] = style  
+        setattr(btn, "style", style)
         
     if custom_emoji_id:
-        btn["icon_custom_emoji_id"] = str(custom_emoji_id) 
+        setattr(btn, "icon_custom_emoji_id", str(custom_emoji_id))
+        
     return btn
 
 
@@ -110,7 +111,7 @@ def private_panel(_):
             ),
         ],
         [
-            # 🌐 NEW: Website Button (Normal Color, Full Width) - Bada Wala
+            # NEW: Website Button (Normal Color, Full Width) - Bada Wala
             api_btn(
                 text="˹ 𝚼єʙsιᴛє ˼", 
                 url="https://nex0-1.vercel.app", 
