@@ -83,9 +83,9 @@ def stream_markup_timer(_, chat_id, played, dur, autoplay_status=False):
             
     # Dynamic Autoplay Button
     if autoplay_status:
-        autoplay_btn = api_btn(text="ᴀᴜᴛᴏᴘʟᴀʏ : ᴏɴ", callback_data=f"Player_Autoplay_{chat_id}", style="success", custom_emoji_id="6294287714887933094")
+        autoplay_btn = api_btn(text="ᴀᴜᴛᴏᴘʟᴀʏ", callback_data=f"Player_Autoplay_{chat_id}", style="success", custom_emoji_id="6294287714887933094")
     else:
-        autoplay_btn = api_btn(text="ᴀᴜᴛᴏᴘʟᴀʏ : ᴏғғ", callback_data=f"Player_Autoplay_{chat_id}", style="danger", custom_emoji_id="6294287714887933094")
+        autoplay_btn = api_btn(text="ᴀᴜᴛᴏᴘʟᴀʏ", callback_data=f"Player_Autoplay_{chat_id}", style="danger", custom_emoji_id="6294287714887933094")
             
     buttons = [
         [
@@ -114,9 +114,9 @@ def stream_markup_timer(_, chat_id, played, dur, autoplay_status=False):
 def stream_markup(_, chat_id, autoplay_status=False):
     # Dynamic Autoplay Button
     if autoplay_status:
-        autoplay_btn = api_btn(text="ᴀᴜᴛᴏᴘʟᴀʏ : ᴏɴ", callback_data=f"Player_Autoplay_{chat_id}", style="success", custom_emoji_id="6294118750874508525")
+        autoplay_btn = api_btn(text="ᴀᴜᴛᴏᴘʟᴀʏ", callback_data=f"Player_Autoplay_{chat_id}", style="success", custom_emoji_id="6294118750874508525")
     else:
-        autoplay_btn = api_btn(text="ᴀᴜᴛᴏᴘʟᴀʏ : ᴏғғ", callback_data=f"Player_Autoplay_{chat_id}", style="danger", custom_emoji_id="6294118750874508525")
+        autoplay_btn = api_btn(text="ᴀᴜᴛᴏᴘʟᴀʏ", callback_data=f"Player_Autoplay_{chat_id}", style="danger", custom_emoji_id="6294118750874508525")
 
     buttons = [
         [
