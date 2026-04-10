@@ -382,20 +382,17 @@ class Call(PyTgCalls):
                         # 1. YouTube Slider se next gaana dhoondho
                         try:
                             _, _, _, next_vidid = await YouTube.slider(prev_title, 1)
-                            # stream() ko result dictionary chahiye hoti hai, wahi nikal rahe hain
                             track_details, next_vidid = await YouTube.track(next_vidid, videoid=True)
                         except Exception as e:
-                            # Agar fail hua toh safety ke liye wahi purana play kar dega
                             track_details, next_vidid = await YouTube.track(popped["vidid"], videoid=True)
                         
-                        # 2. Stream engine call with EXACT keywords
+                        # 2. Stream engine call (Bina 'client' ke)
                         await stream(
-                            client=app,
                             mystic=msg,
                             user_id=app.id,
                             result=track_details,
                             chat_id=chat_id,
-                            user_name="Autoplay", # Ye 'Requested by: Autoplay' dikhayega!
+                            user_name="Autoplay", 
                             original_chat_id=chat_id,
                             video=False,
                             streamtype="youtube",
@@ -403,11 +400,11 @@ class Call(PyTgCalls):
                         )
                         return 
                 except Exception as e:
-                    # Tracker abhi bhi on hai safety ke liye
                     try:
-                        await app.send_message(chat_id, f"🚨 **Autoplay Crash Report 3:**\n`{e}`")
+                        await app.send_message(chat_id, f"🚨 **Autoplay Crash Report 4:**\n`{e}`")
                     except:
                         pass
+                        
                         
                 # ==========================================
                 # NORMAL LEAVE LOGIC 
