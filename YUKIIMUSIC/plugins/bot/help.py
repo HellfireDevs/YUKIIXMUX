@@ -117,7 +117,7 @@ async def helper_cb(client, CallbackQuery):
     await CallbackQuery.edit_message_text(Helper.HELP_M, reply_markup=InlineKeyboardMarkup(BUTTONS.MBUTTON))
 
 
-# 🔥 FIX: Crashing issue fixed and language variable defined properly
+# 
 @app.on_callback_query(filters.regex('managebot123') & ~BANNED_USERS)
 async def on_back_button(client, CallbackQuery):
     try:
@@ -142,7 +142,7 @@ async def mb_plugin_button(client, CallbackQuery):
         await CallbackQuery.edit_message_text(getattr(Helper, cb), reply_markup=keyboard)
 
 
-# 🔥 NEW: Help menu se wapas Start menu pe aane ka rasta (yuki_back)
+# 
 @app.on_callback_query(filters.regex("yuki_back") & ~BANNED_USERS)
 async def back_to_start(client, CallbackQuery):
     try:
@@ -150,7 +150,7 @@ async def back_to_start(client, CallbackQuery):
         _ = get_string(language)
         keyboard = private_panel(_)
         
-        # Start menu ka main text
+        # 
         start_text = _["start_2"].format(CallbackQuery.from_user.mention, app.mention)
         
         await CallbackQuery.edit_message_text(
