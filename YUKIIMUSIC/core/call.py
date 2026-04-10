@@ -388,6 +388,7 @@ class Call(PyTgCalls):
                         
                         # 2. Stream engine call (Bina 'client' ke)
                         await stream(
+                             _=_,
                             mystic=msg,
                             user_id=app.id,
                             result=track_details,
