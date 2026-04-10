@@ -369,24 +369,28 @@ class Call(PyTgCalls):
                 # AUTO PLAY LOGIC
                 # ==========================================
                 try:
-                    from YUKIIMUSIC.utils.database import is_autoplay_on
+                    from YUKIIMUSIC.utils.database import is_autoplay_on, get_lang
                     from YUKIIMUSIC.utils.stream.stream import stream
+                    from strings import get_string
                     
                     auto_play = await is_autoplay_on(chat_id)
                     
                     if auto_play and popped and "vidid" in popped and popped["vidid"] not in ["telegram", "soundcloud"]:
                         prev_title = popped.get("title", "music")
                         
-                        msg = await app.send_message(chat_id, "Autoplay: Loading next related track...")
+                        # Language setup pehle call kar liya
+                        language = await get_lang(chat_id)
+                        theme_lang = get_string(language)
+                        
+                        # en.yml se play_1 string utha li, stream isko apne aap delete kar dega
+                        msg = await app.send_message(chat_id, theme_lang["play_1"])
                         
                         try:
-                            _, _, _, next_vidid = await YouTube.slider(prev_title, 1)
+                            # Index 2 use kiya taaki same gaane ka lyric video na uthaye
+                            _, _, _, next_vidid = await YouTube.slider(prev_title, 2)
                             track_details, next_vidid = await YouTube.track(next_vidid, videoid=True)
                         except Exception:
                             track_details, next_vidid = await YouTube.track(popped["vidid"], videoid=True)
-                        
-                        language = await get_lang(chat_id)
-                        theme_lang = get_string(language)
                         
                         await stream(
                             theme_lang,
