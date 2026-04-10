@@ -73,8 +73,41 @@ async def play_commnd(
                 pass
                 
             return
+            
+    # === 🚫 NSFW & ILLEGAL CONTENT FILTER 🚫 ===
+    if len(message.command) > 1:
+        # Pura search query lower case mein le raha hai
+        query = message.text.split(None, 1)[1].lower()
+        
+        # Yahan apni blocked words ki list add kar lena
+        blocked_words = [
+            "xxx", "porn", "sex", "nude", "drugs", "drug", 
+            "nsfw", "rape", "xnxx", "xvideos", "hot video",
+            "sexy","land","pron1","xxxx","fuck","sexx","sexxx",
+        ]
+        
+        # Check agar query mein koi blocked word hai
+        if any(word in query for word in blocked_words):
+            mention = message.from_user.mention
+            
+            # Premium Aesthetic Blocked Message
+            blocked_msg = (
+                f"<blockquote><b>🚫 ᴄᴏɴᴛᴇɴᴛ ʙʟᴏᴄᴋᴇᴅ !</b></blockquote>\n\n"
+                f"<blockquote><b>⚠️ ᴛʜɪs ǫᴜᴇʀʏ ᴄᴏɴᴛᴀɪɴs ɪʟʟᴇɢᴀʟ ᴏʀ ᴘʀᴏʜɪʙɪᴛᴇᴅ ᴛᴇʀᴍs.</b>\n"
+                f"<b>🛑 ᴘʟᴇᴀsᴇ ᴜsᴇ ᴀᴘᴘʀᴏᴘʀɪᴀᴛᴇ sᴇᴀʀᴄʜ ᴛᴇʀᴍs, {mention}.</b></blockquote>"
+            )
+            
+            await message.reply_text(blocked_msg)
+            
+            # Optional: Gusse wala sticker send karega (Tere list mese hi ek strict wala)
+            try:
+                await message.reply_sticker("CAACAgUAAxkBAAFGekFp0ik5WWEy4etIEwKqZZWSwD2c8wACKgsAAnbIEFe8P0r42zZZfDsE")
+            except Exception:
+                pass
+                
+            return
     # ====================================================
-    
+        
     mystic = await message.reply_text(
         _["play_2"].format(channel) if channel else _["play_1"]
     )
