@@ -55,7 +55,7 @@ def stream_markup_timer(_, chat_id, played, dur):
         if i < pos:
             bar += "━"
         elif i == pos:
-            bar += "✨"  # Premium Emoji as the slider dot!
+            bar += "🍃"  # Premium Emoji as the slider dot!
         else:
             bar += "─"
             
