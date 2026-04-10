@@ -365,43 +365,55 @@ class Call(PyTgCalls):
             
             if not check:
                 # ==========================================
-                # AUTO PLAY LOGIC (TRACKER ENGINE)
+                # ==========================================
+                # 🔥 AUTO PLAY LOGIC (FINAL FIX) 🔥
                 # ==========================================
                 try:
-                    from YUKIIMUSIC.utils.database import is_autoplay_on
+                    from YUKIIMUSIC.utils.database import is_autoplay_on, get_lang
                     from YUKIIMUSIC.utils.stream.stream import stream
+                    from strings import get_string
+                    from YUKIIMUSIC import YouTube
                     
                     auto_play = await is_autoplay_on(chat_id)
                     
                     if auto_play and popped and "vidid" in popped and popped["vidid"] not in ["telegram", "soundcloud"]:
-                        prev_vidid = popped["vidid"]
+                        prev_title = popped.get("title", "")
                         
-                        # Ye bot ko group mein bolne pe majboor karega
-                        msg = await app.send_message(chat_id, "🔍 `Autoplay: Searching for a related track...`")
+                        msg = await app.send_message(chat_id, "🔍 `Autoplay: Loading next related track...`")
                         
+                        # 1. Agla gaana dhoondho (YouTube se 2nd result nikal rahe hain)
+                        try:
+                            _, _, _, next_vidid = await YouTube.slider(prev_title, 1)
+                        except:
+                            next_vidid = popped["vidid"] # Agar fail hua toh same play kar dega
+                            
+                        # 2. Language Setup (Taaki stream engine error na de)
+                        language = await get_lang(chat_id)
+                        _ = get_string(language)
+                        
+                        # 3. Makkhan Stream Engine (Bina kisi faltu keyword ke)
                         await stream(
                             client,
-                            msg, # Asli bimari is argument mein ho sakti hai
-                            app.id,
-                            "video", 
+                            msg,
+                            _,
+                            "video",
                             chat_id,
-                            prev_vidid, 
+                            next_vidid, 
                             video=False,
                             streamtype="youtube",
-                            forceplay=False,
-                            autoplay=True, 
+                            forceplay=False
                         )
                         return 
                 except Exception as e:
-                    # 🚨 CHOR YAHAN PAKDA JAYEGA 🚨
+                    # Tracker abhi bhi on rakha hai safety ke liye
                     try:
-                        await app.send_message(chat_id, f"🚨 **Autoplay Crash Report:**\n`{e}`\n\nSudeep bhai isko solve karo!")
+                        await app.send_message(chat_id, f"🚨 **Autoplay Crash Report 2:**\n`{e}`")
                     except:
                         pass
-
+                       
                 # ==========================================
                 # NORMAL LEAVE LOGIC 
-                # ==========================================
+                # ========================================== 
                 try:
                     if popped and "mystic" in popped:
                         language = await get_lang(chat_id)
