@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 import os
 from pyrogram import filters
 from pyrogram.enums import ChatType, ChatMemberStatus

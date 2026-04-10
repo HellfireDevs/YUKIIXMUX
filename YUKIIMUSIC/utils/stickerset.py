@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 from typing import List
 
 from pyrogram import Client, errors, raw

@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 from pyrogram import Client, errors
 from pyrogram.enums import ChatMemberStatus, ParseMode
 

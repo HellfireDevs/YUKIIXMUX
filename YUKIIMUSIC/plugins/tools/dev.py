@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 import os
 import re
 import subprocess

@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 import asyncio
 
 from YUKIIMUSIC.misc import db

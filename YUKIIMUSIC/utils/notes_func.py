@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 from enum import Enum, auto
 from pyrogram.types import Message
 import html

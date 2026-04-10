@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 import random
 from pyrogram import filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery

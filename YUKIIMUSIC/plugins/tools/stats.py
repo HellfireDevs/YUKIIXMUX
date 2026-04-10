@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 import platform
 from sys import version as pyver
 

@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 import sys
 import traceback
 from functools import wraps

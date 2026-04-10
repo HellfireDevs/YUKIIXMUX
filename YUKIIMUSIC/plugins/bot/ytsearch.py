@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 import logging
 from pyrogram.types import Message
 from youtube_search import YoutubeSearch

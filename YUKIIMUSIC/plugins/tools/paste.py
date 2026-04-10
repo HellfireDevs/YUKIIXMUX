@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 from asyncio import get_running_loop, sleep, TimeoutError
 from functools import partial
 from YUKIIMUSIC import app

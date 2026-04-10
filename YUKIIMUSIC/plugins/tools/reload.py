@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 import asyncio
 import time
 from pyrogram import Client, filters

@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 from pyrogram import filters
 import random
 from YUKIIMUSIC import YouTube, app

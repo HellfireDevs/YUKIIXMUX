@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 from pyrogram import filters
 from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 import os  # Added for .sudoenv command

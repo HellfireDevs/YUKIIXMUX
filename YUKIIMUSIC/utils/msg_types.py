@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 import re
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
 from config import BOT_USERNAME

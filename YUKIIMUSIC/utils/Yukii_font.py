@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 class Fonts:
     def typewriter(text):
         style = {

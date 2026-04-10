@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 from pyrogram.types import Message
 import random
 from pyrogram import Client, filters, idle

@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 from YUKIIMUSIC import app
 from config import OWNER_ID
 from pyrogram import filters, enums

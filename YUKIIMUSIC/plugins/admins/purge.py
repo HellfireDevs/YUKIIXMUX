@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 from asyncio import sleep
 from pyrogram import filters
 from pyrogram.enums import ChatType

@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 from YUKIIMUSIC import app
 from pyrogram import filters,enums
 from pyrogram.types import ChatPermissions 

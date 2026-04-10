@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 import aiohttp
 import re
 from pyrogram import Client, filters

@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 
 import imghdr
 import os

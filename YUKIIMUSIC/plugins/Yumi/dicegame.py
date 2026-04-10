@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 from pyrogram import Client, enums, filters
 #from config import *
 import asyncio

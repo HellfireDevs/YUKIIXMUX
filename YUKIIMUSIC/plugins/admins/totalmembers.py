@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 from YUKIIMUSIC.utils.Yukii_ban import admin_filter
 import os
 import csv

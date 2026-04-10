@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 from .channelplay import *
 from .database import *
 from .decorators import *

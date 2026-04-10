@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 import re
 from dotenv import load_dotenv
 from pyrogram import filters

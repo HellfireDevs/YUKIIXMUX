@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 import requests
 import random
 from YUKIIMUSIC import app, userbot

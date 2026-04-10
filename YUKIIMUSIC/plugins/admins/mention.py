@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 import asyncio
 from pyrogram.enums import ChatType, ChatMemberStatus
 from YUKIIMUSIC import app

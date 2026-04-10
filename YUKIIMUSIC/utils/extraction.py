@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 from pyrogram.enums import MessageEntityType
 from pyrogram.types import Message, User
 

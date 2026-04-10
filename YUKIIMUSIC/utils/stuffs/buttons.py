@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
 from pyrogram import Client, filters, enums 
 

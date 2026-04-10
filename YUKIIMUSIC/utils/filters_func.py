@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 from enum import Enum, auto
 from YUKIIMUSIC import app
 from pyrogram.types import InlineKeyboardMarkup, Message

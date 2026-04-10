@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 from pyrogram.enums import ParseMode
 
 from YUKIIMUSIC import app

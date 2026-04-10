@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 import random
 import asyncio
 from pyrogram import Client, filters

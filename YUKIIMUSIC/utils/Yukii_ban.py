@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 from pyrogram import filters
 from YUKIIMUSIC.utils.admin_check import admin_check
 

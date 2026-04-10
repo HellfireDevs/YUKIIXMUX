@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 from pyrogram import enums
 from pyrogram.enums import ChatType
 from pyrogram import filters, Client

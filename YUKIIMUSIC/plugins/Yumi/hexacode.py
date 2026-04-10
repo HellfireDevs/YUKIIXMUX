@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 from pyrogram import Client, filters
 from YUKIIMUSIC import app
 from config import BOT_USERNAME

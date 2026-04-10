@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 import random, os
 from pyrogram import Client, filters, enums 
 from YUKIIMUSIC import app

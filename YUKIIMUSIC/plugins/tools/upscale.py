@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 import base64
 import httpx
 import os

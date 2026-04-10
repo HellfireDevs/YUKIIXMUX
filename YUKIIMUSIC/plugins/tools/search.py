@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 from traceback import format_exc
 from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup
 from search_engine_parser.core.engines.google import Search as GoogleSearch

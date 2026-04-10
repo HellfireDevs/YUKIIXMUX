@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 import aiohttp
 from pyrogram import filters, enums
 from pyrogram.types import Message, ChatPrivileges, InlineKeyboardMarkup, InlineKeyboardButton

@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 from YUKIIMUSIC import app 
 import asyncio
 import random

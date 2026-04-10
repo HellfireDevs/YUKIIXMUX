@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 from typing import Union
 
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup

@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 from YUKIIMUSIC.utils.mongo import db
 
 #from YUKIIMUSIC.mongo import *# back...............

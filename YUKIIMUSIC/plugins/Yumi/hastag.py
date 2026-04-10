@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 import requests
 from bs4 import BeautifulSoup as  BSP
 from YUKIIMUSIC import app as YUKII

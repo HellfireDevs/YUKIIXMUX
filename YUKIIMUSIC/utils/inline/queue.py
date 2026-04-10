@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 from typing import Union
 from YUKIIMUSIC import app
 from YUKIIMUSIC.utils.formatters import time_to_seconds

@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 import random
 from os.path import realpath
 

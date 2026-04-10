@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 from YUKIIMUSIC.misc import SUDOERS
 from YUKIIMUSIC.utils.database import get_lang, is_maintenance
 from strings import get_string

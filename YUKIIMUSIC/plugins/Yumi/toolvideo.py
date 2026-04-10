@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 import os
 from pyrogram import Client, filters
 from pyrogram.types import Message

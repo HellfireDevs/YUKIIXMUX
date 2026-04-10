@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 # helper for strings
 
 class Helper(object):

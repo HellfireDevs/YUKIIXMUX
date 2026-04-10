@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 import aiohttp
 from io import BytesIO
 from YUKIIMUSIC import app

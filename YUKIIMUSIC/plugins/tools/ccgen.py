@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 import re
 from pyrogram import filters, enums
 from YUKIIMUSIC import app

@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 from YUKIIMUSIC.core.userbot import assistants
 from YUKIIMUSIC import userbot as us, app
 from pyrogram import filters

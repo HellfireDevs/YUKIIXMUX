@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 from pyrogram import Client, filters
 from PIL import Image, ImageEnhance
 from io import BytesIO

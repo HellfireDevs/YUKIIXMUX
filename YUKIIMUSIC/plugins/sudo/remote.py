@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 import asyncio
 from pyrogram import filters
 from pyrogram.errors import FloodWait

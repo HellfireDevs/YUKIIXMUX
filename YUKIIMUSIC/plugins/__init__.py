@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 import glob
 from os.path import dirname, isfile
 

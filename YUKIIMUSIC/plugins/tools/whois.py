@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 from datetime import datetime
 
 from pyrogram import filters

@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 from os import path
 import yt_dlp
 from yt_dlp.utils import DownloadError

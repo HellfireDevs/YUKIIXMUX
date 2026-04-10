@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 import httpx
 from pyrogram import Client, filters
 from YUKIIMUSIC import app

@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 from YUKIIMUSIC import app
 from YUKIIMUSIC.utils.database import get_cmode
 

@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 from io import BytesIO
 from os import path, remove
 from time import time

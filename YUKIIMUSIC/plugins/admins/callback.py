@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 import asyncio
 import aiohttp
 from telegram import CallbackQuery

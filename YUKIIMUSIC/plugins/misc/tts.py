@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 from pyrogram import Client, filters
 from gtts import gTTS
 from YUKIIMUSIC import app

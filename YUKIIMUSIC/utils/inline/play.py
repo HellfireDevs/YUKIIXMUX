@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 import math
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from YUKIIMUSIC import app

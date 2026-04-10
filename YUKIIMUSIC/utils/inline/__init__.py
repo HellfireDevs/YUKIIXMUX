@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 from .extras import *
 from .help import *
 from .play import *

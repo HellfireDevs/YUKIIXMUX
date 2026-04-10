@@ -1,3 +1,4 @@
+import YUKIIMUSIC.yuki_guard
 import asyncio, os, re, httpx, aiofiles.os
 from io import BytesIO 
 from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont, ImageOps
