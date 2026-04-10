@@ -701,3 +701,24 @@ async def remove_card(cc: str):
     if not is_exist:
         return
     return await cardsdb.delete_one({"cc": cc})
+# ==========================================
+# 🔥 AUTOPLAY DATABASE ENGINE 🔥
+# ==========================================
+from YUKIIMUSIC.misc import mongodb
+
+autoplaydb = mongodb["autoplay"]
+
+async def is_autoplay_on(chat_id: int) -> bool:
+    chat = await autoplaydb.find_one({"chat_id": chat_id})
+    if not chat:
+        return False
+    return True
+
+async def autoplay_on(chat_id: int):
+    return await autoplaydb.update_one(
+        {"chat_id": chat_id}, {"$set": {"status": "on"}}, upsert=True
+    )
+
+async def autoplay_off(chat_id: int):
+    return await autoplaydb.delete_one({"chat_id": chat_id})
+    
