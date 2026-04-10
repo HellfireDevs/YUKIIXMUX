@@ -21,13 +21,14 @@
 
 import YUKIIMUSIC.yuki_guard
 from typing import Union
-from pyrogram import filters, types
+from pyrogram import filters, types, enums
 from pyrogram.types import InlineKeyboardMarkup, Message, InlineKeyboardButton
 from YUKIIMUSIC import app
 from YUKIIMUSIC.utils import help_pannel
 from YUKIIMUSIC.utils.database import get_lang
 from YUKIIMUSIC.utils.decorators.language import LanguageStart, languageCB
 from YUKIIMUSIC.utils.inline.help import help_back_markup, private_help_panel
+from YUKIIMUSIC.utils.inline.start import private_panel
 from config import BANNED_USERS, START_IMG_URL, SUPPORT_CHAT
 from strings import get_string, helpers
 from YUKIIMUSIC.utils.stuffs.buttons import BUTTONS
@@ -116,22 +117,46 @@ async def helper_cb(client, CallbackQuery):
     await CallbackQuery.edit_message_text(Helper.HELP_M, reply_markup=InlineKeyboardMarkup(BUTTONS.MBUTTON))
 
 
-@app.on_callback_query(filters.regex('managebot123'))
+# 🔥 FIX: Crashing issue fixed and language variable defined properly
+@app.on_callback_query(filters.regex('managebot123') & ~BANNED_USERS)
 async def on_back_button(client, CallbackQuery):
-    callback_data = CallbackQuery.data.strip()
-    cb = callback_data.split(None, 1)[1]
-    keyboard = help_pannel(_, True)
-    if cb == "settings_back_helper":
+    try:
+        language = await get_lang(CallbackQuery.message.chat.id)
+        _ = get_string(language)
+        keyboard = help_pannel(_, True)
         await CallbackQuery.edit_message_text(
             _["help_1"].format(SUPPORT_CHAT), reply_markup=keyboard
         )
+    except Exception as e:
+        pass
 
-@app.on_callback_query(filters.regex('mplus'))      
+
+@app.on_callback_query(filters.regex('mplus') & ~BANNED_USERS)      
 async def mb_plugin_button(client, CallbackQuery):
     callback_data = CallbackQuery.data.strip()
     cb = callback_data.split(None, 1)[1]
     keyboard = InlineKeyboardMarkup([[InlineKeyboardButton("ʙᴀᴄᴋ", callback_data=f"mbot_cb")]])
     if cb == "Okieeeeee":
-        await CallbackQuery.edit_message_text(f"`something errors`",reply_markup=keyboard,parse_mode=enums.ParseMode.MARKDOWN)
+        await CallbackQuery.edit_message_text(f"`something errors`", reply_markup=keyboard, parse_mode=enums.ParseMode.MARKDOWN)
     else:
         await CallbackQuery.edit_message_text(getattr(Helper, cb), reply_markup=keyboard)
+
+
+# 🔥 NEW: Help menu se wapas Start menu pe aane ka rasta (yuki_back)
+@app.on_callback_query(filters.regex("yuki_back") & ~BANNED_USERS)
+async def back_to_start(client, CallbackQuery):
+    try:
+        language = await get_lang(CallbackQuery.message.chat.id)
+        _ = get_string(language)
+        keyboard = private_panel(_)
+        
+        # Start menu ka main text
+        start_text = _["start_2"].format(CallbackQuery.from_user.mention, app.mention)
+        
+        await CallbackQuery.edit_message_text(
+            text=start_text,
+            reply_markup=InlineKeyboardMarkup(keyboard)
+        )
+    except Exception as e:
+        print(f"Back button error: {e}")
+        
