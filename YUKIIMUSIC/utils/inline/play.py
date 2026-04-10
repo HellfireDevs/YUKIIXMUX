@@ -30,7 +30,7 @@ def track_markup(_, videoid, user_id, channel, fplay):
         ],
         [
             # Cleaned text
-            api_btn(text=str(_["CLOSE_BUTTON"]).strip(), callback_data=f"forceclose {videoid}|{user_id}", style="danger", custom_emoji_id="6334598469746952256")
+            api_btn(text=str(_["CLOSE_BUTTON"]).strip(), callback_data=f"forceclose {videoid}|{user_id}", style="danger", custom_emoji_id="6294047505957003963")
         ],
     ]
     return buttons
@@ -78,7 +78,7 @@ def stream_markup_timer(_, chat_id, played, dur):
         ],
         [
             # Close Red
-            api_btn(text=str(_["CLOSE_BUTTON"]).strip(), callback_data="close", style="danger", custom_emoji_id="6334598469746952256")
+            api_btn(text=str(_["CLOSE_BUTTON"]).strip(), callback_data="close", style="danger", custom_emoji_id="6294047505957003963")
         ],
     ]
     return buttons
@@ -109,7 +109,7 @@ def playlist_markup(_, videoid, user_id, ptype, channel, fplay):
             api_btn(text=_["P_B_2"], callback_data=f"YUKIIPlaylists {videoid}|{user_id}|{ptype}|v|{channel}|{fplay}", style="primary"),
         ],
         [
-            api_btn(text=str(_["CLOSE_BUTTON"]).strip(), callback_data=f"forceclose {videoid}|{user_id}", style="danger", custom_emoji_id="6334598469746952256"),
+            api_btn(text=str(_["CLOSE_BUTTON"]).strip(), callback_data=f"forceclose {videoid}|{user_id}", style="danger", custom_emoji_id="6294047505957003963"),
         ],
     ]
     return buttons
@@ -120,7 +120,7 @@ def livestream_markup(_, videoid, user_id, mode, channel, fplay):
             api_btn(text=_["P_B_3"], callback_data=f"LiveStream {videoid}|{user_id}|{mode}|{channel}|{fplay}", style="primary"),
         ],
         [
-            api_btn(text=str(_["CLOSE_BUTTON"]).strip(), callback_data=f"forceclose {videoid}|{user_id}", style="danger", custom_emoji_id="6334598469746952256"),
+            api_btn(text=str(_["CLOSE_BUTTON"]).strip(), callback_data=f"forceclose {videoid}|{user_id}", style="danger", custom_emoji_id="6294047505957003963"),
         ],
     ]
     return buttons
@@ -134,7 +134,7 @@ def slider_markup(_, videoid, user_id, query, query_type, channel, fplay):
         ],
         [
             api_btn(text="◁", callback_data=f"slider B|{query_type}|{query}|{user_id}|{channel}|{fplay}", style="primary"),
-            api_btn(text=str(_["CLOSE_BUTTON"]).strip(), callback_data=f"forceclose {query}|{user_id}", style="danger", custom_emoji_id="6334598469746952256"),
+            api_btn(text=str(_["CLOSE_BUTTON"]).strip(), callback_data=f"forceclose {query}|{user_id}", style="danger", custom_emoji_id="6294047505957003963"),
             api_btn(text="▷", callback_data=f"slider F|{query_type}|{query}|{user_id}|{channel}|{fplay}", style="primary"),
         ],
     ]
