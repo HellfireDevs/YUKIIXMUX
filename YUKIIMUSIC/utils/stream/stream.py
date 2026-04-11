@@ -1,5 +1,3 @@
-
-
 # Copyright (c) 2025 @SUDEEPBOTS <HellfireDevs>
 # Location: delhi,noida
 #
@@ -425,4 +423,108 @@ async def stream(
             db[chat_id][0]["mystic"] = run
             db[chat_id][0]["markup"] = "tg"
 
-    
+    # --- 5. LIVE STREAM LOGIC ---
+    elif streamtype == "live":
+        link = result["link"]
+        vidid = result["vidid"]
+        title = (result["title"]).title()
+        thumbnail = result["thumb"]
+        duration_min = "Live Track"
+        status = True if video else None
+        if await is_active_chat(chat_id):
+            await put_queue(chat_id, original_chat_id, f"live_{vidid}", title, duration_min, user_name, vidid, user_id, "video" if video else "audio")
+            position = len(db.get(chat_id)) - 1
+            button = aq_markup(_, chat_id)
+            
+            run_msg = await app.send_message(
+                chat_id=original_chat_id, text=_["queue_4"].format(position, title[:27], duration_min, user_name)
+            )
+            await inject_premium_markup(original_chat_id, run_msg.id, button)
+        else:
+            if not forceplay:
+                db[chat_id] = []
+            n, file_path = await YouTube.video(link)
+            if n == 0:
+                raise AssistantErr(_["str_3"])
+            await YUKII.join_call(chat_id, original_chat_id, file_path, video=status, image=thumbnail if thumbnail else None)
+            await put_queue(chat_id, original_chat_id, f"live_{vidid}", title, duration_min, user_name, vidid, user_id, "video" if video else "audio", forceplay=forceplay)
+            
+            img = await get_thumb(vidid)
+            button = stream_markup(_, chat_id)
+            
+            # 🔥 THEME & ON/OFF LOGIC
+            theme = await get_player_style(chat_id)
+            is_on = await is_player_on(chat_id)
+            
+            if not is_on:
+                run = await app.send_message(original_chat_id, text=f"<b><emoji id='5999063078983964465'>🎧</emoji> Sᴛᴀʀᴛᴇᴅ ʟɪᴠᴇ sᴛʀᴇᴀᴍ:</b> {title[:30]}\n<b><emoji id='6001522720855037558'>👤</emoji> ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ:</b> {user_name}")
+                asyncio.create_task(auto_clean(run, 4))
+            else:
+                video_file = getattr(config, "PLAYER_VIDEO", "https://files.catbox.moe/qxj5y2.mp4")
+                caption_text = _[f"livestream_{theme}"].format(f"https://t.me/{app.username}?start=info_{vidid}", title[:23], duration_min, user_name, video_file)
+                
+                if theme == 2:
+                    if HAS_PREVIEW_OPTIONS:
+                        run = await app.send_message(
+                            original_chat_id, 
+                            text=caption_text, 
+                            link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True)
+                        )
+                    else:
+                        run = await app.send_message(original_chat_id, text=caption_text, disable_web_page_preview=False)
+                else:
+                    run = await app.send_photo(original_chat_id, photo=img, caption=caption_text, has_spoiler=True)
+                    
+                await inject_premium_markup(original_chat_id, run.id, button)
+            
+            db[chat_id][0]["mystic"] = run
+            db[chat_id][0]["markup"] = "tg"
+
+    # --- 6. INDEX LOGIC ---
+    elif streamtype == "index":
+        link = result
+        title = "ɪɴᴅᴇx ᴏʀ ᴍ3ᴜ8 ʟɪɴᴋ"
+        duration_min = "00:00"
+        if await is_active_chat(chat_id):
+            await put_queue_index(chat_id, original_chat_id, "index_url", title, duration_min, user_name, link, "video" if video else "audio")
+            position = len(db.get(chat_id)) - 1
+            button = aq_markup(_, chat_id)
+            
+            await mystic.edit_text(text=_["queue_4"].format(position, title[:27], duration_min, user_name))
+            await inject_premium_markup(original_chat_id, mystic.id, button)
+        else:
+            if not forceplay:
+                db[chat_id] = []
+            await YUKII.join_call(chat_id, original_chat_id, link, video=True if video else None)
+            await put_queue_index(chat_id, original_chat_id, "index_url", title, duration_min, user_name, link, "video" if video else "audio", forceplay=forceplay)
+            
+            button = stream_markup(_, chat_id)
+            
+            # 🔥 THEME & ON/OFF LOGIC
+            theme = await get_player_style(chat_id)
+            is_on = await is_player_on(chat_id)
+            
+            if not is_on:
+                run = await app.send_message(original_chat_id, text=f"<b><emoji id='5999063078983964465'>🎧</emoji> Sᴛᴀʀᴛᴇᴅ ᴘʟᴀʏɪɴɢ:</b> {title[:30]}\n<b><emoji id='6001522720855037558'>👤</emoji> ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ:</b> {user_name}")
+                asyncio.create_task(auto_clean(run, 4))
+            else:
+                video_file = getattr(config, "PLAYER_VIDEO", "https://files.catbox.moe/qxj5y2.mp4")
+                caption_text = _[f"stream_{theme}"].format(link, title[:23], duration_min, user_name, video_file)
+                
+                if theme == 2:
+                    if HAS_PREVIEW_OPTIONS:
+                        run = await app.send_message(
+                            original_chat_id, 
+                            text=caption_text, 
+                            link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True)
+                        )
+                    else:
+                        run = await app.send_message(original_chat_id, text=caption_text, disable_web_page_preview=False)
+                else:
+                    run = await app.send_photo(original_chat_id, photo=config.STREAM_IMG_URL, caption=caption_text, has_spoiler=True)
+                    
+                await inject_premium_markup(original_chat_id, run.id, button)
+            
+            db[chat_id][0]["mystic"] = run
+            db[chat_id][0]["markup"] = "tg"
+            await mystic.delete()
