@@ -35,6 +35,98 @@ from YUKIIMUSIC.utils.thumbnails import get_thumb
 from config import BANNED_USERS
 
 
+# 🔥 THE VAULT + KIDNAPPER ENGINE FOR SKIP COMMAND 🔥
+async def apply_autoplay(chat_id, popped, check_list):
+    from YUKIIMUSIC.utils.database import is_autoplay_on
+    if not await is_autoplay_on(chat_id): 
+        return False
+    if not popped or "vidid" not in popped or popped["vidid"] in ["telegram", "soundcloud"]: 
+        return False
+
+    import random
+    import os
+    from pymongo import MongoClient
+    import aiohttp
+
+    vault_dir = "/home/ubuntu/Hellfire_Vault"
+    next_vidid = None
+    file_path = None
+    title = "Autoplay Track"
+    prev_vidid = popped.get("vidid", "")
+
+    try:
+        mongo_client = MongoClient(config.MONGO_DB_URI)
+        music_db = mongo_client["MusicAPI_DB"]
+        cache_col = music_db["songs_cache"]
+    except:
+        cache_col = None
+
+    # 1. 🛡️ TRY VAULT FIRST
+    if os.path.exists(vault_dir):
+        files = os.listdir(vault_dir)
+        valid_files = [f for f in files if f.endswith(('.mp3', '.m4a', '.mp4', '.mkv', '.webm'))]
+        if valid_files:
+            random.shuffle(valid_files)
+            for f in valid_files:
+                vidid = f.rsplit('.', 1)[0]
+                if vidid != prev_vidid:
+                    next_vidid = vidid
+                    file_path = os.path.join(vault_dir, f)
+                    break
+
+    if next_vidid and cache_col is not None:
+        try:
+            song_info = cache_col.find_one({"video_id": next_vidid})
+            if song_info and "title" in song_info: 
+                title = song_info["title"]
+        except: 
+            pass
+
+    # 2. 🕵️ KIDNAPPER DB FALLBACK (Agar Vault khali ho)
+    if not next_vidid and cache_col is not None:
+        try:
+            pipeline = [{"$match": {"status": "completed", "video_id": {"$ne": prev_vidid}}}, {"$sample": {"size": 1}}]
+            random_song = list(cache_col.aggregate(pipeline))
+            if random_song:
+                song = random_song[0]
+                next_vidid = song.get("video_id")
+                title = song.get("title", "Kidnapped Track")
+                catbox_link = song.get("catbox_link")
+                
+                dl_dir = "downloads"
+                if not os.path.exists(dl_dir): 
+                    os.makedirs(dl_dir)
+                fallback_path = os.path.join(dl_dir, f"{next_vidid}_kidnap.mp3")
+
+                if not os.path.exists(fallback_path) and catbox_link:
+                    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+                    async with aiohttp.ClientSession(headers=headers) as session:
+                        async with session.get(catbox_link) as resp:
+                            if resp.status == 200:
+                                with open(fallback_path, "wb") as f: 
+                                    f.write(await resp.read())
+                                file_path = fallback_path
+                elif os.path.exists(fallback_path):
+                    file_path = fallback_path
+        except: 
+            pass
+
+    # 3. 🎵 INJECT INTO QUEUE
+    if next_vidid and file_path and os.path.exists(file_path):
+        check_list.append({
+            "vidid": next_vidid,
+            "title": title,
+            "by": "Autoplay [Vault]",
+            "chat_id": chat_id,
+            "dur": "0:00",
+            "seconds": 0,
+            "file": file_path,
+            "streamtype": "audio",
+        })
+        return True
+    return False
+
+
 @app.on_message(
     filters.command(["skip", "cskip", "next", "cnext"]) & filters.group & ~BANNED_USERS
 )
@@ -62,17 +154,20 @@ async def skip(cli, message: Message, _, chat_id):
                             if popped:
                                 await auto_clean(popped)
                             if not check:
-                                try:
-                                    await message.reply_text(
-                                        text=_["admin_6"].format(
-                                            message.from_user.mention,
-                                            message.chat.title,
-                                        ),
-                                        reply_markup=close_markup(_),
-                                    )
-                                    await YUKII.stop_stream(chat_id)
-                                except:
-                                    return
+                                # 🔥 AUTOPLAY CHECK BEFORE LEAVING (MULTI SKIP)
+                                success = await apply_autoplay(chat_id, popped, check)
+                                if not success:
+                                    try:
+                                        await message.reply_text(
+                                            text=_["admin_6"].format(
+                                                message.from_user.mention,
+                                                message.chat.title,
+                                            ),
+                                            reply_markup=close_markup(_),
+                                        )
+                                        await YUKII.stop_stream(chat_id)
+                                    except:
+                                        return
                                 break
                     else:
                         return await message.reply_text(_["admin_11"].format(count))
@@ -90,16 +185,19 @@ async def skip(cli, message: Message, _, chat_id):
             if popped:
                 await auto_clean(popped)
             if not check:
-                await message.reply_text(
-                    text=_["admin_6"].format(
-                        message.from_user.mention, message.chat.title
-                    ),
-                    reply_markup=close_markup(_),
-                )
-                try:
-                    return await YUKII.stop_stream(chat_id)
-                except:
-                    return
+                # 🔥 AUTOPLAY CHECK BEFORE LEAVING (SINGLE SKIP)
+                success = await apply_autoplay(chat_id, popped, check)
+                if not success:
+                    await message.reply_text(
+                        text=_["admin_6"].format(
+                            message.from_user.mention, message.chat.title
+                        ),
+                        reply_markup=close_markup(_),
+                    )
+                    try:
+                        return await YUKII.stop_stream(chat_id)
+                    except:
+                        return
         except:
             try:
                 await message.reply_text(
@@ -111,6 +209,10 @@ async def skip(cli, message: Message, _, chat_id):
                 return await YUKII.stop_stream(chat_id)
             except:
                 return
+                
+    # ==========================================
+    # 🎶 PLAY THE NEXT QUEUED / AUTOPLAY TRACK 🎶
+    # ==========================================
     queued = check[0]["file"]
     title = (check[0]["title"]).title()
     user = check[0]["by"]
@@ -124,6 +226,7 @@ async def skip(cli, message: Message, _, chat_id):
         db[chat_id][0]["seconds"] = check[0]["old_second"]
         db[chat_id][0]["speed_path"] = None
         db[chat_id][0]["speed"] = 1.0
+        
     if "live_" in queued:
         n, link = await YouTube.video(videoid, True)
         if n == 0:
@@ -198,6 +301,7 @@ async def skip(cli, message: Message, _, chat_id):
         db[chat_id][0]["mystic"] = run
         db[chat_id][0]["markup"] = "tg"
     else:
+        # 🔥 AUTOPLAY WILL TRIGGER HERE (Vault Path) 🔥
         if videoid == "telegram":
             image = None
         elif videoid == "soundcloud":
@@ -252,3 +356,4 @@ async def skip(cli, message: Message, _, chat_id):
             )
             db[chat_id][0]["mystic"] = run
             db[chat_id][0]["markup"] = "stream"
+        
