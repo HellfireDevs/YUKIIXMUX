@@ -103,6 +103,21 @@ def fix_markup(buttons):
         fixed_buttons.append(fixed_row)
     return InlineKeyboardMarkup(fixed_buttons)
 
+# 🔥 ORIGINAL PREMIUM EMOJI & TIMER HACK 🔥
+async def inject_premium_markup(chat_id, message_id, markup):
+    import aiohttp
+    try:
+        url = f"https://api.telegram.org/bot{app.bot_token}/editMessageReplyMarkup"
+        payload = {
+            "chat_id": chat_id,
+            "message_id": message_id,
+            "reply_markup": {"inline_keyboard": markup}
+        }
+        async with aiohttp.ClientSession() as session:
+            await session.post(url, json=payload)
+    except Exception as e:
+        print(f"❌ Markup Injection Error: {e}")
+
 async def _clear_(chat_id):
     db[chat_id] = []
     await remove_active_video_chat(chat_id)
@@ -482,12 +497,13 @@ class Call(PyTgCalls):
                 
                 if theme == 2:
                     if HAS_PREVIEW_OPTIONS:
-                        run = await app.send_message(original_chat_id, text=caption_text, link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True), reply_markup=fix_markup(button))
+                        run = await app.send_message(original_chat_id, text=caption_text, link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True))
                     else:
-                        run = await app.send_message(original_chat_id, text=caption_text, disable_web_page_preview=False, reply_markup=fix_markup(button))
+                        run = await app.send_message(original_chat_id, text=caption_text, disable_web_page_preview=False)
                 else:
-                    run = await app.send_photo(original_chat_id, photo=img, caption=caption_text, reply_markup=fix_markup(button))
+                    run = await app.send_photo(original_chat_id, photo=img, caption=caption_text)
                     
+                await inject_premium_markup(original_chat_id, run.id, button)
                 db[chat_id][0]["mystic"] = run
                 db[chat_id][0]["markup"] = "tg"
                 
@@ -511,12 +527,13 @@ class Call(PyTgCalls):
                 
                 if theme == 2:
                     if HAS_PREVIEW_OPTIONS:
-                        run = await app.send_message(original_chat_id, text=caption_text, link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True), reply_markup=fix_markup(button))
+                        run = await app.send_message(original_chat_id, text=caption_text, link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True))
                     else:
-                        run = await app.send_message(original_chat_id, text=caption_text, disable_web_page_preview=False, reply_markup=fix_markup(button))
+                        run = await app.send_message(original_chat_id, text=caption_text, disable_web_page_preview=False)
                 else:
-                    run = await app.send_photo(original_chat_id, photo=img, caption=caption_text, reply_markup=fix_markup(button))
+                    run = await app.send_photo(original_chat_id, photo=img, caption=caption_text)
                     
+                await inject_premium_markup(original_chat_id, run.id, button)
                 db[chat_id][0]["mystic"] = run
                 db[chat_id][0]["markup"] = "stream"
                 
@@ -529,12 +546,13 @@ class Call(PyTgCalls):
                     
                 if theme == 2:
                     if HAS_PREVIEW_OPTIONS:
-                        run = await app.send_message(original_chat_id, text=caption_text, link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True), reply_markup=fix_markup(button))
+                        run = await app.send_message(original_chat_id, text=caption_text, link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True))
                     else:
-                        run = await app.send_message(original_chat_id, text=caption_text, disable_web_page_preview=False, reply_markup=fix_markup(button))
+                        run = await app.send_message(original_chat_id, text=caption_text, disable_web_page_preview=False)
                 else:
-                    run = await app.send_photo(original_chat_id, photo=config.STREAM_IMG_URL, caption=caption_text, reply_markup=fix_markup(button))
+                    run = await app.send_photo(original_chat_id, photo=config.STREAM_IMG_URL, caption=caption_text)
                     
+                await inject_premium_markup(original_chat_id, run.id, button)
                 db[chat_id][0]["mystic"] = run
                 db[chat_id][0]["markup"] = "tg"
                 
@@ -550,24 +568,27 @@ class Call(PyTgCalls):
                     
                 if videoid == "telegram":
                     if theme == 2:
-                        run = await app.send_message(original_chat_id, text=caption_text, link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True) if HAS_PREVIEW_OPTIONS else None, reply_markup=fix_markup(button))
+                        run = await app.send_message(original_chat_id, text=caption_text, link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True) if HAS_PREVIEW_OPTIONS else None)
                     else:
-                        run = await app.send_photo(original_chat_id, photo=config.TELEGRAM_AUDIO_URL if str(streamtype) == "audio" else config.TELEGRAM_VIDEO_URL, caption=caption_text, reply_markup=fix_markup(button))
+                        run = await app.send_photo(original_chat_id, photo=config.TELEGRAM_AUDIO_URL if str(streamtype) == "audio" else config.TELEGRAM_VIDEO_URL, caption=caption_text)
+                    await inject_premium_markup(original_chat_id, run.id, button)
                     db[chat_id][0]["mystic"] = run
                     db[chat_id][0]["markup"] = "tg"
                 elif videoid == "soundcloud":
                     if theme == 2:
-                        run = await app.send_message(original_chat_id, text=caption_text, link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True) if HAS_PREVIEW_OPTIONS else None, reply_markup=fix_markup(button))
+                        run = await app.send_message(original_chat_id, text=caption_text, link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True) if HAS_PREVIEW_OPTIONS else None)
                     else:
-                        run = await app.send_photo(original_chat_id, photo=config.SOUNCLOUD_IMG_URL if str(streamtype) == "audio" else config.TELEGRAM_VIDEO_URL, caption=caption_text, reply_markup=fix_markup(button))
+                        run = await app.send_photo(original_chat_id, photo=config.SOUNCLOUD_IMG_URL if str(streamtype) == "audio" else config.TELEGRAM_VIDEO_URL, caption=caption_text)
+                    await inject_premium_markup(original_chat_id, run.id, button)
                     db[chat_id][0]["mystic"] = run
                     db[chat_id][0]["markup"] = "tg"
                 else:
                     img = await get_thumb(videoid)
                     if theme == 2:
-                        run = await app.send_message(original_chat_id, text=caption_text, link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True) if HAS_PREVIEW_OPTIONS else None, reply_markup=fix_markup(button))
+                        run = await app.send_message(original_chat_id, text=caption_text, link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True) if HAS_PREVIEW_OPTIONS else None)
                     else:
-                        run = await app.send_photo(original_chat_id, photo=img, caption=caption_text, reply_markup=fix_markup(button))
+                        run = await app.send_photo(original_chat_id, photo=img, caption=caption_text)
+                    await inject_premium_markup(original_chat_id, run.id, button)
                     db[chat_id][0]["mystic"] = run
                     db[chat_id][0]["markup"] = "stream"
 
