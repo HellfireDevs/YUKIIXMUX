@@ -366,7 +366,7 @@ class Call(PyTgCalls):
             if not check:
                 # ==========================================
                 # ==========================================
-                # AUTO PLAY LOGIC (WITH FILTER)
+                # AUTO PLAY LOGIC (FIXED & SMART)
                 # ==========================================
                 try:
                     from YUKIIMUSIC.utils.database import is_autoplay_on, get_lang
@@ -384,20 +384,34 @@ class Call(PyTgCalls):
                         
                         msg = await app.send_message(chat_id, theme_lang["play_1"])
                         
-                        # BANDA KHADA KAR DIYA (Filter Logic)
+                        # 🔥 SMART FILTER LOGIC
+                        # Title ke faltu words hata ke sirf main gaane ka naam nikalo
+                        clean_title = prev_title.split("|")[0].split("(")[0].strip()
+                        search_query = f"{clean_title} similar tracks"
+                        
                         next_vidid = popped["vidid"]
+                        
                         try:
-                            for _ in range(3):
-                                rand_index = random.randint(2, 8)
-                                _, _, _, check_vidid = await YouTube.slider(prev_title, rand_index)
+                            # 1 se 4 ke beech uthao taaki 'Index out of range' error na aaye
+                            rand_index = random.randint(1, 4)
+                            _, _, _, check_vidid = await YouTube.slider(search_query, rand_index)
+                            
+                            # Ensure karo ki naya gaana purane wale se alag ho
+                            if check_vidid and check_vidid != popped["vidid"]:
+                                next_vidid = check_vidid
                                 
-                                if check_vidid != popped["vidid"]:
-                                    next_vidid = check_vidid
-                                    break 
-                                    
                             track_details, next_vidid = await YouTube.track(next_vidid, videoid=True)
                         except Exception:
-                            track_details, next_vidid = await YouTube.track(popped["vidid"], videoid=True)
+                            # 🚨 FALLBACK: Agar koi error aaye toh same gaana mat bajao!
+                            # Koi bhi random mast trending playlist utha lo
+                            fallback_queries = ["Lofi chill track", "Trending pop hits", "NCS latest", "Aesthetic vibe songs"]
+                            fallback_query = random.choice(fallback_queries)
+                            
+                            _, _, _, check_vidid = await YouTube.slider(fallback_query, 1)
+                            if check_vidid:
+                                next_vidid = check_vidid
+                                
+                            track_details, next_vidid = await YouTube.track(next_vidid, videoid=True)
                         
                         await stream(
                             theme_lang,
@@ -412,16 +426,15 @@ class Call(PyTgCalls):
                             forceplay=False
                         )
                         
-                        # Message ko delete karne ka order
                         try:
                             await msg.delete()
                         except Exception:
                             pass
                             
                         return 
-                except Exception:
-                    pass
-                    
+                except Exception as e:
+                    print(f"Autoplay Error: {e}")
+                                     
                 # ==========================================
                 # NORMAL LEAVE LOGIC 
                 # ========================================== 
