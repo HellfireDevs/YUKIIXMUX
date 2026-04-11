@@ -84,7 +84,7 @@ async def get_player_style(chat_id):
     return 1
 
 
-# 🔥 MAGIC BUTTON FIXER (PREMIUM EMOJI CRASH FIX) 🔥
+# 🔥 MAGIC BUTTON FIXER
 def fix_markup(buttons):
     if not isinstance(buttons, list):
         return buttons
@@ -103,7 +103,7 @@ def fix_markup(buttons):
         fixed_buttons.append(fixed_row)
     return InlineKeyboardMarkup(fixed_buttons)
 
-# 🔥 ORIGINAL PREMIUM EMOJI & TIMER HACK 🔥
+# 🔥 ORIGINAL PREMIUM EMOJI & TIMER HACK
 async def inject_premium_markup(chat_id, message_id, markup):
     import aiohttp
     try:
@@ -116,7 +116,7 @@ async def inject_premium_markup(chat_id, message_id, markup):
         async with aiohttp.ClientSession() as session:
             await session.post(url, json=payload)
     except Exception as e:
-        print(f"❌ Markup Injection Error: {e}")
+        pass
 
 async def _clear_(chat_id):
     db[chat_id] = []
@@ -384,18 +384,17 @@ class Call(PyTgCalls):
                                 pass
 
                         if next_vidid and file_path and os.path.exists(file_path):
-                            # 🔥 YOUTUBE SMART FETCH ENGINE 🔥
+                            # 🔥 YOUTUBE SMART FETCH ENGINE FIX 🔥
                             dur_min = "0:00"
                             dur_sec = 0
                             try:
                                 from YUKIIMUSIC import YouTube
-                                track_details, _ = await YouTube.track(next_vidid, videoid=True)
+                                track_details = await YouTube.details(f"https://www.youtube.com/watch?v={next_vidid}", True)
                                 if track_details:
-                                    title = track_details.get("title", title)
-                                    dur_min = track_details.get("duration_min", "0:00")
-                                    dur_sec = track_details.get("duration_sec", 0)
+                                    title = track_details[0]
+                                    dur_min = track_details[1]
+                                    dur_sec = track_details[2]
                             except Exception:
-                                # Fallback to DB title if Youtube fails
                                 if cache_col:
                                     try:
                                         song_info = cache_col.find_one({"video_id": next_vidid})
@@ -457,7 +456,10 @@ class Call(PyTgCalls):
             _ = get_string(language)
             title = (check[0]["title"]).title()
             user = check[0]["by"]
-            original_chat_id = check[0]["chat_id"]
+            
+            # 🔥 BUG 1 FIX: KeyError "chat_id" in change_stream 🔥
+            original_chat_id = chat_id 
+            
             streamtype = check[0]["streamtype"]
             videoid = check[0]["vidid"]
             duration_min = check[0].get("dur", "0:00")
@@ -497,11 +499,11 @@ class Call(PyTgCalls):
                 
                 if theme == 2:
                     if HAS_PREVIEW_OPTIONS:
-                        run = await app.send_message(original_chat_id, text=caption_text, link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True))
+                        run = await app.send_message(original_chat_id, text=caption_text, link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True), reply_markup=fix_markup(button))
                     else:
-                        run = await app.send_message(original_chat_id, text=caption_text, disable_web_page_preview=False)
+                        run = await app.send_message(original_chat_id, text=caption_text, disable_web_page_preview=False, reply_markup=fix_markup(button))
                 else:
-                    run = await app.send_photo(original_chat_id, photo=img, caption=caption_text)
+                    run = await app.send_photo(original_chat_id, photo=img, caption=caption_text, reply_markup=fix_markup(button))
                     
                 await inject_premium_markup(original_chat_id, run.id, button)
                 db[chat_id][0]["mystic"] = run
@@ -527,11 +529,11 @@ class Call(PyTgCalls):
                 
                 if theme == 2:
                     if HAS_PREVIEW_OPTIONS:
-                        run = await app.send_message(original_chat_id, text=caption_text, link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True))
+                        run = await app.send_message(original_chat_id, text=caption_text, link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True), reply_markup=fix_markup(button))
                     else:
-                        run = await app.send_message(original_chat_id, text=caption_text, disable_web_page_preview=False)
+                        run = await app.send_message(original_chat_id, text=caption_text, disable_web_page_preview=False, reply_markup=fix_markup(button))
                 else:
-                    run = await app.send_photo(original_chat_id, photo=img, caption=caption_text)
+                    run = await app.send_photo(original_chat_id, photo=img, caption=caption_text, reply_markup=fix_markup(button))
                     
                 await inject_premium_markup(original_chat_id, run.id, button)
                 db[chat_id][0]["mystic"] = run
@@ -546,11 +548,11 @@ class Call(PyTgCalls):
                     
                 if theme == 2:
                     if HAS_PREVIEW_OPTIONS:
-                        run = await app.send_message(original_chat_id, text=caption_text, link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True))
+                        run = await app.send_message(original_chat_id, text=caption_text, link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True), reply_markup=fix_markup(button))
                     else:
-                        run = await app.send_message(original_chat_id, text=caption_text, disable_web_page_preview=False)
+                        run = await app.send_message(original_chat_id, text=caption_text, disable_web_page_preview=False, reply_markup=fix_markup(button))
                 else:
-                    run = await app.send_photo(original_chat_id, photo=config.STREAM_IMG_URL, caption=caption_text)
+                    run = await app.send_photo(original_chat_id, photo=config.STREAM_IMG_URL, caption=caption_text, reply_markup=fix_markup(button))
                     
                 await inject_premium_markup(original_chat_id, run.id, button)
                 db[chat_id][0]["mystic"] = run
@@ -568,29 +570,38 @@ class Call(PyTgCalls):
                     
                 if videoid == "telegram":
                     if theme == 2:
-                        run = await app.send_message(original_chat_id, text=caption_text, link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True) if HAS_PREVIEW_OPTIONS else None)
+                        run = await app.send_message(original_chat_id, text=caption_text, link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True) if HAS_PREVIEW_OPTIONS else None, reply_markup=fix_markup(button))
                     else:
-                        run = await app.send_photo(original_chat_id, photo=config.TELEGRAM_AUDIO_URL if str(streamtype) == "audio" else config.TELEGRAM_VIDEO_URL, caption=caption_text)
+                        run = await app.send_photo(original_chat_id, photo=config.TELEGRAM_AUDIO_URL if str(streamtype) == "audio" else config.TELEGRAM_VIDEO_URL, caption=caption_text, reply_markup=fix_markup(button))
                     await inject_premium_markup(original_chat_id, run.id, button)
                     db[chat_id][0]["mystic"] = run
                     db[chat_id][0]["markup"] = "tg"
                 elif videoid == "soundcloud":
                     if theme == 2:
-                        run = await app.send_message(original_chat_id, text=caption_text, link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True) if HAS_PREVIEW_OPTIONS else None)
+                        run = await app.send_message(original_chat_id, text=caption_text, link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True) if HAS_PREVIEW_OPTIONS else None, reply_markup=fix_markup(button))
                     else:
-                        run = await app.send_photo(original_chat_id, photo=config.SOUNCLOUD_IMG_URL if str(streamtype) == "audio" else config.TELEGRAM_VIDEO_URL, caption=caption_text)
+                        run = await app.send_photo(original_chat_id, photo=config.SOUNCLOUD_IMG_URL if str(streamtype) == "audio" else config.TELEGRAM_VIDEO_URL, caption=caption_text, reply_markup=fix_markup(button))
                     await inject_premium_markup(original_chat_id, run.id, button)
                     db[chat_id][0]["mystic"] = run
                     db[chat_id][0]["markup"] = "tg"
                 else:
                     img = await get_thumb(videoid)
                     if theme == 2:
-                        run = await app.send_message(original_chat_id, text=caption_text, link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True) if HAS_PREVIEW_OPTIONS else None)
+                        run = await app.send_message(original_chat_id, text=caption_text, link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True) if HAS_PREVIEW_OPTIONS else None, reply_markup=fix_markup(button))
                     else:
-                        run = await app.send_photo(original_chat_id, photo=img, caption=caption_text)
+                        run = await app.send_photo(original_chat_id, photo=img, caption=caption_text, reply_markup=fix_markup(button))
                     await inject_premium_markup(original_chat_id, run.id, button)
                     db[chat_id][0]["mystic"] = run
                     db[chat_id][0]["markup"] = "stream"
+                    
+            # 🔥 BUG 2 FIX: Ensure timer loop tracks this new player message! 🔥
+            try:
+                from YUKIIMUSIC.plugins.admins.callback import checker
+                if chat_id not in checker:
+                    checker[chat_id] = {}
+                checker[chat_id][run.id] = True
+            except:
+                pass
 
     async def ping(self):
         pings = []
