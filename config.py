@@ -37,6 +37,28 @@ NSFWAPI = "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"
 DURATION_LIMIT_MIN = int(getenv("DURATION_LIMIT", 17000))
 # ----------------------------------------------------------------
 
+START_REACTION = getenv("START_REACTION", "🥰")
+
+START_STICKER = getenv("START_STICKER", "CAACAgUAAxkBAAFGelBp0ipffTacP6bK3ik2BabuZJohkwACoh0AAsI8kFYAARHuC8AH2Jw7BA")
+
+BOT_FANCY_NAME = getenv("BOT_FANCY_NAME", "𝐘ᴜᴋɪ ꭙ ϻᴜsɪᴄ")
+
+
+WEBSITE_URL = getenv("WEBSITE_URL", "https://nex0-1.vercel.app")
+
+OWNER_USERNAME = getenv("OWNER_USERNAME", "Kaito_3_2")
+
+OWNER_NAME = getenv("OWNER_NAME", "── 𝛞 𝛜 𝛈 𝛔 𝛈")
+
+
+
+
+
+
+
+
+
+
 # ----------------------------------------------------------------
 LOGGER_ID = int(getenv("LOGGER_ID", -1003639584506))
 # ----------------------------------------------------------------
