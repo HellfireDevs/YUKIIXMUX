@@ -40,7 +40,7 @@ from pytgcalls.types.stream import StreamAudioEnded
 
 import config
 from YUKIIMUSIC import LOGGER, YouTube, app
-from YUKIIMUSIC.misc import db
+from YUKIIMUSIC.misc import db, mongodb
 from YUKIIMUSIC.utils.database import (
     add_active_chat,
     add_active_video_chat,
@@ -55,13 +55,34 @@ from YUKIIMUSIC.utils.database import (
 )
 from YUKIIMUSIC.utils.exceptions import AssistantErr
 from YUKIIMUSIC.utils.formatters import check_duration, seconds_to_min, speed_converter
-from YUKIIMUSIC.utils.inline.play import stream_markup, music_end_markup
+from YUKIIMUSIC.utils.inline.play import stream_markup_timer, music_end_markup
 from YUKIIMUSIC.utils.stream.autoclear import auto_clean
 from YUKIIMUSIC.utils.thumbnails import get_thumb
 from strings import get_string
 
 autoend = {}
 counter = {}
+
+# 🔥 LINK PREVIEW OPTIONS (Theme 2 ke liye)
+try:
+    from pyrogram.types import LinkPreviewOptions
+    HAS_PREVIEW_OPTIONS = True
+except ImportError:
+    HAS_PREVIEW_OPTIONS = False
+
+# 🔥 THEME ENGINE SETUP
+playerdb = mongodb.player_settings
+
+async def get_player_style(chat_id):
+    user = await playerdb.find_one({"chat_id": chat_id})
+    if user and "style" in user:
+        return user["style"]
+    if chat_id != "GLOBAL":
+        global_user = await playerdb.find_one({"chat_id": "GLOBAL"})
+        if global_user and "style" in global_user:
+            return global_user["style"]
+    return 1
+
 
 # 🔥 MAGIC BUTTON FIXER (PREMIUM EMOJI CRASH FIX) 🔥
 def fix_markup(buttons):
@@ -273,7 +294,7 @@ class Call(PyTgCalls):
                 await set_loop(chat_id, loop)
             await auto_clean(popped)
             
-            # 🔥 VAULT & KIDNAPPER AUTOPLAY ENGINE 🔥
+            # 🔥 VAULT & KIDNAPPER AUTOPLAY ENGINE W/ SMART FETCH 🔥
             if not check:
                 try:
                     from YUKIIMUSIC.utils.database import is_autoplay_on
@@ -348,13 +369,31 @@ class Call(PyTgCalls):
                                 pass
 
                         if next_vidid and file_path and os.path.exists(file_path):
+                            # 🔥 YOUTUBE SMART FETCH ENGINE 🔥
+                            dur_min = "0:00"
+                            dur_sec = 0
+                            try:
+                                from YUKIIMUSIC import YouTube
+                                track_details, _ = await YouTube.track(next_vidid, videoid=True)
+                                if track_details:
+                                    title = track_details.get("title", title)
+                                    dur_min = track_details.get("duration_min", "0:00")
+                                    dur_sec = track_details.get("duration_sec", 0)
+                            except Exception:
+                                # Fallback to DB title if Youtube fails
+                                if cache_col:
+                                    try:
+                                        song_info = cache_col.find_one({"video_id": next_vidid})
+                                        if song_info and "title" in song_info: title = song_info["title"]
+                                    except: pass
+
                             check.append({
                                 "vidid": next_vidid,
                                 "title": title,
                                 "by": "Autoplay [Vault]",
                                 "chat_id": chat_id,
-                                "dur": "0:00",
-                                "seconds": 0,
+                                "dur": dur_min,
+                                "seconds": dur_sec,
                                 "file": file_path, 
                                 "streamtype": "audio",
                             })
@@ -406,6 +445,7 @@ class Call(PyTgCalls):
             original_chat_id = check[0]["chat_id"]
             streamtype = check[0]["streamtype"]
             videoid = check[0]["vidid"]
+            duration_min = check[0].get("dur", "0:00")
             db[chat_id][0]["played"] = 0
             exis = (check[0]).get("old_dur")
             if exis:
@@ -415,6 +455,16 @@ class Call(PyTgCalls):
                 db[chat_id][0]["speed"] = 1.0
             video = True if str(streamtype) == "video" else False
             
+            # 🔥 THEMED VIP PLAYER SYNC LOGIC 🔥
+            theme = await get_player_style(chat_id)
+            button = stream_markup_timer(_, chat_id, "00:00", duration_min)
+            video_file = getattr(config, "PLAYER_VIDEO", "https://files.catbox.moe/qxj5y2.mp4")
+            
+            try:
+                caption_text = _[f"stream_{theme}"].format(f"https://t.me/{app.username}?start=info_{videoid}", title[:23], duration_min, user, video_file)
+            except KeyError:
+                caption_text = _["stream_1"].format(f"https://t.me/{app.username}?start=info_{videoid}", title[:23], duration_min, user)
+
             if "live_" in queued:
                 n, link = await YouTube.video(videoid, True)
                 if n == 0:
@@ -427,17 +477,20 @@ class Call(PyTgCalls):
                     await client.change_stream(chat_id, stream)
                 except Exception:
                     return await app.send_message(original_chat_id, text=_["call_6"])
+                    
                 img = await get_thumb(videoid)
-                from YUKIIMUSIC.utils.inline.play import stream_markup
-                button = stream_markup(_, chat_id)
-                run = await app.send_photo(
-                    chat_id=original_chat_id,
-                    photo=img,
-                    caption=_["stream_1"].format(f"https://t.me/{app.username}?start=info_{videoid}", title[:23], check[0]["dur"], user),
-                    reply_markup=fix_markup(button),
-                )
+                
+                if theme == 2:
+                    if HAS_PREVIEW_OPTIONS:
+                        run = await app.send_message(original_chat_id, text=caption_text, link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True), reply_markup=fix_markup(button))
+                    else:
+                        run = await app.send_message(original_chat_id, text=caption_text, disable_web_page_preview=False, reply_markup=fix_markup(button))
+                else:
+                    run = await app.send_photo(original_chat_id, photo=img, caption=caption_text, reply_markup=fix_markup(button))
+                    
                 db[chat_id][0]["mystic"] = run
                 db[chat_id][0]["markup"] = "tg"
+                
             elif "vid_" in queued:
                 mystic = await app.send_message(original_chat_id, _["call_7"])
                 try:
@@ -452,34 +505,39 @@ class Call(PyTgCalls):
                     await client.change_stream(chat_id, stream)
                 except:
                     return await app.send_message(original_chat_id, text=_["call_6"])
+                    
                 img = await get_thumb(videoid)
-                from YUKIIMUSIC.utils.inline.play import stream_markup
-                button = stream_markup(_, chat_id)
                 await mystic.delete()
-                run = await app.send_photo(
-                    chat_id=original_chat_id,
-                    photo=img,
-                    caption=_["stream_1"].format(f"https://t.me/{app.username}?start=info_{videoid}", title[:23], check[0]["dur"], user),
-                    reply_markup=fix_markup(button),
-                )
+                
+                if theme == 2:
+                    if HAS_PREVIEW_OPTIONS:
+                        run = await app.send_message(original_chat_id, text=caption_text, link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True), reply_markup=fix_markup(button))
+                    else:
+                        run = await app.send_message(original_chat_id, text=caption_text, disable_web_page_preview=False, reply_markup=fix_markup(button))
+                else:
+                    run = await app.send_photo(original_chat_id, photo=img, caption=caption_text, reply_markup=fix_markup(button))
+                    
                 db[chat_id][0]["mystic"] = run
                 db[chat_id][0]["markup"] = "stream"
+                
             elif "index_" in queued:
                 stream = AudioVideoPiped(videoid, audio_parameters=HighQualityAudio(), video_parameters=MediumQualityVideo()) if str(streamtype) == "video" else AudioPiped(videoid, audio_parameters=HighQualityAudio())
                 try:
                     await client.change_stream(chat_id, stream)
                 except:
                     return await app.send_message(original_chat_id, text=_["call_6"])
-                from YUKIIMUSIC.utils.inline.play import stream_markup
-                button = stream_markup(_, chat_id)
-                run = await app.send_photo(
-                    chat_id=original_chat_id,
-                    photo=config.STREAM_IMG_URL,
-                    caption=_["stream_2"].format(user),
-                    reply_markup=fix_markup(button),
-                )
+                    
+                if theme == 2:
+                    if HAS_PREVIEW_OPTIONS:
+                        run = await app.send_message(original_chat_id, text=caption_text, link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True), reply_markup=fix_markup(button))
+                    else:
+                        run = await app.send_message(original_chat_id, text=caption_text, disable_web_page_preview=False, reply_markup=fix_markup(button))
+                else:
+                    run = await app.send_photo(original_chat_id, photo=config.STREAM_IMG_URL, caption=caption_text, reply_markup=fix_markup(button))
+                    
                 db[chat_id][0]["mystic"] = run
                 db[chat_id][0]["markup"] = "tg"
+                
             else:
                 if video:
                     stream = AudioVideoPiped(queued, audio_parameters=HighQualityAudio(), video_parameters=MediumQualityVideo())
@@ -489,38 +547,27 @@ class Call(PyTgCalls):
                     await client.change_stream(chat_id, stream)
                 except:
                     return await app.send_message(original_chat_id, text=_["call_6"])
+                    
                 if videoid == "telegram":
-                    from YUKIIMUSIC.utils.inline.play import stream_markup
-                    button = stream_markup(_, chat_id)
-                    run = await app.send_photo(
-                        chat_id=original_chat_id,
-                        photo=config.TELEGRAM_AUDIO_URL if str(streamtype) == "audio" else config.TELEGRAM_VIDEO_URL,
-                        caption=_["stream_1"].format(config.SUPPORT_CHAT, title[:23], check[0]["dur"], user),
-                        reply_markup=fix_markup(button),
-                    )
+                    if theme == 2:
+                        run = await app.send_message(original_chat_id, text=caption_text, link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True) if HAS_PREVIEW_OPTIONS else None, reply_markup=fix_markup(button))
+                    else:
+                        run = await app.send_photo(original_chat_id, photo=config.TELEGRAM_AUDIO_URL if str(streamtype) == "audio" else config.TELEGRAM_VIDEO_URL, caption=caption_text, reply_markup=fix_markup(button))
                     db[chat_id][0]["mystic"] = run
                     db[chat_id][0]["markup"] = "tg"
                 elif videoid == "soundcloud":
-                    from YUKIIMUSIC.utils.inline.play import stream_markup
-                    button = stream_markup(_, chat_id)
-                    run = await app.send_photo(
-                        chat_id=original_chat_id,
-                        photo=config.SOUNCLOUD_IMG_URL,
-                        caption=_["stream_1"].format(config.SUPPORT_CHAT, title[:23], check[0]["dur"], user),
-                        reply_markup=fix_markup(button),
-                    )
+                    if theme == 2:
+                        run = await app.send_message(original_chat_id, text=caption_text, link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True) if HAS_PREVIEW_OPTIONS else None, reply_markup=fix_markup(button))
+                    else:
+                        run = await app.send_photo(original_chat_id, photo=config.SOUNCLOUD_IMG_URL if str(streamtype) == "audio" else config.TELEGRAM_VIDEO_URL, caption=caption_text, reply_markup=fix_markup(button))
                     db[chat_id][0]["mystic"] = run
                     db[chat_id][0]["markup"] = "tg"
                 else:
                     img = await get_thumb(videoid)
-                    from YUKIIMUSIC.utils.inline.play import stream_markup
-                    button = stream_markup(_, chat_id)
-                    run = await app.send_photo(
-                        chat_id=original_chat_id,
-                        photo=img,
-                        caption=_["stream_1"].format(f"https://t.me/{app.username}?start=info_{videoid}", title[:23], check[0]["dur"], user),
-                        reply_markup=fix_markup(button),
-                    )
+                    if theme == 2:
+                        run = await app.send_message(original_chat_id, text=caption_text, link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True) if HAS_PREVIEW_OPTIONS else None, reply_markup=fix_markup(button))
+                    else:
+                        run = await app.send_photo(original_chat_id, photo=img, caption=caption_text, reply_markup=fix_markup(button))
                     db[chat_id][0]["mystic"] = run
                     db[chat_id][0]["markup"] = "stream"
 
