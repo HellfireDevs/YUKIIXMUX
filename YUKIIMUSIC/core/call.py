@@ -365,8 +365,9 @@ class Call(PyTgCalls):
             
             if not check:
                 # ==========================================
-# ==========================================
-                # AUTO PLAY LOGIC (100% FIXED & TESTED)
+            if not check:
+                # ==========================================
+                # AUTO PLAY LOGIC (THE REAL QUEUE FIX)
                 # ==========================================
                 try:
                     from YUKIIMUSIC.utils.database import is_autoplay_on
@@ -401,7 +402,7 @@ class Call(PyTgCalls):
                                 next_vidid = check_vidid
                             track_details, next_vidid = await YouTube.track(next_vidid, videoid=True)
 
-                        # 🔥 THE MASTER FIX: Direct Queue (check) mein daalo bina stream call kiye
+                        # QUEUE me gaana add kiya
                         check.append({
                             "vidid": next_vidid,
                             "title": track_details["title"],
@@ -412,32 +413,38 @@ class Call(PyTgCalls):
                             "file": f"vid_{next_vidid}", 
                             "streamtype": "audio",
                         })
-                        # Yahan se return mat karna! Taaki code aage badh ke PyTgCalls ko play karwa de
-                        
                 except Exception as e:
-                    print(f"Autoplay Error: {e}")
-
-                # ==========================================
-                # NORMAL LEAVE LOGIC 
-                # ========================================== 
-                try:
-                    if popped and "mystic" in popped:
-                        language = await get_lang(chat_id)
-                        _ = get_string(language)
-                        end_msg = _["MUSIC_ENDED"]
-                        try:
-                            await popped["mystic"].edit_caption(caption=end_msg, reply_markup=music_end_markup(_))
-                        except:
-                            await popped["mystic"].edit_text(text=end_msg, disable_web_page_preview=True, reply_markup=music_end_markup(_))
-                except Exception:
                     pass
-                
-                await _clear_(chat_id)
-                return await client.leave_group_call(chat_id)
+
+                # THE MASTER FIX
+                # Ab hum check karenge ki Autoplay ne gaana daala ya nahi
+                # Agar check list abhi bhi khali hai, tabhi bot leave karega
+                if not check:
+                    # ==========================================
+                    # NORMAL LEAVE LOGIC 
+                    # ========================================== 
+                    try:
+                        if popped and "mystic" in popped:
+                            language = await get_lang(chat_id)
+                            from strings import get_string
+                            _ = get_string(language)
+                            end_msg = _["MUSIC_ENDED"]
+                            from YUKIIMUSIC.utils.inline.play import music_end_markup
+                            try:
+                                await popped["mystic"].edit_caption(caption=end_msg, reply_markup=music_end_markup(_))
+                            except:
+                                await popped["mystic"].edit_text(text=end_msg, disable_web_page_preview=True, reply_markup=music_end_markup(_))
+                    except Exception:
+                        pass
+                    
+                    await _clear_(chat_id)
+                    return await client.leave_group_call(chat_id)
+
         except:
             # ==========================================
             # SAFETY FALLBACK LOGIC
             # ==========================================
+            
             try:
                 if popped and "mystic" in popped:
                     language = await get_lang(chat_id)
