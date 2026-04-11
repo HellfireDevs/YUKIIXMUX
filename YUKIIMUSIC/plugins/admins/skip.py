@@ -167,17 +167,17 @@ async def apply_autoplay(chat_id, popped, check_list):
         except: 
             pass
 
-    # 3. 🎵 YOUTUBE SMART FETCH & INJECT INTO QUEUE
+    # 3. 🎵 YOUTUBE SMART FETCH FIX & INJECT INTO QUEUE
     if next_vidid and file_path and os.path.exists(file_path):
         dur_min = "0:00"
         dur_sec = 0
         try:
             from YUKIIMUSIC import YouTube
-            track_details, _ = await YouTube.track(next_vidid, videoid=True)
+            track_details = await YouTube.details(f"https://www.youtube.com/watch?v={next_vidid}", True)
             if track_details:
-                title = track_details.get("title", title)
-                dur_min = track_details.get("duration_min", "0:00")
-                dur_sec = track_details.get("duration_sec", 0)
+                title = track_details[0]
+                dur_min = track_details[1]
+                dur_sec = track_details[2]
         except Exception:
             if cache_col is not None:
                 try:
@@ -432,3 +432,12 @@ async def skip(cli, message: Message, _, chat_id):
         db[chat_id][0]["mystic"] = run
         db[chat_id][0]["markup"] = "tg" if videoid in ["telegram", "soundcloud"] else "stream"
         
+        # 🔥 BUG 2 FIX: Timer loop ko naye skipped message ke baare mein batao! 🔥
+        try:
+            from YUKIIMUSIC.plugins.admins.callback import checker
+            if chat_id not in checker:
+                checker[chat_id] = {}
+            checker[chat_id][run.id] = True
+        except:
+            pass
+                        
