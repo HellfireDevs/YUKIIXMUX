@@ -56,27 +56,40 @@ PROMO =  "───────────────────────\
 
 GREET = ["💞", "🥂", "🔍", "🧪", "🥂", "⚡️", "🔥"]
 
-# 
+# 🔥 MAGIC BUTTON FIXER 🔥
+def fix_markup(buttons):
+    if not isinstance(buttons, list):
+        return buttons
+    fixed_buttons = []
+    for row in buttons:
+        fixed_row = []
+        for btn in row:
+            if isinstance(btn, dict):
+                try:
+                    fixed_row.append(InlineKeyboardButton(**btn))
+                except TypeError:
+                    safe_btn = {k: v for k, v in btn.items() if k in ["text", "callback_data", "url"]}
+                    fixed_row.append(InlineKeyboardButton(**safe_btn))
+            else:
+                fixed_row.append(btn)
+        fixed_buttons.append(fixed_row)
+    return InlineKeyboardMarkup(fixed_buttons)
+
 def get_raw_markup(markup):
-    # 
     keyboard = markup.inline_keyboard if hasattr(markup, 'inline_keyboard') else markup
-    
     if isinstance(keyboard, list):
         raw_kb = []
         for row in keyboard:
             raw_row = []
             for btn in row:
-                # 
                 if isinstance(btn, dict):
                     raw_row.append(btn)
                 else:
-                    # 
                     raw_btn = {"text": btn.text}
                     if getattr(btn, "callback_data", None): 
                         raw_btn["callback_data"] = btn.callback_data
                     if getattr(btn, "url", None): 
                         raw_btn["url"] = btn.url
-                    # 
                     if hasattr(btn, "style"): 
                         raw_btn["style"] = btn.style
                     if hasattr(btn, "icon_custom_emoji_id"): 
@@ -86,7 +99,6 @@ def get_raw_markup(markup):
         return raw_kb
     return keyboard
 
-#
 async def inject_premium_markup(chat_id, message_id, markup):
     try:
         raw_markup = get_raw_markup(markup)
@@ -98,7 +110,6 @@ async def inject_premium_markup(chat_id, message_id, markup):
     except:
         pass
 
-# 
 async def send_magic_start(chat_id, photo_url, caption, markup, reply_to_id=None):
     raw_markup = get_raw_markup(markup)
     try:
@@ -122,13 +133,14 @@ async def send_magic_start(chat_id, photo_url, caption, markup, reply_to_id=None
                 res = await resp.json()
                 
                 if not res.get("ok"):
-                    # Fallback with buttons!
-                    actual_markup = InlineKeyboardMarkup(markup) if isinstance(markup, list) else markup
+                    # 🔥 DICTIONARY CRASH FIX
+                    actual_markup = fix_markup(markup) if isinstance(markup, list) else markup
                     run = await app.send_photo(chat_id, photo=photo_url, caption=caption, has_spoiler=True, reply_markup=actual_markup) 
                     await inject_premium_markup(chat_id, run.id, markup)
                     
     except Exception as e:
-        actual_markup = InlineKeyboardMarkup(markup) if isinstance(markup, list) else markup
+        # 🔥 DICTIONARY CRASH FIX
+        actual_markup = fix_markup(markup) if isinstance(markup, list) else markup
         run = await app.send_photo(chat_id, photo=photo_url, caption=caption, has_spoiler=True, reply_markup=actual_markup)
         await inject_premium_markup(chat_id, run.id, markup)
 
@@ -309,7 +321,9 @@ async def welcome(client, message: Message):
                 out = start_panel(_)
                 bot_welcome = f"<emoji id='6080202089311507876'>😎</emoji> <b>𝖶𝖾𝗅𝖼𝗈𝗆𝖾 𝖳𝗈 {message.chat.title}</b>\n<emoji id='6001132493011425597'>💖</emoji> 𝖳𝗁𝖺𝗇𝗄𝗌 𝖿ᴏʀ 𝖺𝖽𝖽𝗂𝗇𝗀 𝗆𝖾, 𝖨 𝖺𝗆 𝗋𝖾𝖺𝖽𝗒 𝗍𝗈 𝗉𝗅𝖺𝗒!"
                 
-                run = await message.reply_text(text=bot_welcome)
+                # 🔥 DICTIONARY CRASH FIX FOR WELCOME
+                actual_out = fix_markup(out) if isinstance(out, list) else out
+                run = await message.reply_text(text=bot_welcome, reply_markup=actual_out)
                 await inject_premium_markup(message.chat.id, run.id, out)
                 
                 await add_served_chat(message.chat.id)
@@ -333,4 +347,4 @@ async def welcome(client, message: Message):
 
         except Exception as ex:
             pass
-    
+                     
