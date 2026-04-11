@@ -150,11 +150,13 @@ async def send_magic_start(chat_id, photo_url, caption, markup, reply_to_id=None
 async def start_pm(client, message: Message, _):
     
     try:
-        await client.send_reaction(chat_id=message.chat.id, message_id=message.id, emoji="🥰")
+        # 🔥 CONFIG SE REACTION LIGA 🔥
+        await client.send_reaction(chat_id=message.chat.id, message_id=message.id, emoji=getattr(config, "START_REACTION", "🥰"))
     except: pass
         
     try:
-        stk = await message.reply_sticker("CAACAgUAAxkBAAFGelBp0ipffTacP6bK3ik2BabuZJohkwACoh0AAsI8kFYAARHuC8AH2Jw7BA")
+        # 🔥 CONFIG SE STICKER LIGA 🔥
+        stk = await message.reply_sticker(getattr(config, "START_STICKER", "CAACAgUAAxkBAAFGelBp0ipffTacP6bK3ik2BabuZJohkwACoh0AAsI8kFYAARHuC8AH2Jw7BA"))
         await asyncio.sleep(2) 
         await stk.delete()     
     except: pass
@@ -171,7 +173,9 @@ async def start_pm(client, message: Message, _):
     await asyncio.sleep(0.4)
     await loading_1.edit_text("<emoji id='6001132493011425597'>💖</emoji> <b>ʜєʏ ʙᴧʙʏ!</b>")
     await asyncio.sleep(0.4)
-    await loading_1.edit_text("<emoji id='5413840936994097463'>🌺</emoji> <b>𝐘ᴜᴋɪ ꭙ ϻᴜsɪᴄ ♪\nsᴛᴧʀᴛed!</b>")
+    # 🔥 CONFIG SE BOT KA FANCY NAME LIGA 🔥
+    fancy_name = getattr(config, "BOT_FANCY_NAME", "𝐘ᴜᴋɪ ꭙ ϻᴜsɪᴄ")
+    await loading_1.edit_text(f"<emoji id='5413840936994097463'>🌺</emoji> <b>{fancy_name} ♪\nsᴛᴧʀᴛed!</b>")
     await asyncio.sleep(0.5)
     await loading_1.delete()
     
@@ -347,4 +351,4 @@ async def welcome(client, message: Message):
 
         except Exception as ex:
             pass
-                     
+                    
