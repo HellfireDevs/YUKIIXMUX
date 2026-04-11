@@ -44,19 +44,23 @@ pm2 stop yuki > /dev/null 2>&1
 pm2 save > /dev/null 2>&1
 echo -e "${GREEN}✓ Bot Registered and Stopped!${RESET}"
 
-# 7. Inject Dashboard Shortcuts (Yahan setup bhi add kar diya)
+# 7. Inject Dashboard Shortcuts
 echo -e "${CYAN}[*] Creating Terminal Dashboard...${RESET}"
 sed -i '/# YUKI Dashboard/d' ~/.bashrc
 sed -i '/alias logs=/d' ~/.bashrc
 sed -i '/alias restart=/d' ~/.bashrc
 sed -i '/alias stop=/d' ~/.bashrc
 sed -i '/alias setup=/d' ~/.bashrc
+sed -i '/alias version=/d' ~/.bashrc
+sed -i '/alias update=/d' ~/.bashrc
 
 echo "# YUKI Dashboard Aliases" >> ~/.bashrc
 echo "alias logs='pm2 logs yuki'" >> ~/.bashrc
 echo "alias restart='pm2 restart yuki'" >> ~/.bashrc
 echo "alias stop='pm2 stop yuki'" >> ~/.bashrc
 echo "alias setup='bash ~/YUKIXMUSIC/setup'" >> ~/.bashrc
+echo "alias version='python3 ~/YUKIXMUSIC/yuki.py version'" >> ~/.bashrc
+echo "alias update='python3 ~/YUKIXMUSIC/yuki.py update'" >> ~/.bashrc
 
 echo -e "\n${GREEN}=== sᴇᴛᴜᴘ sᴜᴄᴄᴇssғᴜʟʟ ===${RESET}"
 echo -e "--------------------------------------------------"
