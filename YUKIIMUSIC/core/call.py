@@ -319,7 +319,6 @@ class Call(PyTgCalls):
                         import random
                         import os
                         from pymongo import MongoClient
-                        import config
                         import aiohttp
 
                         vault_dir = "/home/ubuntu/Hellfire_Vault"
