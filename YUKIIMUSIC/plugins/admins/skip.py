@@ -34,14 +34,14 @@ from YUKIIMUSIC.utils.stream.autoclear import auto_clean
 from YUKIIMUSIC.utils.thumbnails import get_thumb
 from config import BANNED_USERS
 
-# 
+# 🔥 LINK PREVIEW OPTIONS (Theme 2 ke liye)
 try:
     from pyrogram.types import LinkPreviewOptions
     HAS_PREVIEW_OPTIONS = True
 except ImportError:
     HAS_PREVIEW_OPTIONS = False
 
-# 
+# 🔥 THEME ENGINE SETUP
 playerdb = mongodb.player_settings
 
 async def get_player_style(chat_id):
@@ -55,7 +55,27 @@ async def get_player_style(chat_id):
     return 1
 
 
-# 
+# 🔥 MAGIC BUTTON FIXER (PREMIUM EMOJI CRASH FIX) 🔥
+def fix_markup(buttons):
+    if not isinstance(buttons, list):
+        return buttons
+    fixed_buttons = []
+    for row in buttons:
+        fixed_row = []
+        for btn in row:
+            if isinstance(btn, dict):
+                try:
+                    fixed_row.append(InlineKeyboardButton(**btn))
+                except TypeError:
+                    safe_btn = {k: v for k, v in btn.items() if k in ["text", "callback_data", "url"]}
+                    fixed_row.append(InlineKeyboardButton(**safe_btn))
+            else:
+                fixed_row.append(btn)
+        fixed_buttons.append(fixed_row)
+    return InlineKeyboardMarkup(fixed_buttons)
+
+
+# 🔥 ORIGINAL PREMIUM EMOJI & TIMER HACK 🔥
 async def inject_premium_markup(chat_id, message_id, markup):
     import aiohttp
     try:
@@ -71,7 +91,7 @@ async def inject_premium_markup(chat_id, message_id, markup):
         print(f"❌ Markup Injection Error: {e}")
 
 
-# 
+# 🔥 THE VAULT + KIDNAPPER ENGINE FOR SKIP COMMAND W/ SMART FETCH 🔥
 async def apply_autoplay(chat_id, popped, check_list):
     from YUKIIMUSIC.utils.database import is_autoplay_on, get_lang
     if not await is_autoplay_on(chat_id): 
@@ -320,11 +340,11 @@ async def skip(cli, message: Message, _, chat_id):
         
         if theme == 2:
             if HAS_PREVIEW_OPTIONS:
-                run = await message.reply_text(caption_text, link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True))
+                run = await message.reply_text(caption_text, link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True), reply_markup=fix_markup(button))
             else:
-                run = await message.reply_text(caption_text, disable_web_page_preview=False)
+                run = await message.reply_text(caption_text, disable_web_page_preview=False, reply_markup=fix_markup(button))
         else:
-            run = await message.reply_photo(photo=img, caption=caption_text)
+            run = await message.reply_photo(photo=img, caption=caption_text, reply_markup=fix_markup(button))
             
         await inject_premium_markup(chat_id, run.id, button)
         db[chat_id][0]["mystic"] = run
@@ -350,11 +370,11 @@ async def skip(cli, message: Message, _, chat_id):
         
         if theme == 2:
             if HAS_PREVIEW_OPTIONS:
-                run = await message.reply_text(caption_text, link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True))
+                run = await message.reply_text(caption_text, link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True), reply_markup=fix_markup(button))
             else:
-                run = await message.reply_text(caption_text, disable_web_page_preview=False)
+                run = await message.reply_text(caption_text, disable_web_page_preview=False, reply_markup=fix_markup(button))
         else:
-            run = await message.reply_photo(photo=img, caption=caption_text)
+            run = await message.reply_photo(photo=img, caption=caption_text, reply_markup=fix_markup(button))
             
         await inject_premium_markup(chat_id, run.id, button)
         db[chat_id][0]["mystic"] = run
@@ -368,11 +388,11 @@ async def skip(cli, message: Message, _, chat_id):
             
         if theme == 2:
             if HAS_PREVIEW_OPTIONS:
-                run = await message.reply_text(caption_text, link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True))
+                run = await message.reply_text(caption_text, link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True), reply_markup=fix_markup(button))
             else:
-                run = await message.reply_text(caption_text, disable_web_page_preview=False)
+                run = await message.reply_text(caption_text, disable_web_page_preview=False, reply_markup=fix_markup(button))
         else:
-            run = await message.reply_photo(photo=config.STREAM_IMG_URL, caption=caption_text)
+            run = await message.reply_photo(photo=config.STREAM_IMG_URL, caption=caption_text, reply_markup=fix_markup(button))
             
         await inject_premium_markup(chat_id, run.id, button)
         db[chat_id][0]["mystic"] = run
@@ -393,21 +413,22 @@ async def skip(cli, message: Message, _, chat_id):
             
         if videoid == "telegram":
             if theme == 2:
-                run = await message.reply_text(caption_text, link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True) if HAS_PREVIEW_OPTIONS else None)
+                run = await message.reply_text(caption_text, link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True) if HAS_PREVIEW_OPTIONS else None, reply_markup=fix_markup(button))
             else:
-                run = await message.reply_photo(photo=config.TELEGRAM_AUDIO_URL if str(streamtype) == "audio" else config.TELEGRAM_VIDEO_URL, caption=caption_text)
+                run = await message.reply_photo(photo=config.TELEGRAM_AUDIO_URL if str(streamtype) == "audio" else config.TELEGRAM_VIDEO_URL, caption=caption_text, reply_markup=fix_markup(button))
         elif videoid == "soundcloud":
             if theme == 2:
-                run = await message.reply_text(caption_text, link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True) if HAS_PREVIEW_OPTIONS else None)
+                run = await message.reply_text(caption_text, link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True) if HAS_PREVIEW_OPTIONS else None, reply_markup=fix_markup(button))
             else:
-                run = await message.reply_photo(photo=config.SOUNCLOUD_IMG_URL if str(streamtype) == "audio" else config.TELEGRAM_VIDEO_URL, caption=caption_text)
+                run = await message.reply_photo(photo=config.SOUNCLOUD_IMG_URL if str(streamtype) == "audio" else config.TELEGRAM_VIDEO_URL, caption=caption_text, reply_markup=fix_markup(button))
         else:
             img = await get_thumb(videoid)
             if theme == 2:
-                run = await message.reply_text(caption_text, link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True) if HAS_PREVIEW_OPTIONS else None)
+                run = await message.reply_text(caption_text, link_preview_options=LinkPreviewOptions(url=video_file, show_above_text=True) if HAS_PREVIEW_OPTIONS else None, reply_markup=fix_markup(button))
             else:
-                run = await message.reply_photo(photo=img, caption=caption_text)
+                run = await message.reply_photo(photo=img, caption=caption_text, reply_markup=fix_markup(button))
                 
         await inject_premium_markup(chat_id, run.id, button)
         db[chat_id][0]["mystic"] = run
         db[chat_id][0]["markup"] = "tg" if videoid in ["telegram", "soundcloud"] else "stream"
+        
