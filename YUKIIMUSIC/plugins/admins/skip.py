@@ -21,7 +21,7 @@
 
 import YUKIIMUSIC.yuki_guard
 from pyrogram import filters
-from pyrogram.types import InlineKeyboardMarkup, Message
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
 
 import config
 from YUKIIMUSIC import YouTube, app
@@ -35,13 +35,42 @@ from YUKIIMUSIC.utils.thumbnails import get_thumb
 from config import BANNED_USERS
 
 
+# 🔥 MAGIC BUTTON FIXER (PREMIUM EMOJI CRASH FIX) 🔥
+def fix_markup(buttons):
+    if not isinstance(buttons, list):
+        return buttons
+    fixed_buttons = []
+    for row in buttons:
+        fixed_row = []
+        for btn in row:
+            if isinstance(btn, dict):
+                try:
+                    fixed_row.append(InlineKeyboardButton(**btn))
+                except TypeError:
+                    safe_btn = {k: v for k, v in btn.items() if k in ["text", "callback_data", "url"]}
+                    fixed_row.append(InlineKeyboardButton(**safe_btn))
+            else:
+                fixed_row.append(btn)
+        fixed_buttons.append(fixed_row)
+    return InlineKeyboardMarkup(fixed_buttons)
+
+
 # 🔥 THE VAULT + KIDNAPPER ENGINE FOR SKIP COMMAND 🔥
 async def apply_autoplay(chat_id, popped, check_list):
-    from YUKIIMUSIC.utils.database import is_autoplay_on
+    from YUKIIMUSIC.utils.database import is_autoplay_on, get_lang
     if not await is_autoplay_on(chat_id): 
         return False
     if not popped or "vidid" not in popped or popped["vidid"] in ["telegram", "soundcloud"]: 
         return False
+
+    # Downloading Message (Premium Emojis wala)
+    try:
+        language = await get_lang(chat_id)
+        from strings import get_string
+        _ = get_string(language)
+        msg = await app.send_message(chat_id, _["play_1"])
+    except:
+        msg = None
 
     import random
     import os
@@ -123,7 +152,18 @@ async def apply_autoplay(chat_id, popped, check_list):
             "file": file_path,
             "streamtype": "audio",
         })
+        if msg:
+            try:
+                await msg.delete()
+            except:
+                pass
         return True
+        
+    if msg:
+        try:
+            await msg.delete()
+        except:
+            pass
     return False
 
 
@@ -154,7 +194,6 @@ async def skip(cli, message: Message, _, chat_id):
                             if popped:
                                 await auto_clean(popped)
                             if not check:
-                                # 🔥 AUTOPLAY CHECK BEFORE LEAVING (MULTI SKIP)
                                 success = await apply_autoplay(chat_id, popped, check)
                                 if not success:
                                     try:
@@ -168,7 +207,7 @@ async def skip(cli, message: Message, _, chat_id):
                                         await YUKII.stop_stream(chat_id)
                                     except:
                                         return
-                                break
+                                    break
                     else:
                         return await message.reply_text(_["admin_11"].format(count))
                 else:
@@ -185,7 +224,6 @@ async def skip(cli, message: Message, _, chat_id):
             if popped:
                 await auto_clean(popped)
             if not check:
-                # 🔥 AUTOPLAY CHECK BEFORE LEAVING (SINGLE SKIP)
                 success = await apply_autoplay(chat_id, popped, check)
                 if not success:
                     await message.reply_text(
@@ -210,9 +248,6 @@ async def skip(cli, message: Message, _, chat_id):
             except:
                 return
                 
-    # ==========================================
-    # 🎶 PLAY THE NEXT QUEUED / AUTOPLAY TRACK 🎶
-    # ==========================================
     queued = check[0]["file"]
     title = (check[0]["title"]).title()
     user = check[0]["by"]
@@ -249,7 +284,7 @@ async def skip(cli, message: Message, _, chat_id):
                 check[0]["dur"],
                 user,
             ),
-            reply_markup=InlineKeyboardMarkup(button),
+            reply_markup=fix_markup(button),
         )
         db[chat_id][0]["mystic"] = run
         db[chat_id][0]["markup"] = "tg"
@@ -282,7 +317,7 @@ async def skip(cli, message: Message, _, chat_id):
                 check[0]["dur"],
                 user,
             ),
-            reply_markup=InlineKeyboardMarkup(button),
+            reply_markup=fix_markup(button),
         )
         db[chat_id][0]["mystic"] = run
         db[chat_id][0]["markup"] = "stream"
@@ -296,12 +331,11 @@ async def skip(cli, message: Message, _, chat_id):
         run = await message.reply_photo(
             photo=config.STREAM_IMG_URL,
             caption=_["stream_2"].format(user),
-            reply_markup=InlineKeyboardMarkup(button),
+            reply_markup=fix_markup(button),
         )
         db[chat_id][0]["mystic"] = run
         db[chat_id][0]["markup"] = "tg"
     else:
-        # 🔥 AUTOPLAY WILL TRIGGER HERE (Vault Path) 🔥
         if videoid == "telegram":
             image = None
         elif videoid == "soundcloud":
@@ -324,7 +358,7 @@ async def skip(cli, message: Message, _, chat_id):
                 caption=_["stream_1"].format(
                     config.SUPPORT_CHAT, title[:23], check[0]["dur"], user
                 ),
-                reply_markup=InlineKeyboardMarkup(button),
+                reply_markup=fix_markup(button),
             )
             db[chat_id][0]["mystic"] = run
             db[chat_id][0]["markup"] = "tg"
@@ -337,7 +371,7 @@ async def skip(cli, message: Message, _, chat_id):
                 caption=_["stream_1"].format(
                     config.SUPPORT_CHAT, title[:23], check[0]["dur"], user
                 ),
-                reply_markup=InlineKeyboardMarkup(button),
+                reply_markup=fix_markup(button),
             )
             db[chat_id][0]["mystic"] = run
             db[chat_id][0]["markup"] = "tg"
@@ -352,8 +386,8 @@ async def skip(cli, message: Message, _, chat_id):
                     check[0]["dur"],
                     user,
                 ),
-                reply_markup=InlineKeyboardMarkup(button),
+                reply_markup=fix_markup(button),
             )
             db[chat_id][0]["mystic"] = run
             db[chat_id][0]["markup"] = "stream"
-        
+                                
