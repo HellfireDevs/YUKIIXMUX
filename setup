@@ -39,7 +39,7 @@ fi
 
 # 6. PM2 Registration (Start & Stop)
 echo -e "${CYAN}[*] Registering Bot in PM2...${RESET}"
-pm2 start start --name "yuki" > /dev/null 2>&1
+pm2 start start --interpreter bash --name "yuki" > /dev/null 2>&1
 pm2 stop yuki > /dev/null 2>&1
 pm2 save > /dev/null 2>&1
 echo -e "${GREEN}✓ Bot Registered and Stopped!${RESET}"
