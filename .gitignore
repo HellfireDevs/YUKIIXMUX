@@ -1,10 +1,35 @@
-__pycache__/
+# 1. Ignore Environments & Secrets (SUPER IMPORTANT)
 venv/
+myenv/
 .env
-database/
-downloads/
-cache/
+sample.env
+
+# 2. Block all media files globally
+*.mp3
+*.mp4
+*.png
+*.jpg
+*.jpeg
+*.mkv
+*.webm
+
+# 3. ALLOW media files ONLY inside YUKIIMUSIC/assets
+!YUKIIMUSIC/assets/**/*.mp3
+!YUKIIMUSIC/assets/**/*.mp4
+!YUKIIMUSIC/assets/**/*.png
+!YUKIIMUSIC/assets/**/*.jpg
+!YUKIIMUSIC/assets/**/*.jpeg
+
+# 4. Ignore Cache, Logs and Temporary Bot Data
+__pycache__/
 *.session
 *.session-journal
+downloads/
+database/
+logs/
+cache/
+*.log
 log.txt
+pypilog.txt
+nodelog.txt
 node_modules/
