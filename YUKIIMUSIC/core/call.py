@@ -363,33 +363,12 @@ class Call(PyTgCalls):
                 await set_loop(chat_id, loop)
             await auto_clean(popped)
             
-            if not check:
-                # ==========================================
-                # NORMAL LEAVE LOGIC 
-                # ========================================== 
-                try:
-                    if popped and "mystic" in popped:
-                        language = await get_lang(chat_id)
-                        _ = get_string(language)
-                        end_msg = _["MUSIC_ENDED"]
-                        try:
-                            await popped["mystic"].edit_caption(caption=end_msg, reply_markup=music_end_markup(_))
-                        except:
-                            await popped["mystic"].edit_text(text=end_msg, disable_web_page_preview=True, reply_markup=music_end_markup(_))
-                except Exception:
-                    pass
-                
-                await _clear_(chat_id)
-                return await client.leave_group_call(chat_id)
-        except:
-            # ==========================================
-            # SAFETY FALLBACK LOGIC
-            # ==========================================
+            # 🔥 1. JAISE HI GANA BADLE, PURANE WALE KO "MUSIC ENDED" KAR DO (Taaki photo atki na rahe)
             try:
                 if popped and "mystic" in popped:
                     language = await get_lang(chat_id)
                     _ = get_string(language)
-                    end_msg = _["MUSIC_ENDED"]
+                    end_msg = _.get("MUSIC_ENDED", "Mᴜsɪᴄ ᴇɴᴅᴇᴅ.")
                     try:
                         await popped["mystic"].edit_caption(caption=end_msg, reply_markup=music_end_markup(_))
                     except:
@@ -397,6 +376,64 @@ class Call(PyTgCalls):
             except Exception:
                 pass
                 
+            # 🔥 2. NATIVE AUTOPLAY INJECTION (Is se naya player automatically aayega!)
+            if not check:
+                try:
+                    from YUKIIMUSIC.utils.database import is_autoplay_on
+                    import random
+                    
+                    auto_play = await is_autoplay_on(chat_id)
+                    if auto_play and popped and "vidid" in popped and popped["vidid"] not in ["telegram", "soundcloud"]:
+                        prev_title = popped.get("title", "music")
+                        
+                        try:
+                            next_vidid = popped["vidid"]
+                            for _ in range(3):
+                                rand_index = random.randint(2, 8)
+                                _, _, _, check_vidid = await YouTube.slider(prev_title, rand_index)
+                                if check_vidid != popped["vidid"]:
+                                    next_vidid = check_vidid
+                                    break 
+                            track_details, next_vidid = await YouTube.track(next_vidid, videoid=True)
+                            
+                            # Magic: Hum chup chaap ye gana queue me daal dete hain, bot ko pata bhi nahi chalega aur wo proper photo bhejega
+                            check.append({
+                                "title": track_details["title"].title(),
+                                "file": f"vid_{next_vidid}",
+                                "dur": track_details["duration_min"],
+                                "by": "Autoplay",
+                                "chat_id": popped["chat_id"],
+                                "streamtype": "youtube",
+                                "vidid": next_vidid,
+                                "played": 0
+                            })
+                        except Exception:
+                            # Agar error aaye to kisi backup/trending gane ko queue mein daal do
+                            try:
+                                fallback_queries = ["latest lofi songs", "trending hindi music", "new english songs"]
+                                random_query = random.choice(fallback_queries)
+                                track_details, next_vidid = await YouTube.track(random_query, videoid=False)
+                                check.append({
+                                    "title": track_details["title"].title(),
+                                    "file": f"vid_{next_vidid}",
+                                    "dur": track_details["duration_min"],
+                                    "by": "Autoplay",
+                                    "chat_id": popped["chat_id"],
+                                    "streamtype": "youtube",
+                                    "vidid": next_vidid,
+                                    "played": 0
+                                })
+                            except Exception:
+                                pass
+                except Exception:
+                    pass
+
+            # 🔥 3. AGAR AUTOPLAY OFF HAI YA FAIL HO GAYA TOH HI BOT CHHOD KAR JAYEGA
+            if not check:
+                await _clear_(chat_id)
+                return await client.leave_group_call(chat_id)
+                
+        except:
             try:
                 await _clear_(chat_id)
                 return await client.leave_group_call(chat_id)
@@ -652,3 +689,4 @@ class Call(PyTgCalls):
 
 
 YUKII = Call()
+                        
