@@ -62,7 +62,7 @@ async def skip(cli, message: Message, _, chat_id):
                             if popped:
                                 await auto_clean(popped)
                             
-                            # 🔥 AUTOPLAY INJECTION (Multiple Skip)
+                            # 🔥 AUTOPLAY INJECTION
                             if not check:
                                 try:
                                     from YUKIIMUSIC.utils.database import is_autoplay_on
@@ -71,9 +71,9 @@ async def skip(cli, message: Message, _, chat_id):
                                     if auto_play and popped and "vidid" in popped and popped["vidid"] not in ["telegram", "soundcloud"]:
                                         prev_title = popped.get("title", "music")
                                         next_vidid = popped["vidid"]
-                                        for _ in range(3):
+                                        for attempt in range(3): # FIX: Changed _ to attempt
                                             rand_index = random.randint(2, 8)
-                                            _, _, _, check_vidid = await YouTube.slider(prev_title, rand_index)
+                                            chk_1, chk_2, chk_3, check_vidid = await YouTube.slider(prev_title, rand_index)
                                             if check_vidid != popped["vidid"]:
                                                 next_vidid = check_vidid
                                                 break
@@ -82,6 +82,7 @@ async def skip(cli, message: Message, _, chat_id):
                                             "title": track_details["title"].title(),
                                             "file": f"vid_{next_vidid}",
                                             "dur": track_details["duration_min"],
+                                            "seconds": track_details.get("duration_sec", 0), # FIX: Added seconds
                                             "by": "Autoplay",
                                             "chat_id": chat_id,
                                             "streamtype": "youtube",
@@ -120,7 +121,7 @@ async def skip(cli, message: Message, _, chat_id):
             if popped:
                 await auto_clean(popped)
             
-            # 🔥 AUTOPLAY INJECTION (Single Skip)
+            # 🔥 AUTOPLAY INJECTION
             if not check:
                 try:
                     from YUKIIMUSIC.utils.database import is_autoplay_on
@@ -129,9 +130,9 @@ async def skip(cli, message: Message, _, chat_id):
                     if auto_play and popped and "vidid" in popped and popped["vidid"] not in ["telegram", "soundcloud"]:
                         prev_title = popped.get("title", "music")
                         next_vidid = popped["vidid"]
-                        for _ in range(3):
+                        for attempt in range(3): # FIX: Changed _ to attempt
                             rand_index = random.randint(2, 8)
-                            _, _, _, check_vidid = await YouTube.slider(prev_title, rand_index)
+                            chk_1, chk_2, chk_3, check_vidid = await YouTube.slider(prev_title, rand_index)
                             if check_vidid != popped["vidid"]:
                                 next_vidid = check_vidid
                                 break
@@ -140,6 +141,7 @@ async def skip(cli, message: Message, _, chat_id):
                             "title": track_details["title"].title(),
                             "file": f"vid_{next_vidid}",
                             "dur": track_details["duration_min"],
+                            "seconds": track_details.get("duration_sec", 0), # FIX: Added seconds
                             "by": "Autoplay",
                             "chat_id": chat_id,
                             "streamtype": "youtube",
@@ -155,6 +157,7 @@ async def skip(cli, message: Message, _, chat_id):
                             "title": track_details["title"].title(),
                             "file": f"vid_{next_vidid}",
                             "dur": track_details["duration_min"],
+                            "seconds": track_details.get("duration_sec", 0), # FIX: Added seconds
                             "by": "Autoplay",
                             "chat_id": chat_id,
                             "streamtype": "youtube",
@@ -327,4 +330,4 @@ async def skip(cli, message: Message, _, chat_id):
             )
             db[chat_id][0]["mystic"] = run
             db[chat_id][0]["markup"] = "stream"
-        
+    
