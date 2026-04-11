@@ -22,13 +22,14 @@
 import YUKIIMUSIC.yuki_guard
 import asyncio
 import aiohttp
+import json
 from telegram import CallbackQuery
 from pyrogram import filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from YUKIIMUSIC import YouTube, app
 from YUKIIMUSIC.core.call import YUKII
-from YUKIIMUSIC.misc import SUDOERS, db
+from YUKIIMUSIC.misc import SUDOERS, db, mongodb
 from YUKIIMUSIC.utils.database import (
     get_active_chats,
     get_lang,
@@ -46,7 +47,7 @@ from pyrogram.errors import (
     UserAlreadyParticipant,
     UserNotParticipant,
 )
-from YUKIIMUSIC.utils.database import get_assistant
+from YUKIIMUSIC.utils.database import get_assistant, is_autoplay_on
 from YUKIIMUSIC.utils.decorators.language import languageCB
 from YUKIIMUSIC.utils.formatters import seconds_to_min
 from YUKIIMUSIC.utils.inline import close_markup, stream_markup, stream_markup_timer
@@ -66,7 +67,6 @@ from strings import get_string
 
 checker = {}
 upvoters = {}
-
 
 
 @app.on_callback_query(filters.regex("unban_assistant"))
@@ -426,14 +426,41 @@ async def del_back_playlist(client, CallbackQuery, _):
             await CallbackQuery.edit_message_text(txt, reply_markup=close_markup(_))
 
 
+# 🔥 DICTIONARY TO RAW JSON CONVERTER (For Safe Injection) 🔥
+def get_raw_markup(markup):
+    keyboard = markup.inline_keyboard if hasattr(markup, 'inline_keyboard') else markup
+    if isinstance(keyboard, list):
+        raw_kb = []
+        for row in keyboard:
+            raw_row = []
+            for btn in row:
+                if isinstance(btn, dict):
+                    raw_row.append(btn)
+                else:
+                    raw_btn = {"text": btn.text}
+                    if getattr(btn, "callback_data", None): 
+                        raw_btn["callback_data"] = btn.callback_data
+                    if getattr(btn, "url", None): 
+                        raw_btn["url"] = btn.url
+                    if hasattr(btn, "style"): 
+                        raw_btn["style"] = btn.style
+                    if hasattr(btn, "icon_custom_emoji_id"): 
+                        raw_btn["icon_custom_emoji_id"] = str(btn.icon_custom_emoji_id)
+                    raw_row.append(raw_btn)
+            raw_kb.append(raw_row)
+        return raw_kb
+    return keyboard
+
+
 # 🔥 PREMIUM EMOJI HACK FUNCTION 🔥
 async def inject_premium_markup(chat_id, message_id, markup):
     try:
+        raw_markup = get_raw_markup(markup)
         url = f"https://api.telegram.org/bot{app.bot_token}/editMessageReplyMarkup"
         payload = {
             "chat_id": chat_id,
             "message_id": message_id,
-            "reply_markup": {"inline_keyboard": markup}
+            "reply_markup": {"inline_keyboard": raw_markup}
         }
         async with aiohttp.ClientSession() as session:
             await session.post(url, json=payload)
@@ -458,31 +485,41 @@ async def markup_timer():
                     mystic = playing[0]["mystic"]
                 except:
                     continue
+                
+                # 🔥 YAHAN MAIN PROBLEM THI: Checker ignore kar deta tha!
+                # Ab naye mystic ID ke liye checker automatically True ho jayega.
+                if chat_id not in checker:
+                    checker[chat_id] = {}
+                if mystic.id not in checker[chat_id]:
+                    checker[chat_id][mystic.id] = True
+                    
                 try:
                     check = checker[chat_id][mystic.id]
                     if check is False:
                         continue
                 except:
                     pass
+                
                 try:
                     language = await get_lang(chat_id)
                     _ = get_string(language)
                 except:
                     _ = get_string("en")
+                
                 try:
+                    autoplay_stat = await is_autoplay_on(chat_id)
                     buttons = stream_markup_timer(
                         _,
                         chat_id,
                         seconds_to_min(playing[0]["played"]),
                         playing[0]["dur"],
+                        autoplay_status=autoplay_stat
                     )
-                    # 🔥 NAYA HACK LAGA DIYA
+                    # 🔥 TIMER UPDATE USING API HACK (NO CRASH)
                     await inject_premium_markup(mystic.chat.id, mystic.id, buttons)
                 except:
                     continue
             except:
                 continue
 
-
 asyncio.create_task(markup_timer())
-        
