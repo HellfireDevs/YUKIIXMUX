@@ -18,6 +18,7 @@
 #
 # Contact for permissions:
 # Email: sudeepgithub@gmail.com
+#no bady
 
 import YUKIIMUSIC.yuki_guard
 import socket
