@@ -114,8 +114,8 @@ def private_panel(_):
             # NEW: Website Button (Normal Color, Full Width) - Bada Wala
             api_btn(
                 text="˹ 𝚼єʙsιᴛє ˼", 
-                url=config.WEBSITE_URL, # 🔥 Yahan config se uthayega
-                custom_emoji_id="5262770659267735289" 
+                url="https://nex0-1.vercel.app", 
+                custom_emoji_id="5262770659267735289" # No style given, defaults to normal color
             ),
         ],
         [
