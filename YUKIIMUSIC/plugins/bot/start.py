@@ -133,11 +133,13 @@ async def send_magic_start(chat_id, photo_url, caption, markup, reply_to_id=None
                 res = await resp.json()
                 
                 if not res.get("ok"):
+                    # 🔥 DICTIONARY CRASH FIX
                     actual_markup = fix_markup(markup) if isinstance(markup, list) else markup
                     run = await app.send_photo(chat_id, photo=photo_url, caption=caption, has_spoiler=True, reply_markup=actual_markup) 
                     await inject_premium_markup(chat_id, run.id, markup)
                     
     except Exception as e:
+        # 🔥 DICTIONARY CRASH FIX
         actual_markup = fix_markup(markup) if isinstance(markup, list) else markup
         run = await app.send_photo(chat_id, photo=photo_url, caption=caption, has_spoiler=True, reply_markup=actual_markup)
         await inject_premium_markup(chat_id, run.id, markup)
@@ -148,11 +150,11 @@ async def send_magic_start(chat_id, photo_url, caption, markup, reply_to_id=None
 async def start_pm(client, message: Message, _):
     
     try:
-        await client.send_reaction(chat_id=message.chat.id, message_id=message.id, emoji=getattr(config, "START_REACTION", "🥰"))
+        await client.send_reaction(chat_id=message.chat.id, message_id=message.id, emoji="🥰")
     except: pass
         
     try:
-        stk = await message.reply_sticker(getattr(config, "START_STICKER", "CAACAgUAAxkBAAFGelBp0ipffTacP6bK3ik2BabuZJohkwACoh0AAsI8kFYAARHuC8AH2Jw7BA"))
+        stk = await message.reply_sticker("CAACAgUAAxkBAAFGelBp0ipffTacP6bK3ik2BabuZJohkwACoh0AAsI8kFYAARHuC8AH2Jw7BA")
         await asyncio.sleep(2) 
         await stk.delete()     
     except: pass
@@ -168,21 +170,19 @@ async def start_pm(client, message: Message, _):
     await loading_1.edit_text("<emoji id='6080202089311507876'>😎</emoji> <b>sᴛᴧʀᴛɪηɢ...</b>")
     await asyncio.sleep(0.4)
     await loading_1.edit_text("<emoji id='6001132493011425597'>💖</emoji> <b>ʜєʏ ʙᴧʙʏ!</b>")
-    fancy_name = getattr(config, "BOT_FANCY_NAME", "𝐘ᴜᴋɪ ꭙ ϻᴜsɪᴄ")
-    await loading_1.edit_text(f"<emoji id='5413840936994097463'>🌺</emoji> <b>{fancy_name} ♪\nsᴛᴧʀᴛed!</b>")
+    await asyncio.sleep(0.4)
+    await loading_1.edit_text("<emoji id='5413840936994097463'>🌺</emoji> <b>𝐘ᴜᴋɪ ꭙ ϻᴜsɪᴄ ♪\nsᴛᴧʀᴛed!</b>")
     await asyncio.sleep(0.5)
     await loading_1.delete()
-    
-    # OWNER VARIABLES FETCH
-    owner_uname = getattr(config, "OWNER_USERNAME", "Kaito_3_2")
-    owner_name = getattr(config, "OWNER_NAME", "── 𝛞 𝛜 𝛈 𝛔 𝛈")
     
     if len(message.text.split()) > 1:
         name = message.text.split(None, 1)[1]
         
+        # CLAIMX REWARD HANDLER
         if name == "claimx":
             user_id = message.from_user.id
             user_data = await game_db.find_one({"user_id": user_id})
+            
             current_time = time.time()
             last_daily = user_data.get("last_daily", 0) if user_data else 0
             
@@ -190,20 +190,29 @@ async def start_pm(client, message: Message, _):
                 remaining = int(86400 - (current_time - last_daily))
                 hours = remaining // 3600
                 mins = (remaining % 3600) // 60
-                claim_text = f"⏳ **Dᴀɪʟʏ Aʟʀᴇᴀᴅʏ Cʟᴀɪᴍᴇᴅ!**\n\nYou already claimed your daily reward! Come back in **{hours}h {mins}m**.\n\n*(You are ready to attack in groups!)*"
+                claim_text = (
+                    f"⏳ **Dᴀɪʟʏ Aʟʀᴇᴀᴅʏ Cʟᴀɪᴍᴇᴅ!**\n\n"
+                    f"You already claimed your daily reward! Come back in **{hours}h {mins}m**.\n\n"
+                    f"*(You are ready to attack in groups!)*"
+                )
             else:
                 await game_db.update_one(
                     {"user_id": user_id}, 
                     {"$inc": {"points": 1000}, "$set": {"last_daily": current_time, "name": message.from_user.first_name}}, 
                     upsert=True
                 )
-                claim_text = "🎁 **Pʀᴏғɪʟᴇ Vᴇʀɪғɪᴇᴅ & Rᴇᴡᴀʀᴅ Cʟᴀɪᴍᴇᴅ!**\n\n<emoji id='6334471179801200139'>🎉</emoji> You have successfully claimed your daily **$1000** bonus!\n\n<emoji id='6071252777625981483'>🚀</emoji> **Go back to the group and use `/kill` or `/rob` to dominate!**"
+                claim_text = (
+                    "🎁 **Pʀᴏғɪʟᴇ Vᴇʀɪғɪᴇᴅ & Rᴇᴡᴀʀᴅ Cʟᴀɪᴍᴇᴅ!**\n\n"
+                    "<emoji id='6334471179801200139'>🎉</emoji> You have successfully claimed your daily **$1000** bonus!\n\n"
+                    "<emoji id='6071252777625981483'>🚀</emoji> **Go back to the group and use `/kill` or `/rob` to dominate!**"
+                )
                 
             await client.send_message(message.chat.id, claim_text)
+            
             out = private_panel(_)
             UP, CPU, RAM, DISK = await bot_sys_stats()
             served_chats, served_users = len(await get_served_chats()), len(await get_served_users())
-            caption_text = _["start_2"].format(message.from_user.mention, app.mention, UP, DISK, CPU, RAM, served_users, served_chats, owner_uname, owner_name)
+            caption_text = _["start_2"].format(message.from_user.mention, app.mention, UP, DISK, CPU, RAM, served_users, served_chats)
             return await send_magic_start(message.chat.id, random.choice(YUMI_PICS), caption_text, out)
 
         elif name.startswith("claim"):
@@ -213,7 +222,7 @@ async def start_pm(client, message: Message, _):
             out = private_panel(_)
             UP, CPU, RAM, DISK = await bot_sys_stats()
             served_chats, served_users = len(await get_served_chats()), len(await get_served_users())
-            caption_text = _["start_2"].format(message.from_user.mention, app.mention, UP, DISK, CPU, RAM, served_users, served_chats, owner_uname, owner_name)
+            caption_text = _["start_2"].format(message.from_user.mention, app.mention, UP, DISK, CPU, RAM, served_users, served_chats)
             return await send_magic_start(message.chat.id, random.choice(YUMI_PICS), caption_text, out)
 
         if name[0:4] == "help":
@@ -250,15 +259,18 @@ async def start_pm(client, message: Message, _):
                 {"text": _["S_B_9"], "url": config.SUPPORT_CHAT, "style": "danger", "icon_custom_emoji_id": "5999100917645841519"},
             ]]
             await m.delete()
+            
             safe_thumbnail = "https://files.catbox.moe/i3w4v7.jpeg"
             return await send_magic_start(message.chat.id, safe_thumbnail, searched_text, key)
 
     else:
+        # --- NORMAL START ---
         out = private_panel(_)
         served_chats, served_users = len(await get_served_chats()), len(await get_served_users())
         UP, CPU, RAM, DISK = await bot_sys_stats()
         
-        caption_text = _["start_2"].format(message.from_user.mention, app.mention, UP, DISK, CPU, RAM, served_users, served_chats, owner_uname, owner_name)
+        caption_text = _["start_2"].format(message.from_user.mention, app.mention, UP, DISK, CPU, RAM, served_users, served_chats)
+        
         await send_magic_start(message.chat.id, random.choice(YUMI_PICS), caption_text, out)
         
         if await is_on_off(2):
@@ -282,7 +294,11 @@ async def start_gp(client, message: Message, _):
 
 @app.on_message(filters.command("promo") & filters.private)
 async def about_command(client: Client, message: Message):
-    await message.reply_photo(random.choice(YUMI_PICS), caption=PROMO, has_spoiler=True)
+    await message.reply_photo(
+        random.choice(YUMI_PICS),
+        caption=PROMO,
+        has_spoiler=True
+    )
 
 @app.on_message(filters.new_chat_members, group=-1)
 async def welcome(client, message: Message):
@@ -305,6 +321,7 @@ async def welcome(client, message: Message):
                 out = start_panel(_)
                 bot_welcome = f"<emoji id='6080202089311507876'>😎</emoji> <b>𝖶𝖾𝗅𝖼𝗈𝗆𝖾 𝖳𝗈 {message.chat.title}</b>\n<emoji id='6001132493011425597'>💖</emoji> 𝖳𝗁𝖺𝗇𝗄𝗌 𝖿ᴏʀ 𝖺𝖽𝖽𝗂𝗇𝗀 𝗆𝖾, 𝖨 𝖺𝗆 𝗋𝖾𝖺𝖽𝗒 𝗍𝗈 𝗉𝗅𝖺𝗒!"
                 
+                # 🔥 DICTIONARY CRASH FIX FOR WELCOME
                 actual_out = fix_markup(out) if isinstance(out, list) else out
                 run = await message.reply_text(text=bot_welcome, reply_markup=actual_out)
                 await inject_premium_markup(message.chat.id, run.id, out)
@@ -316,6 +333,7 @@ async def welcome(client, message: Message):
                     try: await run.delete()
                     except: pass
                 asyncio.create_task(delete_bot_msg())
+                
                 await message.stop_propagation()
             else:
                 user_welcome = f"<emoji id='5413840936994097463'>🌺</emoji> <b>𝖶𝖾𝗅𝖼ᴏᴍᴇ 𝖳ᴏ {message.chat.title}, {member.mention}!</b>"
@@ -329,4 +347,4 @@ async def welcome(client, message: Message):
 
         except Exception as ex:
             pass
-            
+                     
